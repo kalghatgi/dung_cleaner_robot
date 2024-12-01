@@ -85,7 +85,7 @@
 #define PWM_RESOLUTION pow(2, (float)PWM_RESOLUTION_BITS)
 #define PWM_FREQUENCY 20000 // Should be lesser than 80MHz/(2^PWM_RESOLUTION)
 #define ADC_CALIBRATION_SCHEME ESP_ADC_CAL_VAL_EFUSE_VREF
-#define ADC_ATTENUATION ADC_ATTEN_DB_11
+#define ADC_ATTENUATION ADC_ATTEN_DB_12
 #define ADC_RESOLUTION_BIT ADC_WIDTH_BIT_12
 
 int64_t Motor1_Encoder_Value = 0, Motor2_Encoder_Value = 0;
@@ -204,7 +204,7 @@ void TASK_microROS(void *args)
 	rcl_init_options_t init_options = rcl_get_zero_initialized_init_options();
 	RCCHECK(rcl_init_options_init(&init_options, allocator));
 	// Initialize and modify options (Set ROS_DOMAIN_ID)
-	RCCHECK(rcl_init_options_set_domain_id(&init_options, 1));
+	//RCCHECK(rcl_init_options_set_domain_id(&init_options, 1));
 
 	// Initialize rclc support object with custom options
 	rclc_support_t support;
@@ -218,7 +218,7 @@ void TASK_microROS(void *args)
 	RCCHECK(rclc_node_init_default(&node, "AMR_MicroROS_Node_v2", "", &support));
 
 	// create publishers
-	RCCHECK(rclc_publisher_init_best_effort(&encoder_raw_publisher, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int64MultiArray), "/amr/encoder_raw"));
+	RCCHECK(rclc_publisher_init_default(&encoder_raw_publisher, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int64MultiArray), "/amr/encoder_raw"));
 	RCCHECK(rclc_publisher_init_default(&imu_raw_publisher, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Imu), "/imu/data_raw"));
 	RCCHECK(rclc_publisher_init_default(&mag_raw_publisher, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, MagneticField), "/imu/mag"));
 	// create subscribers
@@ -302,8 +302,8 @@ void TASK_IMU_data_acquisition(void *arg)
 {
 	ESP_LOGI(TAG, "Fetching raw readings...");
 	uint16_t delta_T = int(1000 * IMU_DAQ_Period);
-	portTickType lastWakeTime;
-	portTickType loopPeriod = pdMS_TO_TICKS(delta_T);
+	TickType_t lastWakeTime;
+	TickType_t loopPeriod = pdMS_TO_TICKS(delta_T);
 	while(true)
 	{
 		bmx160.getAllData(&mag_uT, &gyro_DPS, &accel_G);
@@ -323,6 +323,7 @@ void Setup_PWM()
         .timer_num = PWM_HS_TIMER,
         .freq_hz = PWM_FREQUENCY,
         .clk_cfg = LEDC_AUTO_CLK,
+	.deconfigure = false,
     };
 	ledc_timer_config(&motor_timer);
 	/////////////////// Channel configuration ///////////////////
@@ -467,7 +468,7 @@ void Setup_IMU()
 void Setup_UART()
 {
     // ******************************* UART0 config for microROS transport ******************************* //
-    static size_t uart_port = UART_NUM_0;
+    static uart_port_t uart_port = UART_NUM_0;
     #if defined(RMW_UXRCE_TRANSPORT_CUSTOM)
 		rmw_uros_set_custom_transport(
 			true,
@@ -491,17 +492,17 @@ void Setup_UART()
 	   6. micro-ROS Settings -> UART Settings -> UART RX -> 3
 	 */
 	// ******************************* UART1 config for GPS (optional) ******************************* //
-    static size_t uart1_port = UART_NUM_1;
-    const unsigned int UART1_BUFFER_SIZE = 1024;
-    uart_config_t uart1_config;
-    uart1_config.baud_rate = 115200; // for monitoring via uart1
-    uart1_config.data_bits = UART_DATA_8_BITS;
-    uart1_config.parity    = UART_PARITY_DISABLE;
-    uart1_config.stop_bits = UART_STOP_BITS_1;
-    uart1_config.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
-    uart_param_config(uart1_port, &uart1_config);
-    uart_set_pin(uart1_port, CONFIG_ESP_CONSOLE_UART_TX_GPIO, CONFIG_ESP_CONSOLE_UART_RX_GPIO, -1, -1);
-    uart_driver_install(uart1_port, UART1_BUFFER_SIZE * 2, 0, 0, NULL, 0);
+    //static uart_port_t uart1_port = UART_NUM_1;
+    //const unsigned int UART1_BUFFER_SIZE = 1024;
+    //uart_config_t uart1_config;
+    //uart1_config.baud_rate = 115200; // for monitoring via uart1
+    //uart1_config.data_bits = UART_DATA_8_BITS;
+    //uart1_config.parity    = UART_PARITY_DISABLE;
+    //uart1_config.stop_bits = UART_STOP_BITS_1;
+    //uart1_config.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
+    //uart_param_config(uart1_port, &uart1_config);
+    //uart_set_pin(uart1_port, CONFIG_ESP_CONSOLE_UART_TX_GPIO, CONFIG_ESP_CONSOLE_UART_RX_GPIO, -1, -1);
+    //uart_driver_install(uart1_port, UART1_BUFFER_SIZE * 2, 0, 0, NULL, 0);
 }
 void Setup_CAN()
 {
@@ -509,6 +510,7 @@ void Setup_CAN()
     static const twai_timing_config_t t_config = TWAI_TIMING_CONFIG_1MBITS();
     static const twai_filter_config_t f_config = TWAI_FILTER_CONFIG_ACCEPT_ALL();
     static const twai_general_config_t g_config = {
+	.controller_id = 0, // CAN0
         .mode = TWAI_MODE_NORMAL,
         .tx_io = (gpio_num_t) CAN_TX_GPIO,
         .rx_io = (gpio_num_t) CAN_RX_GPIO,
