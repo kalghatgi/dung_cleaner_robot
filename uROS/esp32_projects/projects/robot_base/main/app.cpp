@@ -13,12 +13,9 @@
 #include "esp_system.h"
 #include "driver/uart.h"
 #include <time.h>
-#include "driver/twai.h"
 #include "driver/gpio.h"
 #include "driver/i2c.h"
 #include "driver/ledc.h"
-#include "driver/adc.h"
-#include "esp_adc_cal.h"
 #include "DFRobot_BMX160.h"
 //////////////////////////////
 #include <rcl/rcl.h>
@@ -35,37 +32,25 @@
 #include <sensor_msgs/msg/magnetic_field.h>
 
 ////////////////////////////////////////////// ROS_DOMAIN_ID //////////////////////////////////////////////
-#define ROS_DOMAIN_ID 1
+#define ROS_DOMAIN_ID 0
 ///////////////////////////////////////////////// SENSORS /////////////////////////////////////////////////
-#define MOTOR1_ENCODER_A_GPIO GPIO_NUM_34		// Digital Input | Quadrature
-#define MOTOR1_ENCODER_B_GPIO GPIO_NUM_35		// Digital Input | Quadrature
-#define MOTOR2_ENCODER_A_GPIO GPIO_NUM_39		// Digital Input | Quadrature
-#define MOTOR2_ENCODER_B_GPIO GPIO_NUM_36		// Digital Input | Quadrature
-#define MOTOR1_SHUNT_P_GPIO ADC2_CHANNEL_7		// GPIO_NUM_27 | Analog Input | R001 (1mOhm) shunt
-#define MOTOR2_SHUNT_P_GPIO ADC1_CHANNEL_5		// GPIO_NUM_33 | Analog Input | R001 (1mOhm) shunt
-#define I2C_SDA GPIO_NUM_21						// Digital IO (I2C)
-#define I2C_SCL GPIO_NUM_22						// Digital IO (I2C)
-#define I2C_CLOCK_SPEED 400000					// Digital IO (I2C)
-#define VOLTAGE_SENSOR_GPIO ADC2_CHANNEL_3		// GPIO_NUM_15 | Analog Input | Voltage divider
+#define MOTOR1_ENCODER_A_GPIO GPIO_NUM_34		// Digital Input
+#define MOTOR1_ENCODER_B_GPIO GPIO_NUM_35		// Digital Input
+#define MOTOR2_ENCODER_A_GPIO GPIO_NUM_39		// Digital Input
+#define MOTOR2_ENCODER_B_GPIO GPIO_NUM_36		// Digital Input
+#define I2C_SDA GPIO_NUM_21				// Digital IO (I2C)
+#define I2C_SCL GPIO_NUM_22				// Digital IO (I2C)
+#define I2C_CLOCK_SPEED 400000				// Digital IO (I2C)
 //////////////////////////////////////////////// ACTUATORS ////////////////////////////////////////////////
-#define MOTOR2_A_PWM_GPIO GPIO_NUM_25			// Analog Output (PWM)
-#define MOTOR2_B_PWM_GPIO GPIO_NUM_32			// Analog Output (PWM)
-#define MOTOR1_A_PWM_GPIO GPIO_NUM_12			// Analog Output (PWM)
-#define MOTOR1_B_PWM_GPIO GPIO_NUM_26			// Analog Output (PWM)
-#define MOTOR_DRIVER_DISABLE GPIO_NUM_5			// Digital Output | Active LOW
-#define RGB_LED_R GPIO_NUM_19					// Analog Output (PWM)
-#define RGB_LED_G GPIO_NUM_18					// Analog Output (PWM)
-#define RGB_LED_B GPIO_NUM_17					// Analog Output (PWM)
-///////////////////////////////////////////////// SERIAL /////////////////////////////////////////////////
-#define UART1_TX GPIO_NUM_13					// Digital IO (Serial)
-#define UART1_RX GPIO_NUM_14					// Digital IO (Serial)
-#define CAN_TX_GPIO GPIO_NUM_4						// Digital IO (Serial)
-#define CAN_RX_GPIO GPIO_NUM_2						// Digital IO (Serial)
+#define MOTOR2_PWM_GPIO GPIO_NUM_25			// PWM
+#define MOTOR2_DIRECTION_GPIO GPIO_NUM_26			// Digital Output
+#define MOTOR1_PWM_GPIO GPIO_NUM_16			// PWM
+#define MOTOR1_DIRECTION_GPIO GPIO_NUM_17			// Digital Output
 
 #define Pi 3.141592653589793238
 #define NUMBER_OF_MOTORS 2
 #define GPIO_DIGITAL_INPUT_PINS_MASK ((1ULL << MOTOR1_ENCODER_B_GPIO) | (1ULL << MOTOR2_ENCODER_B_GPIO))
-#define GPIO_DIGITAL_OUTPUT_PINS_MASK ((1ULL << MOTOR_DRIVER_DISABLE))
+#define GPIO_DIGITAL_OUTPUT_PINS_MASK ((1ULL << MOTOR1_DIRECTION_GPIO) | (1ULL << MOTOR2_DIRECTION_GPIO))
 #define GPIO_INTERRUPT_INPUT_PINS_MASK ((1ULL << MOTOR1_ENCODER_A_GPIO) | (1ULL << MOTOR2_ENCODER_A_GPIO))
 #define IMU_DAQ_Period 0.010 // milliseconds
 #define ESP_INTR_FLAG_DEFAULT 0
@@ -77,25 +62,17 @@
 #define STRING_BUFFER_LEN 20
 #define PWM_HS_TIMER LEDC_TIMER_0
 #define PWM_HS_MODE LEDC_HIGH_SPEED_MODE
-#define MOTOR1_A_PWM_CHANNEL LEDC_CHANNEL_0
-#define MOTOR1_B_PWM_CHANNEL LEDC_CHANNEL_1
-#define MOTOR2_A_PWM_CHANNEL LEDC_CHANNEL_2
-#define MOTOR2_B_PWM_CHANNEL LEDC_CHANNEL_3
+#define MOTOR1_PWM_CHANNEL LEDC_CHANNEL_0
+#define MOTOR2_PWM_CHANNEL LEDC_CHANNEL_1
 #define PWM_RESOLUTION_BITS LEDC_TIMER_11_BIT
 #define PWM_RESOLUTION pow(2, (float)PWM_RESOLUTION_BITS)
 #define PWM_FREQUENCY 20000 // Should be lesser than 80MHz/(2^PWM_RESOLUTION)
-#define ADC_CALIBRATION_SCHEME ESP_ADC_CAL_VAL_EFUSE_VREF
-#define ADC_ATTENUATION ADC_ATTEN_DB_12
-#define ADC_RESOLUTION_BIT ADC_WIDTH_BIT_12
 
 int64_t Motor1_Encoder_Value = 0, Motor2_Encoder_Value = 0;
 float Motor_Duty_Cycle[NUMBER_OF_MOTORS];
 static const char* TAG = "IMU";
 DFRobot_BMX160 bmx160;
 sBmx160SensorData_t mag_uT, gyro_DPS, accel_G;
-static esp_adc_cal_characteristics_t motor1_shunt_p_adc_chars;
-static esp_adc_cal_characteristics_t motor2_shunt_p_adc_chars;
-static esp_adc_cal_characteristics_t voltage_sensor_adc_chars;
 
 rcl_publisher_t encoder_raw_publisher;
 rcl_publisher_t imu_raw_publisher;
@@ -111,7 +88,7 @@ struct timespec current_time_stamp;
 void Set_Inverted_PWM(ledc_mode_t _mode, ledc_channel_t _channel, float _percent_duty)
 {
 	uint32_t _duty = uint32_t((PWM_RESOLUTION - 1) * 1.0/100 * (100 - _percent_duty));
-    ledc_set_duty_and_update(_mode, _channel, _duty, 0);
+	ledc_set_duty_and_update(_mode, _channel, _duty, 0);
 }
 void Set_Motor_Speed()
 {
@@ -120,23 +97,23 @@ void Set_Motor_Speed()
 
 	if(_left_motor_percent_duty_cycle >= 0)
 	{ // CCW
-		Set_Inverted_PWM(PWM_HS_MODE, MOTOR1_A_PWM_CHANNEL, abs(_left_motor_percent_duty_cycle));
-		Set_Inverted_PWM(PWM_HS_MODE, MOTOR1_B_PWM_CHANNEL, 0);
+		Set_Inverted_PWM(PWM_HS_MODE, MOTOR1_PWM_CHANNEL, abs(_left_motor_percent_duty_cycle));
+		gpio_set_level(MOTOR1_DIRECTION_GPIO, 0);
 	}
 	else
 	{ // CW
-		Set_Inverted_PWM(PWM_HS_MODE, MOTOR1_A_PWM_CHANNEL, 0);
-		Set_Inverted_PWM(PWM_HS_MODE, MOTOR1_B_PWM_CHANNEL, abs(_left_motor_percent_duty_cycle));
+		Set_Inverted_PWM(PWM_HS_MODE, MOTOR1_PWM_CHANNEL, 0);
+		gpio_set_level(MOTOR1_DIRECTION_GPIO, 1);
 	}
 	if(_right_motor_percent_duty_cycle >= 0)
 	{ // CCW
-		Set_Inverted_PWM(PWM_HS_MODE, MOTOR2_A_PWM_CHANNEL, abs(_right_motor_percent_duty_cycle));
-		Set_Inverted_PWM(PWM_HS_MODE, MOTOR2_B_PWM_CHANNEL, 0);
+		Set_Inverted_PWM(PWM_HS_MODE, MOTOR2_PWM_CHANNEL, abs(_right_motor_percent_duty_cycle));
+		gpio_set_level(MOTOR2_DIRECTION_GPIO, 0);
 	}
 	else
 	{ // CW
-		Set_Inverted_PWM(PWM_HS_MODE, MOTOR2_A_PWM_CHANNEL, 0);
-		Set_Inverted_PWM(PWM_HS_MODE, MOTOR2_B_PWM_CHANNEL, abs(_right_motor_percent_duty_cycle));
+		Set_Inverted_PWM(PWM_HS_MODE, MOTOR2_PWM_CHANNEL, 0);
+		gpio_set_level(MOTOR2_DIRECTION_GPIO, 1);
 	}
 }
 void ROS2_wheel_speed_Subscription_Callback(const void *_message_in)
@@ -176,7 +153,7 @@ void ROS2_imu_raw_Publisher_Callback(rcl_timer_t *timer, int64_t last_call_time)
 		imu_raw.angular_velocity.x = gyro_DPS.x * (M_PI/180); // send in radians/second
 		imu_raw.angular_velocity.y = gyro_DPS.y * (M_PI/180);
 		imu_raw.angular_velocity.z = gyro_DPS.z * (M_PI/180);
-		
+
 		RCSOFTCHECK(rcl_publish(&imu_raw_publisher, (const void *)&imu_raw, NULL));
 	}
 }
@@ -193,7 +170,7 @@ void ROS2_mag_raw_Publisher_Callback(rcl_timer_t *timer, int64_t last_call_time)
 		mag_raw.magnetic_field.x = mag_uT.x / 1000; // send in Tesla
 		mag_raw.magnetic_field.y = mag_uT.y / 1000;
 		mag_raw.magnetic_field.z = mag_uT.z / 1000;
-		
+
 		RCSOFTCHECK(rcl_publish(&mag_raw_publisher, (const void *)&mag_raw, NULL));
 	}
 }
@@ -204,7 +181,7 @@ void TASK_microROS(void *args)
 	rcl_init_options_t init_options = rcl_get_zero_initialized_init_options();
 	RCCHECK(rcl_init_options_init(&init_options, allocator));
 	// Initialize and modify options (Set ROS_DOMAIN_ID)
-	//RCCHECK(rcl_init_options_set_domain_id(&init_options, 1));
+	RCCHECK(rcl_init_options_set_domain_id(&init_options, ROS_DOMAIN_ID));
 
 	// Initialize rclc support object with custom options
 	rclc_support_t support;
@@ -215,7 +192,7 @@ void TASK_microROS(void *args)
 
 	// create node
 	rcl_node_t node;
-	RCCHECK(rclc_node_init_default(&node, "AMR_MicroROS_Node_v2", "", &support));
+	RCCHECK(rclc_node_init_default(&node, "AMR__robot_base__microROS_node", "", &support));
 
 	// create publishers
 	RCCHECK(rclc_publisher_init_default(&encoder_raw_publisher, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int64MultiArray), "/amr/encoder_raw"));
@@ -234,7 +211,7 @@ void TASK_microROS(void *args)
 	rcl_timer_t mag_raw_publisher_timer;
 	const unsigned int mag_raw_publish_period = 10; // milliseconds for 100Hz publish rate
 	RCCHECK(rclc_timer_init_default(&mag_raw_publisher_timer, &support, RCL_MS_TO_NS(mag_raw_publish_period), ROS2_mag_raw_Publisher_Callback));
-	
+
 	// create and allocate storage space for incoming and outgoing messages via topics
 	// (only if they have a provision for specifying the same)
 	encoder_raw.data.capacity = 2; // increase this wrt. the number of encoders being used
@@ -293,7 +270,7 @@ void TASK_motor_command_reception_timeout(void *arguments)
 		Motor_Duty_Cycle[0] = 0;
 		Motor_Duty_Cycle[1] = 0;
 		Set_Motor_Speed();
-		
+
 		vTaskDelay(pdMS_TO_TICKS(50));
 	}
 	vTaskDelete(NULL);
@@ -317,78 +294,54 @@ void TASK_IMU_data_acquisition(void *arg)
 void Setup_PWM()
 {
 	/////////////////// Timer configuration ///////////////////
-    ledc_timer_config_t motor_timer = {
-        .speed_mode = PWM_HS_MODE,
-        .duty_resolution = PWM_RESOLUTION_BITS,
-        .timer_num = PWM_HS_TIMER,
-        .freq_hz = PWM_FREQUENCY,
-        .clk_cfg = LEDC_AUTO_CLK,
-	.deconfigure = false,
-    };
+	ledc_timer_config_t motor_timer = {
+		.speed_mode = PWM_HS_MODE,
+		.duty_resolution = PWM_RESOLUTION_BITS,
+		.timer_num = PWM_HS_TIMER,
+		.freq_hz = PWM_FREQUENCY,
+		.clk_cfg = LEDC_AUTO_CLK,
+		.deconfigure = false,
+	};
 	ledc_timer_config(&motor_timer);
 	/////////////////// Channel configuration ///////////////////
 	// Channel 1 //
-	ledc_channel_config_t motor1a_channel;
-	motor1a_channel.gpio_num   = MOTOR1_A_PWM_GPIO;
-	motor1a_channel.speed_mode = PWM_HS_MODE;
-	motor1a_channel.channel    = MOTOR1_A_PWM_CHANNEL;
-	motor1a_channel.intr_type  = LEDC_INTR_DISABLE;
-	motor1a_channel.timer_sel  = PWM_HS_TIMER;
-	motor1a_channel.duty       = 0;
-	motor1a_channel.hpoint     = 0;
-	motor1a_channel.flags.output_invert = 0;
-	ledc_channel_config(&motor1a_channel);
+	ledc_channel_config_t motor1_channel;
+	motor1_channel.gpio_num   = MOTOR1_PWM_GPIO;
+	motor1_channel.speed_mode = PWM_HS_MODE;
+	motor1_channel.channel    = MOTOR1_PWM_CHANNEL;
+	motor1_channel.intr_type  = LEDC_INTR_DISABLE;
+	motor1_channel.timer_sel  = PWM_HS_TIMER;
+	motor1_channel.duty       = 0;
+	motor1_channel.hpoint     = 0;
+	motor1_channel.flags.output_invert = 0;
+	ledc_channel_config(&motor1_channel);
 	// Channel 2 //
-	ledc_channel_config_t motor1b_channel;
-	motor1b_channel.gpio_num   = MOTOR1_B_PWM_GPIO;
-	motor1b_channel.speed_mode = PWM_HS_MODE;
-	motor1b_channel.channel    = MOTOR1_B_PWM_CHANNEL;
-	motor1b_channel.intr_type  = LEDC_INTR_DISABLE;
-	motor1b_channel.timer_sel  = PWM_HS_TIMER;
-	motor1b_channel.duty       = 0;
-	motor1b_channel.hpoint     = 0;
-	motor1b_channel.flags.output_invert = 0;
-	ledc_channel_config(&motor1b_channel);
-	// Channel 3 //
-	ledc_channel_config_t motor2a_channel;
-	motor2a_channel.gpio_num   = MOTOR2_A_PWM_GPIO;
-	motor2a_channel.speed_mode = PWM_HS_MODE;
-	motor2a_channel.channel    = MOTOR2_A_PWM_CHANNEL;
-	motor2a_channel.intr_type  = LEDC_INTR_DISABLE;
-	motor2a_channel.timer_sel  = PWM_HS_TIMER;
-	motor2a_channel.duty       = 0;
-	motor2a_channel.hpoint     = 0;
-	motor2a_channel.flags.output_invert = 0;
-	ledc_channel_config(&motor2a_channel);
-	// Channel 4 //
-	ledc_channel_config_t motor2b_channel;
-	motor2b_channel.gpio_num   = MOTOR2_B_PWM_GPIO;
-	motor2b_channel.speed_mode = PWM_HS_MODE;
-	motor2b_channel.channel    = MOTOR2_B_PWM_CHANNEL;
-	motor2b_channel.intr_type  = LEDC_INTR_DISABLE;
-	motor2b_channel.timer_sel  = PWM_HS_TIMER;
-	motor2b_channel.duty       = 0;
-	motor2b_channel.hpoint     = 0;
-	motor2b_channel.flags.output_invert = 0;
-	ledc_channel_config(&motor2b_channel);
+	ledc_channel_config_t motor2_channel;
+	motor2_channel.gpio_num   = MOTOR2_PWM_GPIO;
+	motor2_channel.speed_mode = PWM_HS_MODE;
+	motor2_channel.channel    = MOTOR2_PWM_CHANNEL;
+	motor2_channel.intr_type  = LEDC_INTR_DISABLE;
+	motor2_channel.timer_sel  = PWM_HS_TIMER;
+	motor2_channel.duty       = 0;
+	motor2_channel.hpoint     = 0;
+	motor2_channel.flags.output_invert = 0;
+	ledc_channel_config(&motor2_channel);
 	/////////////////// Fade configuration ///////////////////
 	ledc_fade_func_install(0);
-	Set_Inverted_PWM(PWM_HS_MODE, MOTOR1_A_PWM_CHANNEL, 0.0);
-	Set_Inverted_PWM(PWM_HS_MODE, MOTOR1_B_PWM_CHANNEL, 0.0);
-	Set_Inverted_PWM(PWM_HS_MODE, MOTOR2_A_PWM_CHANNEL, 0.0);
-	Set_Inverted_PWM(PWM_HS_MODE, MOTOR2_B_PWM_CHANNEL, 0.0);
+	Set_Inverted_PWM(PWM_HS_MODE, MOTOR1_PWM_CHANNEL, 0.0);
+	Set_Inverted_PWM(PWM_HS_MODE, MOTOR2_PWM_CHANNEL, 0.0);
 	ESP_LOGI("IO_config", "PWM - check");
 }
 void Setup_INTR()
 {
 	gpio_config_t Interrupt_Pins_Config = (gpio_config_t) // encA of motor 1 and 2
-		{
-			.pin_bit_mask = GPIO_INTERRUPT_INPUT_PINS_MASK,
-			.mode = GPIO_MODE_INPUT,
-			.pull_up_en = GPIO_PULLUP_ENABLE,
-			.pull_down_en = GPIO_PULLDOWN_DISABLE,
-			.intr_type = GPIO_INTR_POSEDGE,
-		};
+	{
+		.pin_bit_mask = GPIO_INTERRUPT_INPUT_PINS_MASK,
+		.mode = GPIO_MODE_INPUT,
+		.pull_up_en = GPIO_PULLUP_ENABLE,
+		.pull_down_en = GPIO_PULLDOWN_DISABLE,
+		.intr_type = GPIO_INTR_POSEDGE,
+	};
 	gpio_config(&Interrupt_Pins_Config);
 
 	gpio_set_intr_type(MOTOR1_ENCODER_A_GPIO, GPIO_INTR_POSEDGE); // don't know why this reduntant line has to be mentioned, but it all fails without it.
@@ -399,90 +352,59 @@ void Setup_INTR()
 }
 void Setup_Digital_IO()
 {
-		////////////////////////////////// DIGITAL INPUTS //////////////////////////////////
+	////////////////////////////////// DIGITAL INPUTS //////////////////////////////////
 	gpio_config_t Digital_Input_Pins_Config = (gpio_config_t) // encB of motor 1 and 2
-		{
-			.pin_bit_mask = GPIO_DIGITAL_INPUT_PINS_MASK,
-			.mode = GPIO_MODE_INPUT,
-			.pull_up_en = GPIO_PULLUP_DISABLE,
-			.pull_down_en = GPIO_PULLDOWN_ENABLE,
-			.intr_type = GPIO_INTR_DISABLE,
-		};
+	{
+		.pin_bit_mask = GPIO_DIGITAL_INPUT_PINS_MASK,
+		.mode = GPIO_MODE_INPUT,
+		.pull_up_en = GPIO_PULLUP_DISABLE,
+		.pull_down_en = GPIO_PULLDOWN_ENABLE,
+		.intr_type = GPIO_INTR_DISABLE,
+	};
 	gpio_config(&Digital_Input_Pins_Config);
 	ESP_LOGI("IO_config", "Digital Inputs - check");
 
 	////////////////////////////////// DIGITAL OUTPUTS //////////////////////////////////
-	gpio_config_t Digital_Output_Pins_Config = (gpio_config_t) // encB of motor 1 and 2
-		{
-			.pin_bit_mask = GPIO_DIGITAL_OUTPUT_PINS_MASK,
-			.mode = GPIO_MODE_OUTPUT,
-			.pull_up_en = GPIO_PULLUP_DISABLE,
-			.pull_down_en = GPIO_PULLDOWN_ENABLE,
-			.intr_type = GPIO_INTR_DISABLE,
-		};
+	gpio_config_t Digital_Output_Pins_Config = (gpio_config_t) // motor 1 and 2 direction control
+	{
+		.pin_bit_mask = GPIO_DIGITAL_OUTPUT_PINS_MASK,
+		.mode = GPIO_MODE_OUTPUT,
+		.pull_up_en = GPIO_PULLUP_DISABLE,
+		.pull_down_en = GPIO_PULLDOWN_ENABLE,
+		.intr_type = GPIO_INTR_DISABLE,
+	};
 	gpio_config(&Digital_Output_Pins_Config);
 	ESP_LOGI("IO_config", "Digital Outputs - check");
-}
-void Setup_ADC()
-{
-	////////////////////////////////// ANALOG INPUTS //////////////////////////////////
-	esp_adc_cal_check_efuse(ADC_CALIBRATION_SCHEME);
-	esp_adc_cal_characterize(ADC_UNIT_2, ADC_ATTENUATION, ADC_RESOLUTION_BIT, 0, &motor1_shunt_p_adc_chars);
-	esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTENUATION, ADC_RESOLUTION_BIT, 0, &motor2_shunt_p_adc_chars);
-	esp_adc_cal_characterize(ADC_UNIT_2, ADC_ATTENUATION, ADC_RESOLUTION_BIT, 0, &voltage_sensor_adc_chars);
-	adc2_config_channel_atten(MOTOR1_SHUNT_P_GPIO, ADC_ATTENUATION);
-	adc1_config_channel_atten(MOTOR2_SHUNT_P_GPIO, ADC_ATTENUATION);
-	adc2_config_channel_atten(VOLTAGE_SENSOR_GPIO, ADC_ATTENUATION);
-	ESP_LOGI("IO_config", "Analog Inputs - check");
 }
 void Setup_IMU()
 {
 	ESP_LOGI(TAG, "Setting up BMX160 via I2C");
-    while(bmx160.begin() != true)
+	while(bmx160.begin() != true)
 	{
 		ESP_LOGE(TAG, "begin failed!");
 		vTaskDelay(pdMS_TO_TICKS(1000));
 	}
-    ESP_LOGI(TAG, "connection successful!");
-	// bmx160.setLowPower();   //disable the gyroscope and accelerometer sensor
-	// bmx160.wakeUp();        //enable the gyroscope and accelerometer sensor
-	// bmx160.softReset();     //reset the sensor
-	/** 
-	 * enum{eGyroRange_2000DPS,
-	 *       eGyroRange_1000DPS,
-	 *       eGyroRange_500DPS,
-	 *       eGyroRange_250DPS,
-	 *       eGyroRange_125DPS
-	 *       }eGyroRange_t;
-	 **/
-	// bmx160.setGyroRange(eGyroRange_500DPS); // default 250DPS inside .h
-	/*
-	*  enum{eAccelRange_2G,
-	*       eAccelRange_4G,
-	*       eAccelRange_8G,
-	*       eAccelRange_16G
-	*       }eAccelRange_t;
-	*/
-	// bmx160.setAccelRange(eAccelRange_4G); // default 2G inside .h
+	ESP_LOGI(TAG, "connection successful!");
 }
 void Setup_UART()
 {
-    // ******************************* UART0 config for microROS transport ******************************* //
-    static uart_port_t uart_port = UART_NUM_0;
-    #if defined(RMW_UXRCE_TRANSPORT_CUSTOM)
-		rmw_uros_set_custom_transport(
-			true,
-			(void *) &uart_port,
-			esp32_serial_open,
-			esp32_serial_close,
-			esp32_serial_write,
-			esp32_serial_read
-		);
-	#else
-		#error micro-ROS transports misconfigured
-	#endif
+	// when designing the custom hardware, use UART0 for flash and logging as usual, meanwhile use UART1 for microROS
+	// ******************************* UART0 config for microROS transport ******************************* //
+#if defined(RMW_UXRCE_TRANSPORT_CUSTOM)
+	static uart_port_t microros_uart_port = UART_NUM_0;
+	rmw_uros_set_custom_transport(
+		true,
+		(void *) &microros_uart_port,
+		esp32_serial_open,
+		esp32_serial_close,
+		esp32_serial_write,
+		esp32_serial_read
+	);
+#else
+#error micro-ROS transports misconfigured
+#endif
 
-    // ******************************* UART1 config for serial monitoring ******************************* //
+	// ******************************* UART1 config for serial monitoring ******************************* //
 	/* Please make sure that the following is set inside menuconfig:
 	   1. component_config -> ESP system settings -> channel for console output -> custom UART
 	   2. component_config -> ESP system settings -> UART peripheral for console output -> UART1
@@ -492,38 +414,17 @@ void Setup_UART()
 	   6. micro-ROS Settings -> UART Settings -> UART RX -> 3
 	 */
 	// ******************************* UART1 config for GPS (optional) ******************************* //
-    //static uart_port_t uart1_port = UART_NUM_1;
-    //const unsigned int UART1_BUFFER_SIZE = 1024;
-    //uart_config_t uart1_config;
-    //uart1_config.baud_rate = 115200; // for monitoring via uart1
-    //uart1_config.data_bits = UART_DATA_8_BITS;
-    //uart1_config.parity    = UART_PARITY_DISABLE;
-    //uart1_config.stop_bits = UART_STOP_BITS_1;
-    //uart1_config.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
-    //uart_param_config(uart1_port, &uart1_config);
-    //uart_set_pin(uart1_port, CONFIG_ESP_CONSOLE_UART_TX_GPIO, CONFIG_ESP_CONSOLE_UART_RX_GPIO, -1, -1);
-    //uart_driver_install(uart1_port, UART1_BUFFER_SIZE * 2, 0, 0, NULL, 0);
-}
-void Setup_CAN()
-{
-	// ******************************* CAN config ******************************* //
-    static const twai_timing_config_t t_config = TWAI_TIMING_CONFIG_1MBITS();
-    static const twai_filter_config_t f_config = TWAI_FILTER_CONFIG_ACCEPT_ALL();
-    static const twai_general_config_t g_config = {
-	.controller_id = 0, // CAN0
-        .mode = TWAI_MODE_NORMAL,
-        .tx_io = (gpio_num_t) CAN_TX_GPIO,
-        .rx_io = (gpio_num_t) CAN_RX_GPIO,
-		.clkout_io = (gpio_num_t) -1,
-		.bus_off_io = (gpio_num_t) -1,
-        .tx_queue_len = 0,
-        .rx_queue_len = 65,
-        .alerts_enabled = TWAI_ALERT_ALL,
-        .clkout_divider = 0,
-		.intr_flags = 0
-    };
-    twai_driver_install(&g_config, &t_config, &f_config);
-    twai_start();
+	//static uart_port_t uart1_port = UART_NUM_1;
+	//const unsigned int UART1_BUFFER_SIZE = 1024;
+	//uart_config_t uart1_config;
+	//uart1_config.baud_rate = 460800; // for monitoring via uart1
+	//uart1_config.data_bits = UART_DATA_8_BITS;
+	//uart1_config.parity    = UART_PARITY_DISABLE;
+	//uart1_config.stop_bits = UART_STOP_BITS_1;
+	//uart1_config.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
+	//uart_param_config(uart1_port, &uart1_config);
+	//uart_set_pin(uart1_port, CONFIG_ESP_CONSOLE_UART_TX_GPIO, CONFIG_ESP_CONSOLE_UART_RX_GPIO, -1, -1);
+	//uart_driver_install(uart1_port, UART1_BUFFER_SIZE * 2, 0, 0, NULL, 0);
 }
 
 extern "C" void app_main(void)
@@ -531,9 +432,7 @@ extern "C" void app_main(void)
 	Setup_PWM();
 	Setup_INTR();
 	Setup_Digital_IO();
-	Setup_ADC();
 	Setup_UART();
-	Setup_CAN();
 	// for some reason the microROS TASK fails to initialize from 'node' and onwards, if GPIO of CTS and RTS is configured on the fly.
 	// therefore, make sure that EITHER the GPIOs have finished configuring OR the microROS task has initialized completely, once function at a time and not simultaneously.
 	xTaskCreatePinnedToCore(TASK_microROS, "microROS task", CONFIG_MICRO_ROS_APP_STACK, NULL, CONFIG_MICRO_ROS_APP_TASK_PRIO, NULL, 0);

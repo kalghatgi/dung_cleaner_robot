@@ -43,7 +43,7 @@ const uint8_t int_mask_lookup_table[13] = {
 bool DFRobot_BMX160::begin()
 {
     // _pWire->begin();
-    int i2c_master_port = I2C_NUM_0;
+    i2c_port_t i2c_master_port = I2C_NUM_0;
     i2c_config_t conf;
     conf.mode = I2C_MODE_MASTER;
     conf.sda_io_num = SDA_PIN;
