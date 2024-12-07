@@ -39,15 +39,15 @@ class robot_base_node : public rclcpp::Node
 
       encoder_raw_subscription_ = this->create_subscription<std_msgs::msg::Int64MultiArray>(
         "/amr/encoder_raw", rclcpp::SensorDataQoS(), std::bind(&robot_base_node::encoder_raw_callback, this, _1));
-      
+
       cmd_vel_subscription_ = this->create_subscription<geometry_msgs::msg::Twist>(
         velocity_input_topic_, rclcpp::SystemDefaultsQoS(), std::bind(&robot_base_node::cmd_vel_callback, this, _1));
-      
+
       wheel_odometry_publisher_ = this->create_publisher<nav_msgs::msg::Odometry>(
         "/odom/wheel_encoder", rclcpp::SystemDefaultsQoS());
       wheel_odometry_timer_ = this->create_wall_timer(
         100ms, std::bind(&robot_base_node::wheel_odometry_timer_callback, this));
-      
+
       wheel_velocity_publisher_ = this->create_publisher<sensor_msgs::msg::JointState>(
         "/amr/wheel_speed", rclcpp::SystemDefaultsQoS());
       wheel_velocity_timer_ = this->create_wall_timer(

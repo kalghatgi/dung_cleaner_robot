@@ -1,0 +1,2 @@
+Invoking command in '/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake /home/akash/dung_cleaner_robot/ROS/robot_base -DCMAKE_INSTALL_PREFIX=/home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base
+Invoked command in '/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base' returned '1': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake /home/akash/dung_cleaner_robot/ROS/robot_base -DCMAKE_INSTALL_PREFIX=/home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base
