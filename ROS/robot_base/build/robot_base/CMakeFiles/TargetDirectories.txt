@@ -1,0 +1,10 @@
+/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base/CMakeFiles/uninstall.dir
+/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base/CMakeFiles/robot_base_uninstall.dir
+/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base/CMakeFiles/robot_base_node.dir
+/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base/CMakeFiles/test.dir
+/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base/CMakeFiles/edit_cache.dir
+/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base/CMakeFiles/rebuild_cache.dir
+/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base/CMakeFiles/list_install_components.dir
+/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base/CMakeFiles/install.dir
+/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base/CMakeFiles/install/local.dir
+/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base/CMakeFiles/install/strip.dir

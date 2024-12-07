@@ -1,0 +1,32 @@
+[0.045s] Invoking command in '/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base -- -j4 -l4
+[0.299s] [ 16%] [32mBuilding CXX object CMakeFiles/app.dir/src/app.cpp.o[0m
+[0.300s] [ 33%] [32mBuilding CXX object CMakeFiles/app.dir/src/odometry.cpp.o[0m
+[0.301s] [ 50%] [32mBuilding CXX object CMakeFiles/app_node.dir/src/app.cpp.o[0m
+[0.302s] [ 66%] [32mBuilding CXX object CMakeFiles/app_node.dir/src/odometry.cpp.o[0m
+[11.049s] [ 83%] [32m[1mLinking CXX executable app_node[0m
+[11.082s] [100%] [32m[1mLinking CXX executable app[0m
+[11.808s] [100%] Built target app
+[11.815s] [100%] Built target app_node
+[11.826s] Invoked command in '/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base -- -j4 -l4
+[11.839s] Invoking command in '/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base
+[11.846s] -- Install configuration: ""
+[11.849s] -- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/lib/robot_base/app_node
+[11.854s] -- Set runtime path of "/home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/lib/robot_base/app_node" to ""
+[11.854s] -- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/lib/robot_base/app
+[11.857s] -- Set runtime path of "/home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/lib/robot_base/app" to ""
+[11.860s] -- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/ament_index/resource_index/package_run_dependencies/robot_base
+[11.861s] -- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/ament_index/resource_index/parent_prefix_path/robot_base
+[11.864s] -- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/environment/ament_prefix_path.sh
+[11.864s] -- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/environment/ament_prefix_path.dsv
+[11.865s] -- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/environment/path.sh
+[11.866s] -- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/environment/path.dsv
+[11.867s] -- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/local_setup.bash
+[11.867s] -- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/local_setup.sh
+[11.868s] -- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/local_setup.zsh
+[11.869s] -- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/local_setup.dsv
+[11.870s] -- Up-to-date: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/package.dsv
+[11.870s] -- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/ament_index/resource_index/packages/robot_base
+[11.871s] -- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/cmake/robot_baseConfig.cmake
+[11.872s] -- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/cmake/robot_baseConfig-version.cmake
+[11.873s] -- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/package.xml
+[11.877s] Invoked command in '/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base

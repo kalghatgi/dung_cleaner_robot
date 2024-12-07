@@ -1,0 +1,270 @@
+[0.000000] (-) TimerEvent: {}
+[0.000515] (robot_base) JobQueued: {'identifier': 'robot_base', 'dependencies': OrderedDict()}
+[0.001384] (robot_base) JobStarted: {'identifier': 'robot_base'}
+[0.023208] (robot_base) JobProgress: {'identifier': 'robot_base', 'progress': 'cmake'}
+[0.033227] (robot_base) Command: {'cmd': ['/usr/bin/cmake', '/home/akash/dung_cleaner_robot/ROS/robot_base', '-DCMAKE_INSTALL_PREFIX=/home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base'], 'cwd': '/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base', 'env': OrderedDict([('LESSOPEN', '| /usr/bin/lesspipe %s'), ('USER', 'akash'), ('IDF_TOOLS_INSTALL_CMD', '/home/akash/esp/esp-idf/install.sh'), ('SHLVL', '1'), ('LD_LIBRARY_PATH', '/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib'), ('WT_PROFILE_ID', '{61c54bbd-c2c6-5271-96e7-009a87ff44bf}'), ('MOTD_SHOWN', 'update-motd'), ('HOME', '/home/akash'), ('OLDPWD', '/home/akash/dung_cleaner_robot/uROS/esp32_projects/projects/robot_base'), ('ROS_PYTHON_VERSION', '3'), ('DBUS_SESSION_BUS_ADDRESS', 'unix:path=/run/user/1000/bus'), ('WSL_DISTRO_NAME', 'Ubuntu-22.04'), ('OPENOCD_SCRIPTS', '/home/akash/.espressif/tools/openocd-esp32/v0.12.0-esp32-20240821/openocd-esp32/share/openocd/scripts'), ('WAYLAND_DISPLAY', 'wayland-0'), ('COLCON_PREFIX_PATH', '/home/akash/dung_cleaner_robot/ROS/robot_base/install'), ('ROS_DISTRO', 'humble'), ('LOGNAME', 'akash'), ('NAME', 'Akash-H510M'), ('WSL_INTEROP', '/run/WSL/283_interop'), ('PULSE_SERVER', 'unix:/mnt/wslg/PulseServer'), ('_', '/home/akash/.espressif/python_env/idf5.2_py3.10_env/bin/colcon'), ('ROS_VERSION', '2'), ('TERM', 'xterm-256color'), ('IDF_DEACTIVATE_FILE_PATH', '/tmp/tmp3393545cidf_284'), ('ROS_LOCALHOST_ONLY', '0'), ('IDF_PATH', '/home/akash/esp/esp-idf'), ('PATH', '/home/akash/esp/esp-idf/components/espcoredump:/home/akash/esp/esp-idf/components/partition_table:/home/akash/esp/esp-idf/components/app_update:/home/akash/.espressif/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin:/home/akash/.espressif/tools/riscv32-esp-elf-gdb/14.2_20240403/riscv32-esp-elf-gdb/bin:/home/akash/.espressif/tools/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/bin:/home/akash/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20230928/riscv32-esp-elf/bin:/home/akash/.espressif/tools/esp32ulp-elf/2.35_20220830/esp32ulp-elf/bin:/home/akash/.espressif/tools/openocd-esp32/v0.12.0-esp32-20240821/openocd-esp32/bin:/home/akash/.espressif/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin:/home/akash/.espressif/tools/riscv32-esp-elf-gdb/14.2_20240403/riscv32-esp-elf-gdb/bin:/home/akash/.espressif/tools/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/bin:/home/akash/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20230928/riscv32-esp-elf/bin:/home/akash/.espressif/tools/esp32ulp-elf/2.35_20220830/esp32ulp-elf/bin:/home/akash/.espressif/tools/openocd-esp32/v0.12.0-esp32-20240821/openocd-esp32/bin:/home/akash/esp/esp-idf/components/espcoredump:/home/akash/esp/esp-idf/components/partition_table:/home/akash/esp/esp-idf/components/app_update:/home/akash/.espressif/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin:/home/akash/.espressif/tools/riscv32-esp-elf-gdb/14.2_20240403/riscv32-esp-elf-gdb/bin:/home/akash/.espressif/tools/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/bin:/home/akash/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20230928/riscv32-esp-elf/bin:/home/akash/.espressif/tools/esp32ulp-elf/2.35_20220830/esp32ulp-elf/bin:/home/akash/.espressif/tools/openocd-esp32/v0.12.0-esp32-20240821/openocd-esp32/bin:/home/akash/.espressif/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin:/home/akash/.espressif/tools/riscv32-esp-elf-gdb/14.2_20240403/riscv32-esp-elf-gdb/bin:/home/akash/.espressif/tools/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/bin:/home/akash/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20230928/riscv32-esp-elf/bin:/home/akash/.espressif/tools/esp32ulp-elf/2.35_20220830/esp32ulp-elf/bin:/home/akash/.espressif/tools/openocd-esp32/v0.12.0-esp32-20240821/openocd-esp32/bin:/opt/ros/humble/bin:/home/akash/esp/esp-idf/components/espcoredump:/home/akash/esp/esp-idf/components/partition_table:/home/akash/esp/esp-idf/components/app_update:/home/akash/.espressif/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin:/home/akash/.espressif/tools/riscv32-esp-elf-gdb/14.2_20240403/riscv32-esp-elf-gdb/bin:/home/akash/.espressif/tools/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/bin:/home/akash/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20230928/riscv32-esp-elf/bin:/home/akash/.espressif/tools/esp32ulp-elf/2.35_20220830/esp32ulp-elf/bin:/home/akash/.espressif/tools/openocd-esp32/v0.12.0-esp32-20240821/openocd-esp32/bin:/home/akash/.espressif/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin:/home/akash/.espressif/tools/riscv32-esp-elf-gdb/14.2_20240403/riscv32-esp-elf-gdb/bin:/home/akash/.espressif/tools/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/bin:/home/akash/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20230928/riscv32-esp-elf/bin:/home/akash/.espressif/tools/esp32ulp-elf/2.35_20220830/esp32ulp-elf/bin:/home/akash/.espressif/tools/openocd-esp32/v0.12.0-esp32-20240821/openocd-esp32/bin:/home/akash/.espressif/python_env/idf5.2_py3.10_env/bin:/home/akash/esp/esp-idf/tools:/home/akash/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib:/mnt/c/Program Files (x86)/Common Files/Oracle/Java/javapath:/mnt/c/Program Files (x86)/NVIDIA Corporation/PhysX/Common:/mnt/c/WINDOWS/system32:/mnt/c/WINDOWS:/mnt/c/WINDOWS/System32/Wbem:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/:/mnt/c/WINDOWS/System32/OpenSSH/:/mnt/c/Program Files (x86)/Windows Kits/8.1/Windows Performance Toolkit/:/mnt/c/Program Files/dotnet/:/mnt/c/Program Files/PuTTY/:/mnt/c/Program Files/Git/cmd:/mnt/c/Program Files/usbipd-win/:/mnt/c/Users/akash/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/akash/AppData/Local/Programs/Microsoft VS Code/bin:/mnt/c/Users/akash/AppData/Local/GitHubDesktop/bin:/mnt/c/Users/akash/Infineon/LauncherService:/snap/bin'), ('WT_SESSION', '95e62687-b991-414f-8b5c-051367f99940'), ('XDG_RUNTIME_DIR', '/run/user/1000/'), ('DISPLAY', ':0'), ('LANG', 'en_US.UTF-8'), ('ESP_IDF_VERSION', '5.2'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('AMENT_PREFIX_PATH', '/home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base:/opt/ros/humble'), ('SHELL', '/bin/bash'), ('IDF_PYTHON_ENV_PATH', '/home/akash/.espressif/python_env/idf5.2_py3.10_env'), ('WEBOTS_HOME', '/mnt/c/Program Files/Webots'), ('LESSCLOSE', '/usr/bin/lesspipe %s %s'), ('IDF_TOOLS_EXPORT_CMD', '/home/akash/esp/esp-idf/export.sh'), ('PWD', '/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base'), ('XDG_DATA_DIRS', '/usr/local/share:/usr/share:/var/lib/snapd/desktop'), ('PYTHONPATH', '/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('ESP_ROM_ELF_DIR', '/home/akash/.espressif/tools/esp-rom-elfs/20230320/'), ('COLCON', '1'), ('WSL2_GUI_APPS_ENABLED', '1'), ('HOSTTYPE', 'x86_64'), ('CMAKE_PREFIX_PATH', '/home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base:/opt/ros/humble'), ('WSLENV', 'WT_SESSION:WT_PROFILE_ID:')]), 'shell': False}
+[0.100897] (-) TimerEvent: {}
+[0.202401] (-) TimerEvent: {}
+[0.304923] (-) TimerEvent: {}
+[0.415734] (-) TimerEvent: {}
+[0.517338] (-) TimerEvent: {}
+[0.621627] (-) TimerEvent: {}
+[0.732394] (-) TimerEvent: {}
+[0.832855] (-) TimerEvent: {}
+[0.854050] (robot_base) StdoutLine: {'line': b'-- The C compiler identification is GNU 11.4.0\n'}
+[0.933012] (-) TimerEvent: {}
+[1.033537] (-) TimerEvent: {}
+[1.145909] (-) TimerEvent: {}
+[1.246616] (-) TimerEvent: {}
+[1.296760] (robot_base) StdoutLine: {'line': b'-- The CXX compiler identification is GNU 11.4.0\n'}
+[1.347179] (-) TimerEvent: {}
+[1.454334] (-) TimerEvent: {}
+[1.564669] (-) TimerEvent: {}
+[1.655169] (robot_base) StdoutLine: {'line': b'-- Detecting C compiler ABI info\n'}
+[1.665796] (-) TimerEvent: {}
+[1.767226] (-) TimerEvent: {}
+[1.870955] (-) TimerEvent: {}
+[1.916606] (robot_base) StdoutLine: {'line': b'-- Detecting C compiler ABI info - done\n'}
+[1.921755] (robot_base) StdoutLine: {'line': b'-- Check for working C compiler: /usr/bin/cc - skipped\n'}
+[1.922892] (robot_base) StdoutLine: {'line': b'-- Detecting C compile features\n'}
+[1.923816] (robot_base) StdoutLine: {'line': b'-- Detecting C compile features - done\n'}
+[1.931119] (robot_base) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info\n'}
+[1.972020] (-) TimerEvent: {}
+[2.072956] (-) TimerEvent: {}
+[2.080356] (robot_base) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info - done\n'}
+[2.085630] (robot_base) StdoutLine: {'line': b'-- Check for working CXX compiler: /usr/bin/c++ - skipped\n'}
+[2.085918] (robot_base) StdoutLine: {'line': b'-- Detecting CXX compile features\n'}
+[2.086206] (robot_base) StdoutLine: {'line': b'-- Detecting CXX compile features - done\n'}
+[2.151300] (robot_base) StdoutLine: {'line': b'-- Found ament_cmake: 1.3.10 (/opt/ros/humble/share/ament_cmake/cmake)\n'}
+[2.173208] (-) TimerEvent: {}
+[2.273661] (-) TimerEvent: {}
+[2.376199] (-) TimerEvent: {}
+[2.477152] (-) TimerEvent: {}
+[2.582179] (-) TimerEvent: {}
+[2.633628] (robot_base) StdoutLine: {'line': b'-- Found Python3: /home/akash/.espressif/python_env/idf5.2_py3.10_env/bin/python3 (found version "3.10.12") found components: Interpreter \n'}
+[2.682916] (-) TimerEvent: {}
+[2.754131] (robot_base) StdoutLine: {'line': b'-- Found rclcpp: 16.0.10 (/opt/ros/humble/share/rclcpp/cmake)\n'}
+[2.783103] (-) TimerEvent: {}
+[2.883877] (-) TimerEvent: {}
+[2.988481] (-) TimerEvent: {}
+[3.090199] (-) TimerEvent: {}
+[3.127609] (robot_base) StdoutLine: {'line': b'-- Found rosidl_generator_c: 3.1.5 (/opt/ros/humble/share/rosidl_generator_c/cmake)\n'}
+[3.143695] (robot_base) StdoutLine: {'line': b'-- Found rosidl_adapter: 3.1.5 (/opt/ros/humble/share/rosidl_adapter/cmake)\n'}
+[3.151361] (robot_base) StdoutLine: {'line': b'-- Found rosidl_generator_cpp: 3.1.5 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)\n'}
+[3.183010] (robot_base) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c\n'}
+[3.191088] (-) TimerEvent: {}
+[3.219734] (robot_base) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp\n'}
+[3.298512] (-) TimerEvent: {}
+[3.314365] (robot_base) StdoutLine: {'line': b'-- Found rmw_implementation_cmake: 6.1.2 (/opt/ros/humble/share/rmw_implementation_cmake/cmake)\n'}
+[3.318981] (robot_base) StdoutLine: {'line': b'-- Found rmw_fastrtps_cpp: 6.2.7 (/opt/ros/humble/share/rmw_fastrtps_cpp/cmake)\n'}
+[3.402976] (-) TimerEvent: {}
+[3.503635] (-) TimerEvent: {}
+[3.614198] (-) TimerEvent: {}
+[3.714812] (-) TimerEvent: {}
+[3.815544] (-) TimerEvent: {}
+[3.916355] (-) TimerEvent: {}
+[4.017137] (-) TimerEvent: {}
+[4.118129] (-) TimerEvent: {}
+[4.219090] (-) TimerEvent: {}
+[4.327481] (-) TimerEvent: {}
+[4.429402] (-) TimerEvent: {}
+[4.530525] (-) TimerEvent: {}
+[4.584031] (robot_base) StdoutLine: {'line': b'-- Found OpenSSL: /usr/lib/x86_64-linux-gnu/libcrypto.so (found version "3.0.2")  \n'}
+[4.631423] (-) TimerEvent: {}
+[4.732515] (-) TimerEvent: {}
+[4.837363] (-) TimerEvent: {}
+[4.938497] (-) TimerEvent: {}
+[5.039505] (-) TimerEvent: {}
+[5.140385] (-) TimerEvent: {}
+[5.241479] (-) TimerEvent: {}
+[5.342748] (robot_base) StdoutLine: {'line': b'-- Found FastRTPS: /opt/ros/humble/include  \n'}
+[5.342903] (-) TimerEvent: {}
+[5.449171] (-) TimerEvent: {}
+[5.559476] (-) TimerEvent: {}
+[5.665137] (-) TimerEvent: {}
+[5.773679] (-) TimerEvent: {}
+[5.884090] (-) TimerEvent: {}
+[5.984558] (-) TimerEvent: {}
+[6.088068] (-) TimerEvent: {}
+[6.198475] (-) TimerEvent: {}
+[6.308782] (-) TimerEvent: {}
+[6.419095] (-) TimerEvent: {}
+[6.519969] (-) TimerEvent: {}
+[6.578583] (robot_base) StdoutLine: {'line': b"-- Using RMW implementation 'rmw_fastrtps_cpp' as default\n"}
+[6.586062] (robot_base) StdoutLine: {'line': b'-- Looking for pthread.h\n'}
+[6.620967] (-) TimerEvent: {}
+[6.690744] (robot_base) StdoutLine: {'line': b'-- Looking for pthread.h - found\n'}
+[6.691075] (robot_base) StdoutLine: {'line': b'-- Performing Test CMAKE_HAVE_LIBC_PTHREAD\n'}
+[6.721907] (-) TimerEvent: {}
+[6.793221] (robot_base) StdoutLine: {'line': b'-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success\n'}
+[6.794042] (robot_base) StdoutLine: {'line': b'-- Found Threads: TRUE  \n'}
+[6.822844] (-) TimerEvent: {}
+[6.830190] (robot_base) StdoutLine: {'line': b'-- Found nav_msgs: 4.2.4 (/opt/ros/humble/share/nav_msgs/cmake)\n'}
+[6.859553] (robot_base) StdoutLine: {'line': b'-- Found sensor_msgs: 4.2.4 (/opt/ros/humble/share/sensor_msgs/cmake)\n'}
+[6.881428] (robot_base) StdoutLine: {'line': b'-- Found tf2: 0.25.8 (/opt/ros/humble/share/tf2/cmake)\n'}
+[6.890414] (robot_base) StdoutLine: {'line': b'-- Found ament_lint_auto: 0.12.11 (/opt/ros/humble/share/ament_lint_auto/cmake)\n'}
+[6.925961] (-) TimerEvent: {}
+[6.968896] (robot_base) StdoutLine: {'line': b"-- Added test 'copyright' to check source files copyright and LICENSE\n"}
+[6.972383] (robot_base) StdoutLine: {'line': b"-- Added test 'cppcheck' to perform static code analysis on C / C++ code\n"}
+[6.972643] (robot_base) StdoutLine: {'line': b'-- Configured cppcheck include dirs: $<BUILD_INTERFACE:/home/akash/dung_cleaner_robot/ROS/robot_base/include>\n'}
+[6.972746] (robot_base) StdoutLine: {'line': b'-- Configured cppcheck exclude dirs and/or files: \n'}
+[6.975877] (robot_base) StdoutLine: {'line': b"-- Added test 'cpplint' to check C / C++ code against the Google style\n"}
+[6.975962] (robot_base) StdoutLine: {'line': b'-- Configured cpplint exclude dirs and/or files: \n'}
+[6.977419] (robot_base) StdoutLine: {'line': b"-- Added test 'lint_cmake' to check CMake code style\n"}
+[6.981222] (robot_base) StdoutLine: {'line': b"-- Added test 'uncrustify' to check C / C++ code style\n"}
+[6.981305] (robot_base) StdoutLine: {'line': b'-- Configured uncrustify additional arguments: \n'}
+[6.982142] (robot_base) StdoutLine: {'line': b"-- Added test 'xmllint' to check XML markup files\n"}
+[6.987284] (robot_base) StdoutLine: {'line': b'-- Configuring done\n'}
+[6.995889] (robot_base) StdoutLine: {'line': b'-- Generating done\n'}
+[7.000148] (robot_base) StdoutLine: {'line': b'-- Build files have been written to: /home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base\n'}
+[7.009042] (robot_base) CommandEnded: {'returncode': 0}
+[7.009432] (robot_base) JobProgress: {'identifier': 'robot_base', 'progress': 'build'}
+[7.009475] (robot_base) Command: {'cmd': ['/usr/bin/cmake', '--build', '/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base', '--', '-j4', '-l4'], 'cwd': '/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base', 'env': OrderedDict([('LESSOPEN', '| /usr/bin/lesspipe %s'), ('USER', 'akash'), ('IDF_TOOLS_INSTALL_CMD', '/home/akash/esp/esp-idf/install.sh'), ('SHLVL', '1'), ('LD_LIBRARY_PATH', '/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib'), ('WT_PROFILE_ID', '{61c54bbd-c2c6-5271-96e7-009a87ff44bf}'), ('MOTD_SHOWN', 'update-motd'), ('HOME', '/home/akash'), ('OLDPWD', '/home/akash/dung_cleaner_robot/uROS/esp32_projects/projects/robot_base'), ('ROS_PYTHON_VERSION', '3'), ('DBUS_SESSION_BUS_ADDRESS', 'unix:path=/run/user/1000/bus'), ('WSL_DISTRO_NAME', 'Ubuntu-22.04'), ('OPENOCD_SCRIPTS', '/home/akash/.espressif/tools/openocd-esp32/v0.12.0-esp32-20240821/openocd-esp32/share/openocd/scripts'), ('WAYLAND_DISPLAY', 'wayland-0'), ('COLCON_PREFIX_PATH', '/home/akash/dung_cleaner_robot/ROS/robot_base/install'), ('ROS_DISTRO', 'humble'), ('LOGNAME', 'akash'), ('NAME', 'Akash-H510M'), ('WSL_INTEROP', '/run/WSL/283_interop'), ('PULSE_SERVER', 'unix:/mnt/wslg/PulseServer'), ('_', '/home/akash/.espressif/python_env/idf5.2_py3.10_env/bin/colcon'), ('ROS_VERSION', '2'), ('TERM', 'xterm-256color'), ('IDF_DEACTIVATE_FILE_PATH', '/tmp/tmp3393545cidf_284'), ('ROS_LOCALHOST_ONLY', '0'), ('IDF_PATH', '/home/akash/esp/esp-idf'), ('PATH', '/home/akash/esp/esp-idf/components/espcoredump:/home/akash/esp/esp-idf/components/partition_table:/home/akash/esp/esp-idf/components/app_update:/home/akash/.espressif/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin:/home/akash/.espressif/tools/riscv32-esp-elf-gdb/14.2_20240403/riscv32-esp-elf-gdb/bin:/home/akash/.espressif/tools/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/bin:/home/akash/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20230928/riscv32-esp-elf/bin:/home/akash/.espressif/tools/esp32ulp-elf/2.35_20220830/esp32ulp-elf/bin:/home/akash/.espressif/tools/openocd-esp32/v0.12.0-esp32-20240821/openocd-esp32/bin:/home/akash/.espressif/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin:/home/akash/.espressif/tools/riscv32-esp-elf-gdb/14.2_20240403/riscv32-esp-elf-gdb/bin:/home/akash/.espressif/tools/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/bin:/home/akash/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20230928/riscv32-esp-elf/bin:/home/akash/.espressif/tools/esp32ulp-elf/2.35_20220830/esp32ulp-elf/bin:/home/akash/.espressif/tools/openocd-esp32/v0.12.0-esp32-20240821/openocd-esp32/bin:/home/akash/esp/esp-idf/components/espcoredump:/home/akash/esp/esp-idf/components/partition_table:/home/akash/esp/esp-idf/components/app_update:/home/akash/.espressif/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin:/home/akash/.espressif/tools/riscv32-esp-elf-gdb/14.2_20240403/riscv32-esp-elf-gdb/bin:/home/akash/.espressif/tools/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/bin:/home/akash/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20230928/riscv32-esp-elf/bin:/home/akash/.espressif/tools/esp32ulp-elf/2.35_20220830/esp32ulp-elf/bin:/home/akash/.espressif/tools/openocd-esp32/v0.12.0-esp32-20240821/openocd-esp32/bin:/home/akash/.espressif/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin:/home/akash/.espressif/tools/riscv32-esp-elf-gdb/14.2_20240403/riscv32-esp-elf-gdb/bin:/home/akash/.espressif/tools/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/bin:/home/akash/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20230928/riscv32-esp-elf/bin:/home/akash/.espressif/tools/esp32ulp-elf/2.35_20220830/esp32ulp-elf/bin:/home/akash/.espressif/tools/openocd-esp32/v0.12.0-esp32-20240821/openocd-esp32/bin:/opt/ros/humble/bin:/home/akash/esp/esp-idf/components/espcoredump:/home/akash/esp/esp-idf/components/partition_table:/home/akash/esp/esp-idf/components/app_update:/home/akash/.espressif/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin:/home/akash/.espressif/tools/riscv32-esp-elf-gdb/14.2_20240403/riscv32-esp-elf-gdb/bin:/home/akash/.espressif/tools/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/bin:/home/akash/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20230928/riscv32-esp-elf/bin:/home/akash/.espressif/tools/esp32ulp-elf/2.35_20220830/esp32ulp-elf/bin:/home/akash/.espressif/tools/openocd-esp32/v0.12.0-esp32-20240821/openocd-esp32/bin:/home/akash/.espressif/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin:/home/akash/.espressif/tools/riscv32-esp-elf-gdb/14.2_20240403/riscv32-esp-elf-gdb/bin:/home/akash/.espressif/tools/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/bin:/home/akash/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20230928/riscv32-esp-elf/bin:/home/akash/.espressif/tools/esp32ulp-elf/2.35_20220830/esp32ulp-elf/bin:/home/akash/.espressif/tools/openocd-esp32/v0.12.0-esp32-20240821/openocd-esp32/bin:/home/akash/.espressif/python_env/idf5.2_py3.10_env/bin:/home/akash/esp/esp-idf/tools:/home/akash/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib:/mnt/c/Program Files (x86)/Common Files/Oracle/Java/javapath:/mnt/c/Program Files (x86)/NVIDIA Corporation/PhysX/Common:/mnt/c/WINDOWS/system32:/mnt/c/WINDOWS:/mnt/c/WINDOWS/System32/Wbem:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/:/mnt/c/WINDOWS/System32/OpenSSH/:/mnt/c/Program Files (x86)/Windows Kits/8.1/Windows Performance Toolkit/:/mnt/c/Program Files/dotnet/:/mnt/c/Program Files/PuTTY/:/mnt/c/Program Files/Git/cmd:/mnt/c/Program Files/usbipd-win/:/mnt/c/Users/akash/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/akash/AppData/Local/Programs/Microsoft VS Code/bin:/mnt/c/Users/akash/AppData/Local/GitHubDesktop/bin:/mnt/c/Users/akash/Infineon/LauncherService:/snap/bin'), ('WT_SESSION', '95e62687-b991-414f-8b5c-051367f99940'), ('XDG_RUNTIME_DIR', '/run/user/1000/'), ('DISPLAY', ':0'), ('LANG', 'en_US.UTF-8'), ('ESP_IDF_VERSION', '5.2'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('AMENT_PREFIX_PATH', '/home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base:/opt/ros/humble'), ('SHELL', '/bin/bash'), ('IDF_PYTHON_ENV_PATH', '/home/akash/.espressif/python_env/idf5.2_py3.10_env'), ('WEBOTS_HOME', '/mnt/c/Program Files/Webots'), ('LESSCLOSE', '/usr/bin/lesspipe %s %s'), ('IDF_TOOLS_EXPORT_CMD', '/home/akash/esp/esp-idf/export.sh'), ('PWD', '/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base'), ('XDG_DATA_DIRS', '/usr/local/share:/usr/share:/var/lib/snapd/desktop'), ('PYTHONPATH', '/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('ESP_ROM_ELF_DIR', '/home/akash/.espressif/tools/esp-rom-elfs/20230320/'), ('COLCON', '1'), ('WSL2_GUI_APPS_ENABLED', '1'), ('HOSTTYPE', 'x86_64'), ('CMAKE_PREFIX_PATH', '/home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base:/opt/ros/humble'), ('WSLENV', 'WT_SESSION:WT_PROFILE_ID:')]), 'shell': False}
+[7.026615] (-) TimerEvent: {}
+[7.053583] (robot_base) StdoutLine: {'line': b'[ 33%] \x1b[32mBuilding CXX object CMakeFiles/robot_base_node.dir/src/app.cpp.o\x1b[0m\n'}
+[7.053760] (robot_base) StdoutLine: {'line': b'[ 66%] \x1b[32mBuilding CXX object CMakeFiles/robot_base_node.dir/src/odometry.cpp.o\x1b[0m\n'}
+[7.127213] (-) TimerEvent: {}
+[7.237113] (-) TimerEvent: {}
+[7.347511] (-) TimerEvent: {}
+[7.456874] (-) TimerEvent: {}
+[7.567275] (-) TimerEvent: {}
+[7.673367] (-) TimerEvent: {}
+[7.773795] (-) TimerEvent: {}
+[7.874781] (-) TimerEvent: {}
+[7.985133] (-) TimerEvent: {}
+[8.095518] (-) TimerEvent: {}
+[8.205944] (-) TimerEvent: {}
+[8.316322] (-) TimerEvent: {}
+[8.426722] (-) TimerEvent: {}
+[8.535582] (-) TimerEvent: {}
+[8.636333] (-) TimerEvent: {}
+[8.744041] (-) TimerEvent: {}
+[8.854460] (-) TimerEvent: {}
+[8.959761] (-) TimerEvent: {}
+[9.070820] (-) TimerEvent: {}
+[9.181438] (-) TimerEvent: {}
+[9.291861] (-) TimerEvent: {}
+[9.402282] (-) TimerEvent: {}
+[9.502903] (-) TimerEvent: {}
+[9.603351] (-) TimerEvent: {}
+[9.715286] (-) TimerEvent: {}
+[9.825658] (-) TimerEvent: {}
+[9.936122] (-) TimerEvent: {}
+[10.083705] (-) TimerEvent: {}
+[10.194102] (-) TimerEvent: {}
+[10.300262] (-) TimerEvent: {}
+[10.406057] (-) TimerEvent: {}
+[10.508726] (-) TimerEvent: {}
+[10.617286] (-) TimerEvent: {}
+[10.727744] (-) TimerEvent: {}
+[10.895677] (-) TimerEvent: {}
+[10.996614] (-) TimerEvent: {}
+[11.107034] (-) TimerEvent: {}
+[11.217168] (-) TimerEvent: {}
+[11.327537] (-) TimerEvent: {}
+[11.429429] (-) TimerEvent: {}
+[11.539823] (-) TimerEvent: {}
+[11.640941] (-) TimerEvent: {}
+[11.749085] (-) TimerEvent: {}
+[11.853553] (-) TimerEvent: {}
+[11.964029] (-) TimerEvent: {}
+[12.064580] (-) TimerEvent: {}
+[12.170967] (-) TimerEvent: {}
+[12.271623] (-) TimerEvent: {}
+[12.382019] (-) TimerEvent: {}
+[12.485873] (-) TimerEvent: {}
+[12.596261] (-) TimerEvent: {}
+[12.697114] (-) TimerEvent: {}
+[12.802967] (-) TimerEvent: {}
+[12.911783] (-) TimerEvent: {}
+[13.019418] (-) TimerEvent: {}
+[13.121582] (-) TimerEvent: {}
+[13.222845] (-) TimerEvent: {}
+[13.323168] (-) TimerEvent: {}
+[13.433530] (-) TimerEvent: {}
+[13.542430] (-) TimerEvent: {}
+[13.652789] (-) TimerEvent: {}
+[13.756076] (-) TimerEvent: {}
+[13.866443] (-) TimerEvent: {}
+[13.967266] (-) TimerEvent: {}
+[14.077687] (-) TimerEvent: {}
+[14.185453] (-) TimerEvent: {}
+[14.291025] (-) TimerEvent: {}
+[14.394219] (-) TimerEvent: {}
+[14.496711] (-) TimerEvent: {}
+[14.601455] (-) TimerEvent: {}
+[14.705112] (-) TimerEvent: {}
+[14.811676] (-) TimerEvent: {}
+[14.922081] (-) TimerEvent: {}
+[15.026411] (-) TimerEvent: {}
+[15.127174] (-) TimerEvent: {}
+[15.232503] (-) TimerEvent: {}
+[15.342878] (-) TimerEvent: {}
+[15.446531] (-) TimerEvent: {}
+[15.566321] (-) TimerEvent: {}
+[15.668064] (-) TimerEvent: {}
+[15.774319] (-) TimerEvent: {}
+[15.884689] (-) TimerEvent: {}
+[15.989184] (-) TimerEvent: {}
+[16.110212] (-) TimerEvent: {}
+[16.211328] (-) TimerEvent: {}
+[16.315563] (-) TimerEvent: {}
+[16.425986] (-) TimerEvent: {}
+[16.529752] (-) TimerEvent: {}
+[16.640151] (-) TimerEvent: {}
+[16.743522] (-) TimerEvent: {}
+[16.845870] (-) TimerEvent: {}
+[16.956292] (-) TimerEvent: {}
+[17.113216] (-) TimerEvent: {}
+[17.220581] (-) TimerEvent: {}
+[17.321641] (-) TimerEvent: {}
+[17.423824] (-) TimerEvent: {}
+[17.534231] (-) TimerEvent: {}
+[17.644640] (-) TimerEvent: {}
+[17.749273] (-) TimerEvent: {}
+[17.859670] (-) TimerEvent: {}
+[17.970133] (-) TimerEvent: {}
+[18.080505] (-) TimerEvent: {}
+[18.185659] (-) TimerEvent: {}
+[18.287457] (-) TimerEvent: {}
+[18.389271] (-) TimerEvent: {}
+[18.496227] (-) TimerEvent: {}
+[18.606707] (-) TimerEvent: {}
+[18.717129] (-) TimerEvent: {}
+[18.825988] (-) TimerEvent: {}
+[18.936520] (-) TimerEvent: {}
+[19.046917] (-) TimerEvent: {}
+[19.148818] (-) TimerEvent: {}
+[19.259366] (-) TimerEvent: {}
+[19.306003] (robot_base) StdoutLine: {'line': b'[100%] \x1b[32m\x1b[1mLinking CXX executable robot_base_node\x1b[0m\n'}
+[19.361088] (-) TimerEvent: {}
+[19.503554] (-) TimerEvent: {}
+[19.608933] (-) TimerEvent: {}
+[19.719406] (-) TimerEvent: {}
+[19.748356] (robot_base) StdoutLine: {'line': b'[100%] Built target robot_base_node\n'}
+[19.820175] (-) TimerEvent: {}
+[19.824376] (robot_base) CommandEnded: {'returncode': 0}
+[19.828735] (robot_base) JobProgress: {'identifier': 'robot_base', 'progress': 'install'}
+[19.840443] (robot_base) Command: {'cmd': ['/usr/bin/cmake', '--install', '/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base'], 'cwd': '/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base', 'env': OrderedDict([('LESSOPEN', '| /usr/bin/lesspipe %s'), ('USER', 'akash'), ('IDF_TOOLS_INSTALL_CMD', '/home/akash/esp/esp-idf/install.sh'), ('SHLVL', '1'), ('LD_LIBRARY_PATH', '/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib'), ('WT_PROFILE_ID', '{61c54bbd-c2c6-5271-96e7-009a87ff44bf}'), ('MOTD_SHOWN', 'update-motd'), ('HOME', '/home/akash'), ('OLDPWD', '/home/akash/dung_cleaner_robot/uROS/esp32_projects/projects/robot_base'), ('ROS_PYTHON_VERSION', '3'), ('DBUS_SESSION_BUS_ADDRESS', 'unix:path=/run/user/1000/bus'), ('WSL_DISTRO_NAME', 'Ubuntu-22.04'), ('OPENOCD_SCRIPTS', '/home/akash/.espressif/tools/openocd-esp32/v0.12.0-esp32-20240821/openocd-esp32/share/openocd/scripts'), ('WAYLAND_DISPLAY', 'wayland-0'), ('COLCON_PREFIX_PATH', '/home/akash/dung_cleaner_robot/ROS/robot_base/install'), ('ROS_DISTRO', 'humble'), ('LOGNAME', 'akash'), ('NAME', 'Akash-H510M'), ('WSL_INTEROP', '/run/WSL/283_interop'), ('PULSE_SERVER', 'unix:/mnt/wslg/PulseServer'), ('_', '/home/akash/.espressif/python_env/idf5.2_py3.10_env/bin/colcon'), ('ROS_VERSION', '2'), ('TERM', 'xterm-256color'), ('IDF_DEACTIVATE_FILE_PATH', '/tmp/tmp3393545cidf_284'), ('ROS_LOCALHOST_ONLY', '0'), ('IDF_PATH', '/home/akash/esp/esp-idf'), ('PATH', '/home/akash/esp/esp-idf/components/espcoredump:/home/akash/esp/esp-idf/components/partition_table:/home/akash/esp/esp-idf/components/app_update:/home/akash/.espressif/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin:/home/akash/.espressif/tools/riscv32-esp-elf-gdb/14.2_20240403/riscv32-esp-elf-gdb/bin:/home/akash/.espressif/tools/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/bin:/home/akash/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20230928/riscv32-esp-elf/bin:/home/akash/.espressif/tools/esp32ulp-elf/2.35_20220830/esp32ulp-elf/bin:/home/akash/.espressif/tools/openocd-esp32/v0.12.0-esp32-20240821/openocd-esp32/bin:/home/akash/.espressif/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin:/home/akash/.espressif/tools/riscv32-esp-elf-gdb/14.2_20240403/riscv32-esp-elf-gdb/bin:/home/akash/.espressif/tools/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/bin:/home/akash/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20230928/riscv32-esp-elf/bin:/home/akash/.espressif/tools/esp32ulp-elf/2.35_20220830/esp32ulp-elf/bin:/home/akash/.espressif/tools/openocd-esp32/v0.12.0-esp32-20240821/openocd-esp32/bin:/home/akash/esp/esp-idf/components/espcoredump:/home/akash/esp/esp-idf/components/partition_table:/home/akash/esp/esp-idf/components/app_update:/home/akash/.espressif/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin:/home/akash/.espressif/tools/riscv32-esp-elf-gdb/14.2_20240403/riscv32-esp-elf-gdb/bin:/home/akash/.espressif/tools/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/bin:/home/akash/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20230928/riscv32-esp-elf/bin:/home/akash/.espressif/tools/esp32ulp-elf/2.35_20220830/esp32ulp-elf/bin:/home/akash/.espressif/tools/openocd-esp32/v0.12.0-esp32-20240821/openocd-esp32/bin:/home/akash/.espressif/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin:/home/akash/.espressif/tools/riscv32-esp-elf-gdb/14.2_20240403/riscv32-esp-elf-gdb/bin:/home/akash/.espressif/tools/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/bin:/home/akash/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20230928/riscv32-esp-elf/bin:/home/akash/.espressif/tools/esp32ulp-elf/2.35_20220830/esp32ulp-elf/bin:/home/akash/.espressif/tools/openocd-esp32/v0.12.0-esp32-20240821/openocd-esp32/bin:/opt/ros/humble/bin:/home/akash/esp/esp-idf/components/espcoredump:/home/akash/esp/esp-idf/components/partition_table:/home/akash/esp/esp-idf/components/app_update:/home/akash/.espressif/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin:/home/akash/.espressif/tools/riscv32-esp-elf-gdb/14.2_20240403/riscv32-esp-elf-gdb/bin:/home/akash/.espressif/tools/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/bin:/home/akash/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20230928/riscv32-esp-elf/bin:/home/akash/.espressif/tools/esp32ulp-elf/2.35_20220830/esp32ulp-elf/bin:/home/akash/.espressif/tools/openocd-esp32/v0.12.0-esp32-20240821/openocd-esp32/bin:/home/akash/.espressif/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin:/home/akash/.espressif/tools/riscv32-esp-elf-gdb/14.2_20240403/riscv32-esp-elf-gdb/bin:/home/akash/.espressif/tools/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/bin:/home/akash/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20230928/riscv32-esp-elf/bin:/home/akash/.espressif/tools/esp32ulp-elf/2.35_20220830/esp32ulp-elf/bin:/home/akash/.espressif/tools/openocd-esp32/v0.12.0-esp32-20240821/openocd-esp32/bin:/home/akash/.espressif/python_env/idf5.2_py3.10_env/bin:/home/akash/esp/esp-idf/tools:/home/akash/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib:/mnt/c/Program Files (x86)/Common Files/Oracle/Java/javapath:/mnt/c/Program Files (x86)/NVIDIA Corporation/PhysX/Common:/mnt/c/WINDOWS/system32:/mnt/c/WINDOWS:/mnt/c/WINDOWS/System32/Wbem:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/:/mnt/c/WINDOWS/System32/OpenSSH/:/mnt/c/Program Files (x86)/Windows Kits/8.1/Windows Performance Toolkit/:/mnt/c/Program Files/dotnet/:/mnt/c/Program Files/PuTTY/:/mnt/c/Program Files/Git/cmd:/mnt/c/Program Files/usbipd-win/:/mnt/c/Users/akash/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/akash/AppData/Local/Programs/Microsoft VS Code/bin:/mnt/c/Users/akash/AppData/Local/GitHubDesktop/bin:/mnt/c/Users/akash/Infineon/LauncherService:/snap/bin'), ('WT_SESSION', '95e62687-b991-414f-8b5c-051367f99940'), ('XDG_RUNTIME_DIR', '/run/user/1000/'), ('DISPLAY', ':0'), ('LANG', 'en_US.UTF-8'), ('ESP_IDF_VERSION', '5.2'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('AMENT_PREFIX_PATH', '/home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base:/opt/ros/humble'), ('SHELL', '/bin/bash'), ('IDF_PYTHON_ENV_PATH', '/home/akash/.espressif/python_env/idf5.2_py3.10_env'), ('WEBOTS_HOME', '/mnt/c/Program Files/Webots'), ('LESSCLOSE', '/usr/bin/lesspipe %s %s'), ('IDF_TOOLS_EXPORT_CMD', '/home/akash/esp/esp-idf/export.sh'), ('PWD', '/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base'), ('XDG_DATA_DIRS', '/usr/local/share:/usr/share:/var/lib/snapd/desktop'), ('PYTHONPATH', '/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('ESP_ROM_ELF_DIR', '/home/akash/.espressif/tools/esp-rom-elfs/20230320/'), ('COLCON', '1'), ('WSL2_GUI_APPS_ENABLED', '1'), ('HOSTTYPE', 'x86_64'), ('CMAKE_PREFIX_PATH', '/home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base:/opt/ros/humble'), ('WSLENV', 'WT_SESSION:WT_PROFILE_ID:')]), 'shell': False}
+[19.845217] (robot_base) StdoutLine: {'line': b'-- Install configuration: ""\n'}
+[19.859931] (robot_base) StdoutLine: {'line': b'-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/lib/robot_base/robot_base_node\n'}
+[19.863610] (robot_base) StdoutLine: {'line': b'-- Set runtime path of "/home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/lib/robot_base/robot_base_node" to ""\n'}
+[19.864018] (robot_base) StdoutLine: {'line': b'-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/ament_index/resource_index/package_run_dependencies/robot_base\n'}
+[19.864238] (robot_base) StdoutLine: {'line': b'-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/ament_index/resource_index/parent_prefix_path/robot_base\n'}
+[19.864510] (robot_base) StdoutLine: {'line': b'-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/environment/ament_prefix_path.sh\n'}
+[19.864831] (robot_base) StdoutLine: {'line': b'-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/environment/ament_prefix_path.dsv\n'}
+[19.865068] (robot_base) StdoutLine: {'line': b'-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/environment/path.sh\n'}
+[19.865311] (robot_base) StdoutLine: {'line': b'-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/environment/path.dsv\n'}
+[19.865600] (robot_base) StdoutLine: {'line': b'-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/local_setup.bash\n'}
+[19.865789] (robot_base) StdoutLine: {'line': b'-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/local_setup.sh\n'}
+[19.866056] (robot_base) StdoutLine: {'line': b'-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/local_setup.zsh\n'}
+[19.866114] (robot_base) StdoutLine: {'line': b'-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/local_setup.dsv\n'}
+[19.866287] (robot_base) StdoutLine: {'line': b'-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/package.dsv\n'}
+[19.866390] (robot_base) StdoutLine: {'line': b'-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/ament_index/resource_index/packages/robot_base\n'}
+[19.866631] (robot_base) StdoutLine: {'line': b'-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/cmake/robot_baseConfig.cmake\n'}
+[19.866720] (robot_base) StdoutLine: {'line': b'-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/cmake/robot_baseConfig-version.cmake\n'}
+[19.872383] (robot_base) StdoutLine: {'line': b'-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/package.xml\n'}
+[19.875149] (robot_base) CommandEnded: {'returncode': 0}
+[19.961042] (-) TimerEvent: {}
+[20.002868] (robot_base) JobEnded: {'identifier': 'robot_base', 'rc': 0}
+[20.003997] (-) EventReactorShutdown: {}
