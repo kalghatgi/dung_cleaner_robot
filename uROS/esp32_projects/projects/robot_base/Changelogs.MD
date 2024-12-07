@@ -1,3 +1,6 @@
+# v1.3
+* Modified the GPIOs for ease of connections while making the zero-PCB.
+
 # v1.2
 * Modified the PWM and Digital_output pin config for the selected motor driver.
 * Modified the speed control function for controlling the speed and direction of both motors using the selected driver.
