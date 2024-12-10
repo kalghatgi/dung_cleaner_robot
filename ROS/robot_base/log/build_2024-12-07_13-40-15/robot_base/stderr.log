@@ -1,0 +1,26 @@
+[01m[K/home/akash/dung_cleaner_robot/ROS/robot_base/src/odometry.cpp:19:10:[m[K [01;31m[Kfatal error: [m[Kodometry.hpp: No such file or directory
+   19 | #include [01;31m[K"odometry.hpp"[m[K
+      |          [01;31m[K^~~~~~~~~~~~~~[m[K
+compilation terminated.
+[01m[K/home/akash/dung_cleaner_robot/ROS/robot_base/src/odometry.cpp:19:10:[m[K [01;31m[Kfatal error: [m[Kodometry.hpp: No such file or directory
+   19 | #include [01;31m[K"odometry.hpp"[m[K
+      |          [01;31m[K^~~~~~~~~~~~~~[m[K
+compilation terminated.
+gmake[2]: *** [CMakeFiles/app.dir/build.make:90: CMakeFiles/app.dir/src/odometry.cpp.o] Error 1
+gmake[2]: *** Waiting for unfinished jobs....
+gmake[2]: *** [CMakeFiles/app_node.dir/build.make:90: CMakeFiles/app_node.dir/src/odometry.cpp.o] Error 1
+gmake[2]: *** Waiting for unfinished jobs....
+[01m[K/home/akash/dung_cleaner_robot/ROS/robot_base/src/app.cpp:13:10:[m[K [01;31m[Kfatal error: [m[Kodometry.hpp: No such file or directory
+   13 | #include [01;31m[K"odometry.hpp"[m[K
+      |          [01;31m[K^~~~~~~~~~~~~~[m[K
+[01m[K/home/akash/dung_cleaner_robot/ROS/robot_base/src/app.cpp:13:10:[m[K [01;31m[Kfatal error: [m[Kodometry.hpp: No such file or directory
+   13 | #include [01;31m[K"odometry.hpp"[m[K
+      |          [01;31m[K^~~~~~~~~~~~~~[m[K
+compilation terminated.
+compilation terminated.
+gmake[2]: *** [CMakeFiles/app_node.dir/build.make:76: CMakeFiles/app_node.dir/src/app.cpp.o] Error 1
+gmake[2]: *** [CMakeFiles/app.dir/build.make:76: CMakeFiles/app.dir/src/app.cpp.o] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:165: CMakeFiles/app.dir/all] Error 2
+gmake[1]: *** Waiting for unfinished jobs....
+gmake[1]: *** [CMakeFiles/Makefile2:139: CMakeFiles/app_node.dir/all] Error 2
+gmake: *** [Makefile:146: all] Error 2

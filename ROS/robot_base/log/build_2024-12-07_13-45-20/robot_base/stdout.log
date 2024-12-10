@@ -1,0 +1,28 @@
+[ 16%] [32mBuilding CXX object CMakeFiles/app.dir/src/app.cpp.o[0m
+[ 33%] [32mBuilding CXX object CMakeFiles/app.dir/src/odometry.cpp.o[0m
+[ 50%] [32mBuilding CXX object CMakeFiles/app_node.dir/src/app.cpp.o[0m
+[ 66%] [32mBuilding CXX object CMakeFiles/app_node.dir/src/odometry.cpp.o[0m
+[ 83%] [32m[1mLinking CXX executable app_node[0m
+[100%] [32m[1mLinking CXX executable app[0m
+[100%] Built target app
+[100%] Built target app_node
+-- Install configuration: ""
+-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/lib/robot_base/app_node
+-- Set runtime path of "/home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/lib/robot_base/app_node" to ""
+-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/lib/robot_base/app
+-- Set runtime path of "/home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/lib/robot_base/app" to ""
+-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/ament_index/resource_index/package_run_dependencies/robot_base
+-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/ament_index/resource_index/parent_prefix_path/robot_base
+-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/environment/ament_prefix_path.sh
+-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/environment/ament_prefix_path.dsv
+-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/environment/path.sh
+-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/environment/path.dsv
+-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/local_setup.bash
+-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/local_setup.sh
+-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/local_setup.zsh
+-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/local_setup.dsv
+-- Up-to-date: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/package.dsv
+-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/ament_index/resource_index/packages/robot_base
+-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/cmake/robot_baseConfig.cmake
+-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/cmake/robot_baseConfig-version.cmake
+-- Installing: /home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base/share/robot_base/package.xml

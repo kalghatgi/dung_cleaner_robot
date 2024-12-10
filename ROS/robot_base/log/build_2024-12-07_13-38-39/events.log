@@ -1,0 +1,81 @@
+[0.000000] (-) TimerEvent: {}
+[0.000218] (robot_base) JobQueued: {'identifier': 'robot_base', 'dependencies': OrderedDict()}
+[0.000942] (robot_base) JobStarted: {'identifier': 'robot_base'}
+[0.008031] (robot_base) JobProgress: {'identifier': 'robot_base', 'progress': 'cmake'}
+[0.008583] (robot_base) Command: {'cmd': ['/usr/bin/cmake', '/home/akash/dung_cleaner_robot/ROS/robot_base', '-DCMAKE_INSTALL_PREFIX=/home/akash/dung_cleaner_robot/ROS/robot_base/install/robot_base'], 'cwd': '/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base', 'env': OrderedDict([('LESSOPEN', '| /usr/bin/lesspipe %s'), ('USER', 'akash'), ('IDF_TOOLS_INSTALL_CMD', '/home/akash/esp/esp-idf/install.sh'), ('SHLVL', '1'), ('LD_LIBRARY_PATH', '/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib'), ('WT_PROFILE_ID', '{61c54bbd-c2c6-5271-96e7-009a87ff44bf}'), ('MOTD_SHOWN', 'update-motd'), ('HOME', '/home/akash'), ('OLDPWD', '/home/akash/dung_cleaner_robot/ROS/robot_base/src'), ('ROS_PYTHON_VERSION', '3'), ('DBUS_SESSION_BUS_ADDRESS', 'unix:path=/run/user/1000/bus'), ('WSL_DISTRO_NAME', 'Ubuntu-22.04'), ('OPENOCD_SCRIPTS', '/home/akash/.espressif/tools/openocd-esp32/v0.12.0-esp32-20240821/openocd-esp32/share/openocd/scripts'), ('WAYLAND_DISPLAY', 'wayland-0'), ('ROS_DISTRO', 'humble'), ('LOGNAME', 'akash'), ('NAME', 'Akash-H510M'), ('WSL_INTEROP', '/run/WSL/283_interop'), ('PULSE_SERVER', 'unix:/mnt/wslg/PulseServer'), ('_', '/home/akash/.espressif/python_env/idf5.2_py3.10_env/bin/colcon'), ('ROS_VERSION', '2'), ('TERM', 'xterm-256color'), ('IDF_DEACTIVATE_FILE_PATH', '/tmp/tmp3393545cidf_284'), ('ROS_LOCALHOST_ONLY', '0'), ('IDF_PATH', '/home/akash/esp/esp-idf'), ('PATH', '/opt/ros/humble/bin:/home/akash/esp/esp-idf/components/espcoredump:/home/akash/esp/esp-idf/components/partition_table:/home/akash/esp/esp-idf/components/app_update:/home/akash/.espressif/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin:/home/akash/.espressif/tools/riscv32-esp-elf-gdb/14.2_20240403/riscv32-esp-elf-gdb/bin:/home/akash/.espressif/tools/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/bin:/home/akash/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20230928/riscv32-esp-elf/bin:/home/akash/.espressif/tools/esp32ulp-elf/2.35_20220830/esp32ulp-elf/bin:/home/akash/.espressif/tools/openocd-esp32/v0.12.0-esp32-20240821/openocd-esp32/bin:/home/akash/.espressif/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin:/home/akash/.espressif/tools/riscv32-esp-elf-gdb/14.2_20240403/riscv32-esp-elf-gdb/bin:/home/akash/.espressif/tools/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/bin:/home/akash/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20230928/riscv32-esp-elf/bin:/home/akash/.espressif/tools/esp32ulp-elf/2.35_20220830/esp32ulp-elf/bin:/home/akash/.espressif/tools/openocd-esp32/v0.12.0-esp32-20240821/openocd-esp32/bin:/home/akash/.espressif/python_env/idf5.2_py3.10_env/bin:/home/akash/esp/esp-idf/tools:/home/akash/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib:/mnt/c/Program Files (x86)/Common Files/Oracle/Java/javapath:/mnt/c/Program Files (x86)/NVIDIA Corporation/PhysX/Common:/mnt/c/WINDOWS/system32:/mnt/c/WINDOWS:/mnt/c/WINDOWS/System32/Wbem:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/:/mnt/c/WINDOWS/System32/OpenSSH/:/mnt/c/Program Files (x86)/Windows Kits/8.1/Windows Performance Toolkit/:/mnt/c/Program Files/dotnet/:/mnt/c/Program Files/PuTTY/:/mnt/c/Program Files/Git/cmd:/mnt/c/Program Files/usbipd-win/:/mnt/c/Users/akash/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/akash/AppData/Local/Programs/Microsoft VS Code/bin:/mnt/c/Users/akash/AppData/Local/GitHubDesktop/bin:/mnt/c/Users/akash/Infineon/LauncherService:/snap/bin'), ('WT_SESSION', '95e62687-b991-414f-8b5c-051367f99940'), ('XDG_RUNTIME_DIR', '/run/user/1000/'), ('DISPLAY', ':0'), ('LANG', 'en_US.UTF-8'), ('ESP_IDF_VERSION', '5.2'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('AMENT_PREFIX_PATH', '/opt/ros/humble'), ('SHELL', '/bin/bash'), ('IDF_PYTHON_ENV_PATH', '/home/akash/.espressif/python_env/idf5.2_py3.10_env'), ('WEBOTS_HOME', '/mnt/c/Program Files/Webots'), ('LESSCLOSE', '/usr/bin/lesspipe %s %s'), ('IDF_TOOLS_EXPORT_CMD', '/home/akash/esp/esp-idf/export.sh'), ('PWD', '/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base'), ('XDG_DATA_DIRS', '/usr/local/share:/usr/share:/var/lib/snapd/desktop'), ('PYTHONPATH', '/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('ESP_ROM_ELF_DIR', '/home/akash/.espressif/tools/esp-rom-elfs/20230320/'), ('COLCON', '1'), ('WSL2_GUI_APPS_ENABLED', '1'), ('HOSTTYPE', 'x86_64'), ('WSLENV', 'WT_SESSION:WT_PROFILE_ID:'), ('CMAKE_PREFIX_PATH', '/opt/ros/humble')]), 'shell': False}
+[0.019251] (robot_base) StdoutLine: {'line': b'-- Found ament_cmake: 1.3.10 (/opt/ros/humble/share/ament_cmake/cmake)\n'}
+[0.100895] (-) TimerEvent: {}
+[0.106823] (robot_base) StdoutLine: {'line': b'-- Found rclcpp: 16.0.10 (/opt/ros/humble/share/rclcpp/cmake)\n'}
+[0.186186] (robot_base) StdoutLine: {'line': b'-- Found rosidl_generator_c: 3.1.5 (/opt/ros/humble/share/rosidl_generator_c/cmake)\n'}
+[0.187812] (robot_base) StdoutLine: {'line': b'-- Found rosidl_adapter: 3.1.5 (/opt/ros/humble/share/rosidl_adapter/cmake)\n'}
+[0.191972] (robot_base) StdoutLine: {'line': b'-- Found rosidl_generator_cpp: 3.1.5 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)\n'}
+[0.198453] (robot_base) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c\n'}
+[0.201333] (-) TimerEvent: {}
+[0.207049] (robot_base) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp\n'}
+[0.229109] (robot_base) StdoutLine: {'line': b'-- Found rmw_implementation_cmake: 6.1.2 (/opt/ros/humble/share/rmw_implementation_cmake/cmake)\n'}
+[0.229976] (robot_base) StdoutLine: {'line': b'-- Found rmw_fastrtps_cpp: 6.2.7 (/opt/ros/humble/share/rmw_fastrtps_cpp/cmake)\n'}
+[0.308610] (-) TimerEvent: {}
+[0.419017] (-) TimerEvent: {}
+[0.527542] (-) TimerEvent: {}
+[0.637957] (-) TimerEvent: {}
+[0.748358] (-) TimerEvent: {}
+[0.848779] (-) TimerEvent: {}
+[0.951010] (-) TimerEvent: {}
+[1.055721] (-) TimerEvent: {}
+[1.164832] (-) TimerEvent: {}
+[1.275204] (-) TimerEvent: {}
+[1.377180] (-) TimerEvent: {}
+[1.487565] (-) TimerEvent: {}
+[1.597999] (-) TimerEvent: {}
+[1.698384] (-) TimerEvent: {}
+[1.798868] (-) TimerEvent: {}
+[1.899292] (-) TimerEvent: {}
+[1.999765] (-) TimerEvent: {}
+[2.100329] (-) TimerEvent: {}
+[2.200958] (-) TimerEvent: {}
+[2.304065] (-) TimerEvent: {}
+[2.408541] (-) TimerEvent: {}
+[2.510938] (-) TimerEvent: {}
+[2.621342] (-) TimerEvent: {}
+[2.731705] (-) TimerEvent: {}
+[2.839639] (-) TimerEvent: {}
+[2.942260] (-) TimerEvent: {}
+[3.047125] (-) TimerEvent: {}
+[3.157549] (-) TimerEvent: {}
+[3.255219] (robot_base) StdoutLine: {'line': b"-- Using RMW implementation 'rmw_fastrtps_cpp' as default\n"}
+[3.257957] (-) TimerEvent: {}
+[3.289542] (robot_base) StdoutLine: {'line': b'-- Found nav_msgs: 4.2.4 (/opt/ros/humble/share/nav_msgs/cmake)\n'}
+[3.308627] (robot_base) StdoutLine: {'line': b'-- Found sensor_msgs: 4.2.4 (/opt/ros/humble/share/sensor_msgs/cmake)\n'}
+[3.319775] (robot_base) StdoutLine: {'line': b'-- Found tf2: 0.25.8 (/opt/ros/humble/share/tf2/cmake)\n'}
+[3.325166] (robot_base) StdoutLine: {'line': b'-- Found ament_lint_auto: 0.12.11 (/opt/ros/humble/share/ament_lint_auto/cmake)\n'}
+[3.361401] (-) TimerEvent: {}
+[3.389976] (robot_base) StdoutLine: {'line': b"-- Added test 'copyright' to check source files copyright and LICENSE\n"}
+[3.393278] (robot_base) StdoutLine: {'line': b"-- Added test 'cppcheck' to perform static code analysis on C / C++ code\n"}
+[3.393653] (robot_base) StdoutLine: {'line': b'-- Configured cppcheck include dirs: $<BUILD_INTERFACE:/home/akash/dung_cleaner_robot/ROS/robot_base/include>\n'}
+[3.393765] (robot_base) StdoutLine: {'line': b'-- Configured cppcheck exclude dirs and/or files: \n'}
+[3.396482] (robot_base) StdoutLine: {'line': b"-- Added test 'cpplint' to check C / C++ code against the Google style\n"}
+[3.396611] (robot_base) StdoutLine: {'line': b'-- Configured cpplint exclude dirs and/or files: \n'}
+[3.397097] (robot_base) StdoutLine: {'line': b"-- Added test 'flake8' to check Python code syntax and style conventions\n"}
+[3.398016] (robot_base) StdoutLine: {'line': b"-- Added test 'lint_cmake' to check CMake code style\n"}
+[3.398641] (robot_base) StdoutLine: {'line': b"-- Added test 'pep257' to check Python code against some of the docstring style conventions in PEP 257\n"}
+[3.401401] (robot_base) StdoutLine: {'line': b"-- Added test 'uncrustify' to check C / C++ code style\n"}
+[3.401514] (robot_base) StdoutLine: {'line': b'-- Configured uncrustify additional arguments: \n'}
+[3.402022] (robot_base) StdoutLine: {'line': b"-- Added test 'xmllint' to check XML markup files\n"}
+[3.402606] (robot_base) StdoutLine: {'line': b'-- Configuring done\n'}
+[3.405364] (robot_base) StderrLine: {'line': b'\x1b[31mCMake Error at CMakeLists.txt:34 (add_executable):\n'}
+[3.405508] (robot_base) StderrLine: {'line': b'  Cannot find source file:\n'}
+[3.405566] (robot_base) StderrLine: {'line': b'\n'}
+[3.405743] (robot_base) StderrLine: {'line': b'    src/app.cpp\n'}
+[3.405795] (robot_base) StderrLine: {'line': b'\n'}
+[3.405833] (robot_base) StderrLine: {'line': b'  Tried extensions .c .C .c++ .cc .cpp .cxx .cu .mpp .m .M .mm .ixx .cppm .h\n'}
+[3.405871] (robot_base) StderrLine: {'line': b'  .hh .h++ .hm .hpp .hxx .in .txx .f .F .for .f77 .f90 .f95 .f03 .hip .ispc\n'}
+[3.405909] (robot_base) StderrLine: {'line': b'\n'}
+[3.405944] (robot_base) StderrLine: {'line': b'\x1b[0m\n'}
+[3.405980] (robot_base) StderrLine: {'line': b'\x1b[31mCMake Error at CMakeLists.txt:34 (add_executable):\n'}
+[3.406016] (robot_base) StderrLine: {'line': b'  No SOURCES given to target: app\n'}
+[3.406052] (robot_base) StderrLine: {'line': b'\n'}
+[3.406088] (robot_base) StderrLine: {'line': b'\x1b[0m\n'}
+[3.406122] (robot_base) StderrLine: {'line': b'\x1b[0mCMake Generate step failed.  Build files cannot be regenerated correctly.\x1b[0m\n'}
+[3.411997] (robot_base) CommandEnded: {'returncode': 1}
+[3.428237] (robot_base) JobEnded: {'identifier': 'robot_base', 'rc': 1}
+[3.439393] (-) EventReactorShutdown: {}
