@@ -262,13 +262,11 @@ void TASK_motor_command_reception_timeout(void *arguments)
 	while(true)
 	{
 		clock_gettime(CLOCK_REALTIME, &current_time_stamp);
-		while((current_time_stamp.tv_sec - wheel_speed_message_time_stamp.tv_sec) < 0.200) // 200ms timeout period
+		if((current_time_stamp.tv_sec - wheel_speed_message_time_stamp.tv_sec) >= 0.200) // 200ms timeout period
 		{
-			clock_gettime(CLOCK_REALTIME, &current_time_stamp);
-			vTaskDelay(pdMS_TO_TICKS(10));
+			Motor_Duty_Cycle[0] = 0;
+			Motor_Duty_Cycle[1] = 0;
 		}
-		Motor_Duty_Cycle[0] = 0;
-		Motor_Duty_Cycle[1] = 0;
 		Set_Motor_Speed();
 
 		vTaskDelay(pdMS_TO_TICKS(50));
@@ -433,10 +431,9 @@ extern "C" void app_main(void)
 	Setup_INTR();
 	Setup_Digital_IO();
 	Setup_UART();
-	// for some reason the microROS TASK fails to initialize from 'node' and onwards, if GPIO of CTS and RTS is configured on the fly.
-	// therefore, make sure that EITHER the GPIOs have finished configuring OR the microROS task has initialized completely, once function at a time and not simultaneously.
+	Setup_IMU();
+
 	xTaskCreatePinnedToCore(TASK_microROS, "microROS task", CONFIG_MICRO_ROS_APP_STACK, NULL, CONFIG_MICRO_ROS_APP_TASK_PRIO, NULL, 0);
 	xTaskCreate(TASK_motor_command_reception_timeout, "Check motor command reception timeout", 2048, NULL, 4, NULL);
-	Setup_IMU(); // make sure that this function and following task is executed only at the end, because this function won't proceed further unless communication with IMU has established.
  	xTaskCreatePinnedToCore(TASK_IMU_data_acquisition, "IMU raw data acquisition", 2048, NULL, 5, NULL, 0);
 }
