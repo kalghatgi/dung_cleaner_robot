@@ -26,10 +26,10 @@ class robot_base_node : public rclcpp::Node
   Odometry wheel_odom;
   tf2::Quaternion wheel_odom_quaternion;
   public:
-  // for transferring the parameter value into a variable for use inside the code
-  rclcpp::Parameter _velocity_input_topic;
-  // for using inside the code, the value held by these parameters
-  std::string velocity_input_topic_;
+    // for transferring the parameter value into a variable for use inside the code
+    rclcpp::Parameter _velocity_input_topic;
+    // for using inside the code, the value held by these parameters
+    std::string velocity_input_topic_;
 
     robot_base_node(): Node("AMR__robot_base__ROS_node")
     {
@@ -62,8 +62,8 @@ class robot_base_node : public rclcpp::Node
   private:
     const double WHEEL_RADIUS = 0.088; // meters
     const double WHEEL_SEPERATION = 0.682; // meters
-    const uint16_t ENCODER_PPR = 13;
-    const uint16_t MOTOR_GEAR_RATIO = 92;
+    const uint16_t ENCODER_PPR = 2000; // Reference: https://robokits.co.in/motors/rhino-planetary-geared-24v-motor/100w-24v-encoder-servo-motor/rhino-servo-24v-60rpm-100w-ig52-extra-heavy-duty-planetary-encoder-servo-motor-160kgcm#:~:text=Quad%20Encoder%20requires-,2000,-Pulses%20Per%20Revolution
+    const uint16_t MOTOR_GEAR_RATIO = 47; // Reference: https://robokits.co.in/motors/rhino-planetary-geared-24v-motor/100w-24v-encoder-servo-motor/rhino-servo-24v-60rpm-100w-ig52-extra-heavy-duty-planetary-encoder-servo-motor-160kgcm#:~:text=ratio%20is%201%20%3A-,47,-the%20Optical%20encoder
     const uint16_t ENCODER_TICKS_PER_WHEEL_ROTATION = ENCODER_PPR * MOTOR_GEAR_RATIO;
     const double WHEEL_METERS_PER_TICK = (2 * M_PI * WHEEL_RADIUS) / (ENCODER_PPR * MOTOR_GEAR_RATIO); // meters
     int64_t NEW_encoder_value_LEFT_wheel = 0, NEW_encoder_value_RIGHT_wheel = 0;
