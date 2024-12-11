@@ -42,10 +42,10 @@
 #define I2C_SCL GPIO_NUM_22				// Digital IO (I2C)
 #define I2C_CLOCK_SPEED 400000				// Digital IO (I2C)
 //////////////////////////////////////////////// ACTUATORS ////////////////////////////////////////////////
-#define MOTOR2_PWM_GPIO GPIO_NUM_26			// PWM
-#define MOTOR2_DIRECTION_GPIO GPIO_NUM_25			// Digital Output
-#define MOTOR1_PWM_GPIO GPIO_NUM_17			// PWM
-#define MOTOR1_DIRECTION_GPIO GPIO_NUM_16			// Digital Output
+#define MOTOR2_PWM_GPIO GPIO_NUM_25			// PWM
+#define MOTOR2_DIRECTION_GPIO GPIO_NUM_26			// Digital Output
+#define MOTOR1_PWM_GPIO GPIO_NUM_16			// PWM
+#define MOTOR1_DIRECTION_GPIO GPIO_NUM_17			// Digital Output
 
 #define Pi 3.141592653589793238
 #define NUMBER_OF_MOTORS 2
