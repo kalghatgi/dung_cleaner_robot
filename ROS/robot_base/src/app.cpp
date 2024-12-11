@@ -78,6 +78,7 @@ class robot_base_node : public rclcpp::Node
     rclcpp::Time _encoders_previous_time = this->get_clock()->now();
     rclcpp::Time _imu_previous_time = this->get_clock()->now();
     rclcpp::Time _velocity_previous_time = this->get_clock()->now();
+    rclcpp::Time last_log_time = this->get_clock()->now();
     bool _encoders_first_value = true; // to indicate that this is the first value from encoders
 
     void encoder_raw_callback(std_msgs::msg::Int64MultiArray::SharedPtr encoder_raw_msg)
@@ -114,7 +115,9 @@ class robot_base_node : public rclcpp::Node
     {
       NEW_command_linear_X = cmd_vel_msg->linear.x;
       NEW_command_angular_Z = cmd_vel_msg->angular.z;
-      RCLCPP_INFO(this->get_logger(), "cmd_vel_callback: Lx:%.2f Az:%.2f", NEW_command_linear_X, NEW_command_angular_Z);
+      if (std::abs(NEW_command_linear_X) > 0.1 || std::abs(NEW_command_angular_Z) > 0.1) {
+        RCLCPP_INFO(this->get_logger(), "cmd_vel_callback: Linear X: %.2f, Angular Z: %.2f", NEW_command_linear_X, NEW_command_angular_Z);
+      }
     }
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_subscription_;
 
@@ -200,11 +203,18 @@ class robot_base_node : public rclcpp::Node
 
       // RCLCPP_INFO(this->get_logger(), "e_L:%.5f  e_R:%.5f\td_L:%.1f  d_R:%.1f", CURRENT_velocity_error_LEFT_wheel, CURRENT_velocity_error_RIGHT_wheel, Percent_duty_cycle_LEFT_wheel, Percent_duty_cycle_RIGHT_wheel);
     }
+    
     void wheel_velocity_timer_callback()
     {
+      rclcpp::Time current_time = this->get_clock()->now();
+      double time_diff = (current_time - last_log_time).seconds();
+      
+      if (time_diff >= 1.0) {  // Log every 1 second
+        RCLCPP_INFO(this->get_logger(), "wheel_velocity_timer_callback: Left Duty: %.2f%%, Right Duty: %.2f%%",
+                    Percent_duty_cycle_LEFT_wheel, Percent_duty_cycle_RIGHT_wheel);
+        last_log_time = current_time;  // Reset the timer
+      }
       calculate_CommandPercentDutyCycle();
-      RCLCPP_INFO(this->get_logger(), "wheel_velocity_timer_callback: L:%2.2lf R:%2.2lf", Percent_duty_cycle_LEFT_wheel, Percent_duty_cycle_RIGHT_wheel);
-
       rclcpp::Time _now = this->get_clock()->now();
       auto velocity_message = sensor_msgs::msg::JointState();
       velocity_message.header.stamp = _now;
