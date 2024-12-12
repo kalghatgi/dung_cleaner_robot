@@ -87,13 +87,23 @@ struct timespec current_time_stamp;
 
 void Set_Inverted_PWM(ledc_mode_t _mode, ledc_channel_t _channel, float _percent_duty)
 {
-	uint32_t _duty = uint32_t((PWM_RESOLUTION - 1) * 1.0/100 * (100 - _percent_duty));
+	// uint32_t _duty = uint32_t((PWM_RESOLUTION - 1) * 1.0/100 * (100 - _percent_duty));
+	
+	// New Code Addition : **********************************************************
+	uint32_t _duty = (uint32_t)((PWM_RESOLUTION - 1) * (100.0 - _percent_duty) / 100.0);
+	// ************************************************************************************
+
 	ledc_set_duty_and_update(_mode, _channel, _duty, 0);
 }
 void Set_Motor_Speed()
 {
-	float _left_motor_percent_duty_cycle = LIMIT(Motor_Duty_Cycle[0], -100, 100);
-	float _right_motor_percent_duty_cycle = LIMIT(Motor_Duty_Cycle[1], -100, 100);
+	// float _left_motor_percent_duty_cycle = LIMIT(Motor_Duty_Cycle[0], -100, 100);
+	// float _right_motor_percent_duty_cycle = LIMIT(Motor_Duty_Cycle[1], -100, 100);
+	
+	// New Code Addition : **********************************************************
+	float _left_motor_percent_duty_cycle = LIMIT(Motor_Duty_Cycle[0], -100.0f, 100.0f);
+    float _right_motor_percent_duty_cycle = LIMIT(Motor_Duty_Cycle[1], -100.0f, 100.0f);
+	// ************************************************************************************
 
 	if(_left_motor_percent_duty_cycle >= 0)
 	{ // CCW

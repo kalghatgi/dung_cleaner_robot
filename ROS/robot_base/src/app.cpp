@@ -31,7 +31,7 @@ class robot_base_node : public rclcpp::Node
     // for using inside the code, the value held by these parameters
     std::string velocity_input_topic_;
 
-    robot_base_node(): Node("AMR__robot_base__ROS_node")
+    robot_base_node(): Node("AMR__robot_base__ROS_node"), motor_running_(false)
     {
       this->declare_parameter("velocity_input_topic", "/cmd_vel");
       _velocity_input_topic = this->get_parameter("velocity_input_topic");
@@ -57,6 +57,22 @@ class robot_base_node : public rclcpp::Node
         "/amr/current_speed", rclcpp::SystemDefaultsQoS());
       current_velocity_timer_ = this->create_wall_timer(
         50ms, std::bind(&robot_base_node::current_velocity_timer_callback, this));
+      
+     // New Code Addtion: **************************************************************
+      RCLCPP_INFO(this->get_logger(), "Shutting down, stopping motors...");
+      auto velocity_message = sensor_msgs::msg::JointState();
+      velocity_message.header.stamp = this->get_clock()->now();
+      velocity_message.effort.push_back(0.0);
+      velocity_message.effort.push_back(0.0);
+      wheel_velocity_publisher_->publish(velocity_message);
+      // Create a timer to check for timeouts
+      watchdog_timer_ = this->create_wall_timer(
+          std::chrono::milliseconds(100),
+          std::bind(&robot_base_node::watchdogCallback, this));
+      // Initialize motor to stop
+      stopMotors();
+    // *********************************************************************************
+
     }
 
   private:
@@ -115,12 +131,46 @@ class robot_base_node : public rclcpp::Node
     {
       NEW_command_linear_X = cmd_vel_msg->linear.x;
       NEW_command_angular_Z = cmd_vel_msg->angular.z;
+
+      // New Code Addtion: **************************************************************
+      _velocity_previous_time = this->get_clock()->now();
+      last_msg_time_ = this->get_clock()->now();
+      motor_running_ = true;
+      // Send commands to the motor based on msg
+      controlMotors(cmd_vel_msg->linear.x, cmd_vel_msg->angular.z)
+      // *********************************************************************************
+
       if (std::abs(NEW_command_linear_X) > 0.1 || std::abs(NEW_command_angular_Z) > 0.1) {
         RCLCPP_INFO(this->get_logger(), "cmd_vel_callback: Linear X: %.2f, Angular Z: %.2f", NEW_command_linear_X, NEW_command_angular_Z);
       }
     }
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_subscription_;
 
+
+    // New Code Addtion: **************************************************************
+    void watchdogCallback()
+    {
+        if (motor_running_ && (this->get_clock()->now() - last_msg_time_ > rclcpp::Duration::from_seconds(0.5)))
+        {
+            RCLCPP_WARN(this->get_logger(), "No command received. Stopping motors.");
+            stopMotors();
+            motor_running_ = false;
+        }
+    }
+    void controlMotors(double linear, double angular)
+    {
+        // Implement motor control logic here
+        RCLCPP_INFO(this->get_logger(), "Motor running: linear=%.2f, angular=%.2f", linear, angular);
+        // Example: send commands to your motor driver
+    }
+    void stopMotors()
+    {
+        RCLCPP_INFO(this->get_logger(), "Stopping motors.");
+        controlMotors(0.0, 0.0);
+    }
+    // *********************************************************************************
+
+    
     void wheel_odometry_timer_callback()
     {
       double _Position_X = wheel_odom.getX(); // aka cartesian coordinates
@@ -241,6 +291,12 @@ class robot_base_node : public rclcpp::Node
     }
     rclcpp::TimerBase::SharedPtr current_velocity_timer_;
     rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr current_velocity_publisher_;
+    
+    // New Code Addtion: ****************************************************
+    rclcpp::TimerBase::SharedPtr watchdog_timer_;
+    rclcpp::Time last_msg_time_;
+    bool motor_running_;
+    // *****************************************************
 };
 
 int main(int argc, char * argv[])
