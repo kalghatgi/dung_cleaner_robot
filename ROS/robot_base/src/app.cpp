@@ -155,7 +155,7 @@ class robot_base_node : public rclcpp::Node
     void watchdogCallback()
     {
       auto now = this->get_clock()->now();
-      this->declare_parameter("watchdog_timeout", 0.5); // default to 0.5 seconds
+      this->declare_parameter("watchdog_timeout", 5); // default to 0.5 seconds
       double watchdog_timeout = this->get_parameter("watchdog_timeout").as_double();
       if (motor_running_ && (now - last_msg_time_ > rclcpp::Duration::from_seconds(watchdog_timeout)))
       {
