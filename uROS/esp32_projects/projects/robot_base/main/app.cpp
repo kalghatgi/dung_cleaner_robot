@@ -114,18 +114,6 @@ void initialize_motor() {
 	Motor_Duty_Cycle[0] = 0;
 	Motor_Duty_Cycle[1] = 0;
 }
-void set_motor_from_effort(double effort) {
-    // Clamp effort to [-100, 100] and normalize to [-1.0, 1.0] if required
-    effort = std::clamp(effort, -100.0, 100.0);
-    double duty_cycle = effort / 100.0;
-	Motor_Duty_Cycle[0] = duty_cycle;
-	Motor_Duty_Cycle[1] = duty_cycle;
-}
-void motor_command_callback(const std_msgs::msg::Float64::SharedPtr msg) {
-    last_command_time = this->get_clock()->now(); // Update last command time
-    set_motor_from_effort(msg->data);
-}
-
 void check_motor_timeout() {
     double current_time = this->get_clock()->now();
     if ((current_time - last_command_time_).seconds() > 1.0) {
