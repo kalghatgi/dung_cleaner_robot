@@ -68,7 +68,7 @@ class robot_base_node : public rclcpp::Node
       watchdog_timer_ = this->create_wall_timer(
         100ms, std::bind(&robot_base_node::watchdogCallback, this));
       // Initialize motor to stop
-      stopMotors();
+      // stopMotors();
     // *********************************************************************************
 
     }
