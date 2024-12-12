@@ -74,9 +74,6 @@
 
 // New Code Addition<Chetan> : *************************************************************
 #define WDT_TIMEOUT_SEC 5
-// static const char *TAG = "motor_control";
-// float Motor_Duty_Cycle[2] = {0, 0};
-// struct timespec current_time_stamp, wheel_speed_message_time_stamp;
 // *****************************************************************************************
 
 int64_t Motor1_Encoder_Value = 0, Motor2_Encoder_Value = 0;
@@ -97,22 +94,44 @@ struct timespec wheel_speed_message_time_stamp;
 struct timespec current_time_stamp;
 
 // New Code Addition<Chetan> : *************************************************************
+double last_command_time = 0;
+float clamp(float value, float min, float max) {
+    return (value < min) ? min : (value > max) ? max : value;
+}
 const esp_task_wdt_config_t wdt_config = {
     .timeout_ms = WDT_TIMEOUT_SEC * 1000,
     .trigger_panic = true
 };
-
 void Setup_WDT()
 {
     // Initialize the Task Watchdog Timer
     esp_task_wdt_init(&wdt_config); // Enable panic handler
     esp_task_wdt_add(NULL); // Add the current task to the WDT
 }
-
 void Feed_WDT()
 {
     // Feed the watchdog to prevent reset
     esp_task_wdt_reset();
+}
+void initialize_motor() {
+    set_motor_duty_cycle(0); // Function to stop motor
+}
+void set_motor_from_effort(double effort) {
+    // Clamp effort to [-100, 100] and normalize to [-1.0, 1.0] if required
+    effort = std::clamp(effort, -100.0, 100.0);
+    double duty_cycle = effort / 100.0;
+    set_motor_duty_cycle(duty_cycle); // Update motor driver
+}
+void motor_command_callback(const std_msgs::msg::Float64::SharedPtr msg) {
+    last_command_time = get_current_time(); // Update last command time
+    set_motor_from_effort(msg->data);
+}
+
+void check_motor_timeout() {
+    double current_time = get_current_time();
+    if (current_time - last_command_time > TIMEOUT_DURATION) {
+        set_motor_duty_cycle(0); // Stop motor after timeout
+    }
 }
 // *****************************************************************************************
 
@@ -247,13 +266,13 @@ void TASK_microROS(void *args)
 	// create and initialize the timers for each publisher
 	rcl_timer_t encoder_raw_publisher_timer;
 	const unsigned int encoder_raw_publish_period = 50; // milliseconds for 20Hz publish rate
-	RCCHECK(rclc_timer_init_default(&encoder_raw_publisher_timer, &support, RCL_MS_TO_NS(encoder_raw_publish_period), ROS2_encoder_raw_Publisher_Callback));
+	RCCHECK(rclc_timer_init_default2(&encoder_raw_publisher_timer, &support, RCL_MS_TO_NS(encoder_raw_publish_period), ROS2_encoder_raw_Publisher_Callback));
 	rcl_timer_t imu_raw_publisher_timer;
 	const unsigned int imu_raw_publish_period = 10; // milliseconds for 100Hz publish rate
-	RCCHECK(rclc_timer_init_default(&imu_raw_publisher_timer, &support, RCL_MS_TO_NS(imu_raw_publish_period), ROS2_imu_raw_Publisher_Callback));
+	RCCHECK(rclc_timer_init_default2(&imu_raw_publisher_timer, &support, RCL_MS_TO_NS(imu_raw_publish_period), ROS2_imu_raw_Publisher_Callback));
 	rcl_timer_t mag_raw_publisher_timer;
 	const unsigned int mag_raw_publish_period = 10; // milliseconds for 100Hz publish rate
-	RCCHECK(rclc_timer_init_default(&mag_raw_publisher_timer, &support, RCL_MS_TO_NS(mag_raw_publish_period), ROS2_mag_raw_Publisher_Callback));
+	RCCHECK(rclc_timer_init_default2(&mag_raw_publisher_timer, &support, RCL_MS_TO_NS(mag_raw_publish_period), ROS2_mag_raw_Publisher_Callback));
 
 	// create and allocate storage space for incoming and outgoing messages via topics
 	// (only if they have a provision for specifying the same)

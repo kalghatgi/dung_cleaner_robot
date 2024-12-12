@@ -2,6 +2,7 @@
 #include <functional>
 #include <memory>
 #include <math.h>
+#include <cmath>
 ///////////////////////////////////////////////////
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/float32_multi_array.hpp"
@@ -14,6 +15,11 @@
 
 #define LIMIT(x, min, max) ((x < min) ? min : (x > max) ? max : x)
 #define SIGN(x) ((x > 0) ? 1 : -1)
+
+// New Code Addition<Chetan> : *************************************************************
+#define MOTOR_DEADBAND 10         // Deadband threshold to prevent small oscillations
+// *****************************************************************************************
+
 
 using std::placeholders::_1;
 using namespace std::chrono_literals;
@@ -81,8 +87,14 @@ class robot_base_node : public rclcpp::Node
     double NEXT_velocity_LEFT_wheel, NEXT_velocity_RIGHT_wheel;
     float PREVIOUS_velocity_error_LEFT_wheel = 0, PREVIOUS_velocity_error_RIGHT_wheel = 0;
     float Integration_velocity_error_LEFT_wheel = 0, Integration_velocity_error_RIGHT_wheel = 0;
-    float Duty_LEFT_Wheel = 0, Duty_RIGHT_Wheel = 0;
-    float Percent_duty_cycle_LEFT_wheel = 0, Percent_duty_cycle_RIGHT_wheel = 0;
+    // float Duty_LEFT_Wheel = 0, Duty_RIGHT_Wheel = 0;
+    // New Code Addtion: **************************************************************
+    float Duty_LEFT_Wheel = 0.0;
+    float Duty_RIGHT_Wheel = 0.0;
+    float Percent_duty_cycle_LEFT_wheel = 0.0;
+    float Percent_duty_cycle_RIGHT_wheel = 0.0;
+    // *********************************************************************************
+    // float Percent_duty_cycle_LEFT_wheel = 0, Percent_duty_cycle_RIGHT_wheel = 0;
     rclcpp::Time _encoders_previous_time = this->get_clock()->now();
     rclcpp::Time _imu_previous_time = this->get_clock()->now();
     rclcpp::Time _velocity_previous_time = this->get_clock()->now();
@@ -129,7 +141,7 @@ class robot_base_node : public rclcpp::Node
       last_msg_time_ = this->get_clock()->now();
       motor_running_ = true;
       // Send commands to the motor based on msg
-      controlMotors(cmd_vel_msg->linear.x, cmd_vel_msg->angular.z);
+      // controlMotors(cmd_vel_msg->linear.x, cmd_vel_msg->angular.z);
       // *********************************************************************************
 
       if (std::abs(NEW_command_linear_X) > 0.1 || std::abs(NEW_command_angular_Z) > 0.1) {
@@ -143,24 +155,28 @@ class robot_base_node : public rclcpp::Node
     void watchdogCallback()
     {
       auto now = this->get_clock()->now();
-      if (motor_running_ && (now - last_msg_time_ > rclcpp::Duration::from_seconds(0.5)))
+      this->declare_parameter("watchdog_timeout", 0.5); // default to 0.5 seconds
+      double watchdog_timeout = this->get_parameter("watchdog_timeout").as_double();
+      if (motor_running_ && (now - last_msg_time_ > rclcpp::Duration::from_seconds(watchdog_timeout)))
       {
           RCLCPP_WARN(this->get_logger(), "No command received. Stopping motors.");
-          stopMotors();
+          // stopMotors();
           motor_running_ = false;
       }
     }
-    void controlMotors(double linear, double angular)
-    {
-        // Implement motor control logic here
-        RCLCPP_INFO(this->get_logger(), "Motor running: linear=%.2f, angular=%.2f", linear, angular);
-        // Example: send commands to your motor driver
-    }
-    void stopMotors()
-    {
-        RCLCPP_INFO(this->get_logger(), "Stopping motors.");
-        controlMotors(0.0, 0.0);
-    }
+    // void controlMotors()
+    // {
+    //     RCLCPP_INFO(this->get_logger(),
+    //                 "controlMotors: Linear=%.2f, Angular=%.2f, LeftDuty=%.2f%%, RightDuty=%.2f%%",
+    //                 linear, angular, left_motor_duty, right_motor_duty);
+    //     stopMotors();
+    // }
+
+    // void stopMotors()
+    // {
+    //     RCLCPP_INFO(this->get_logger(), "Stopping motors.");
+    //     controlMotors(0.0, 0.0);
+    // }
     // *********************************************************************************
 
     
