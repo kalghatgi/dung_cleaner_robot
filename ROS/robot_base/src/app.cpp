@@ -2,7 +2,6 @@
 #include <functional>
 #include <memory>
 #include <math.h>
-#include <cmath>
 ///////////////////////////////////////////////////
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/float32_multi_array.hpp"
@@ -15,11 +14,6 @@
 
 #define LIMIT(x, min, max) ((x < min) ? min : (x > max) ? max : x)
 #define SIGN(x) ((x > 0) ? 1 : -1)
-
-// New Code Addition<Chetan> : *************************************************************
-#define MOTOR_DEADBAND 10         // Deadband threshold to prevent small oscillations
-// *****************************************************************************************
-
 
 using std::placeholders::_1;
 using namespace std::chrono_literals;
@@ -37,7 +31,7 @@ class robot_base_node : public rclcpp::Node
     // for using inside the code, the value held by these parameters
     std::string velocity_input_topic_;
 
-    robot_base_node(): Node("AMR__robot_base__ROS_node"), motor_running_(false)
+    robot_base_node(): Node("AMR__robot_base__ROS_node")
     {
       this->declare_parameter("velocity_input_topic", "/cmd_vel");
       _velocity_input_topic = this->get_parameter("velocity_input_topic");
@@ -63,14 +57,6 @@ class robot_base_node : public rclcpp::Node
         "/amr/current_speed", rclcpp::SystemDefaultsQoS());
       current_velocity_timer_ = this->create_wall_timer(
         50ms, std::bind(&robot_base_node::current_velocity_timer_callback, this));
-      
-     // New Code Addtion: **************************************************************
-      watchdog_timer_ = this->create_wall_timer(
-        std::chrono::milliseconds(100), std::bind(&robot_base_node::watchdogCallback, this));
-      // Initialize motor to stop
-      // stopMotors();
-    // *********************************************************************************
-
     }
 
   private:
@@ -87,18 +73,11 @@ class robot_base_node : public rclcpp::Node
     double NEXT_velocity_LEFT_wheel, NEXT_velocity_RIGHT_wheel;
     float PREVIOUS_velocity_error_LEFT_wheel = 0, PREVIOUS_velocity_error_RIGHT_wheel = 0;
     float Integration_velocity_error_LEFT_wheel = 0, Integration_velocity_error_RIGHT_wheel = 0;
-    // float Duty_LEFT_Wheel = 0, Duty_RIGHT_Wheel = 0;
-    // New Code Addtion: **************************************************************
-    float Duty_LEFT_Wheel = 0.0;
-    float Duty_RIGHT_Wheel = 0.0;
-    float Percent_duty_cycle_LEFT_wheel = 0.0;
-    float Percent_duty_cycle_RIGHT_wheel = 0.0;
-    // *********************************************************************************
-    // float Percent_duty_cycle_LEFT_wheel = 0, Percent_duty_cycle_RIGHT_wheel = 0;
+    float Duty_LEFT_Wheel = 0, Duty_RIGHT_Wheel = 0;
+    float Percent_duty_cycle_LEFT_wheel = 0, Percent_duty_cycle_RIGHT_wheel = 0;
     rclcpp::Time _encoders_previous_time = this->get_clock()->now();
     rclcpp::Time _imu_previous_time = this->get_clock()->now();
     rclcpp::Time _velocity_previous_time = this->get_clock()->now();
-    rclcpp::Time last_log_time = this->get_clock()->now();
     bool _encoders_first_value = true; // to indicate that this is the first value from encoders
 
     void encoder_raw_callback(std_msgs::msg::Int64MultiArray::SharedPtr encoder_raw_msg)
@@ -116,15 +95,12 @@ class robot_base_node : public rclcpp::Node
         PREVIOUS_encoder_value_RIGHT_wheel = NEW_encoder_value_RIGHT_wheel;
         _encoders_first_value = false;
       }
-      RCLCPP_INFO(this->get_logger(), "encoder_raw_callback: %ld %ld", NEW_encoder_value_LEFT_wheel, NEW_encoder_value_RIGHT_wheel);
+      // RCLCPP_INFO(this->get_logger(), "encoder_raw_callback: %ld %ld", NEW_encoder_value_LEFT_wheel, NEW_encoder_value_RIGHT_wheel);
 
       CURRENT_velocity_LEFT_wheel = -(NEW_encoder_value_LEFT_wheel - PREVIOUS_encoder_value_LEFT_wheel) * WHEEL_METERS_PER_TICK / _dt; // meters per second
       CURRENT_velocity_RIGHT_wheel = -(NEW_encoder_value_RIGHT_wheel - PREVIOUS_encoder_value_RIGHT_wheel) * WHEEL_METERS_PER_TICK / _dt;
       // wheel_odom.updateFromVelocity(CURRENT_velocity_LEFT_wheel, CURRENT_velocity_RIGHT_wheel, _now);
-      RCLCPP_INFO(this->get_logger(), "encoder_raw_callback: Left Velocity: %.4f m/s, Right Velocity: %.4f m/s", 
-              CURRENT_velocity_LEFT_wheel, CURRENT_velocity_RIGHT_wheel);
       wheel_odom.updateFromVelocity(CURRENT_velocity_LEFT_wheel/20, -CURRENT_velocity_RIGHT_wheel/20, _dt);
-      
 
       PREVIOUS_encoder_value_LEFT_wheel = NEW_encoder_value_LEFT_wheel;
       PREVIOUS_encoder_value_RIGHT_wheel = NEW_encoder_value_RIGHT_wheel;
@@ -135,42 +111,10 @@ class robot_base_node : public rclcpp::Node
     {
       NEW_command_linear_X = cmd_vel_msg->linear.x;
       NEW_command_angular_Z = cmd_vel_msg->angular.z;
-
-      // New Code Addtion: **************************************************************
-      // _velocity_previous_time = this->get_clock()->now();
-      last_msg_time_ = this->get_clock()->now();
-      motor_running_ = true;
-      // Send commands to the motor based on msg
-      // controlMotors(cmd_vel_msg->linear.x, cmd_vel_msg->angular.z);
-      // *********************************************************************************
-
-      if (std::abs(NEW_command_linear_X) > 0.1 || std::abs(NEW_command_angular_Z) > 0.1) {
-        RCLCPP_INFO(this->get_logger(), "cmd_vel_callback: Linear X: %.2f, Angular Z: %.2f", NEW_command_linear_X, NEW_command_angular_Z);
-      }
+      // RCLCPP_INFO(this->get_logger(), "cmd_vel_callback: Lx:%.2f Az:%.2f", NEW_command_linear_X, NEW_command_angular_Z);
     }
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_subscription_;
 
-
-    // New Code Addtion: **************************************************************
-    void watchdogCallback()
-    {
-      auto now = this->get_clock()->now();
-      this->declare_parameter("watchdog_timeout", 5); // default to 5 seconds
-      double watchdog_timeout = this->get_parameter("watchdog_timeout").as_double();
-      
-      if (now - last_msg_time_ > rclcpp::Duration::from_seconds(watchdog_timeout)) {
-        if (motor_running_) {
-          RCLCPP_WARN(this->get_logger(), "No new command received. Continuing with the last command.");
-          // Retain the last received command and keep running
-          calculate_CommandPercentDutyCycle(); // Continue calculating and publishing duty cycle
-        }
-      } else {
-        motor_running_ = true; // Reset motor_running_ flag if within timeout period
-      }
-    }
-    // *********************************************************************************
-
-    
     void wheel_odometry_timer_callback()
     {
       double _Position_X = wheel_odom.getX(); // aka cartesian coordinates
@@ -178,8 +122,7 @@ class robot_base_node : public rclcpp::Node
       wheel_odom_quaternion.setRPY(0.0, 0.0, wheel_odom.getHeading());
       double _LinearVelocity_X = wheel_odom.getLinear();
       double _AngularVelocity_Z = wheel_odom.getAngular();
-
-      RCLCPP_INFO(this->get_logger(), "wheel_odometry_timer_callback: Px:%2.2lf Py:%2.2lf Lx:%2.2lf Az:%2.2lf", _Position_X, _Position_Y, _LinearVelocity_X, _AngularVelocity_Z);
+      // RCLCPP_INFO(this->get_logger(), "wheel_odometry_timer_callback: Px:%2.2lf Py:%2.2lf Lx:%2.2lf Az:%2.2lf", _Position_X, _Position_Y, _LinearVelocity_X, _AngularVelocity_Z);
 
       rclcpp::Time _now = this->get_clock()->now();
       auto odometry_message = nav_msgs::msg::Odometry();
@@ -219,8 +162,6 @@ class robot_base_node : public rclcpp::Node
       // Inverse Jacobian: Velocity of individual wheels, calculated from received velocity command
       NEXT_velocity_LEFT_wheel = (NEW_command_linear_X - (NEW_command_angular_Z * WHEEL_SEPERATION / 2)); // meters per second
       NEXT_velocity_RIGHT_wheel = -(NEW_command_linear_X + (NEW_command_angular_Z * WHEEL_SEPERATION / 2)); // '-ve' sign because this one has to spin reverse inorder to move the robot along a direction.
-      RCLCPP_INFO(this->get_logger(), "calculate_CommandPercentDutyCycle: Next Left Velocity: %.4f, Next Right Velocity: %.4f",
-              NEXT_velocity_LEFT_wheel, NEXT_velocity_RIGHT_wheel);
 
       /* **************************************************** LEFT wheel **************************************************** */
       CURRENT_velocity_error_LEFT_wheel = NEXT_velocity_LEFT_wheel - CURRENT_velocity_LEFT_wheel;
@@ -248,23 +189,14 @@ class robot_base_node : public rclcpp::Node
       /* ********** %Duty calculation ********** */
       Percent_duty_cycle_LEFT_wheel = LIMIT((Duty_LEFT_Wheel*100), -100, 100);
       Percent_duty_cycle_RIGHT_wheel = LIMIT((-Duty_RIGHT_Wheel*100), -100, 100); // '-ve' sign for right wheel because it has to spin in opposite direction
-      RCLCPP_INFO(this->get_logger(), "calculate_CommandPercentDutyCycle: Left Duty Cycle: %.2f%%, Right Duty Cycle: %.2f%%",
-              Percent_duty_cycle_LEFT_wheel, Percent_duty_cycle_RIGHT_wheel);
 
       // RCLCPP_INFO(this->get_logger(), "e_L:%.5f  e_R:%.5f\td_L:%.1f  d_R:%.1f", CURRENT_velocity_error_LEFT_wheel, CURRENT_velocity_error_RIGHT_wheel, Percent_duty_cycle_LEFT_wheel, Percent_duty_cycle_RIGHT_wheel);
     }
-    
     void wheel_velocity_timer_callback()
     {
-      rclcpp::Time current_time = this->get_clock()->now();
-      double time_diff = (current_time - last_log_time).seconds();
-      
-      if (time_diff >= 1.0) {  // Log every 1 second
-        RCLCPP_INFO(this->get_logger(), "wheel_velocity_timer_callback: Left Duty: %.2f%%, Right Duty: %.2f%%",
-                    Percent_duty_cycle_LEFT_wheel, Percent_duty_cycle_RIGHT_wheel);
-        last_log_time = current_time;  // Reset the timer
-      }
       calculate_CommandPercentDutyCycle();
+      // RCLCPP_INFO(this->get_logger(), "wheel_velocity_timer_callback: L:%2.2lf R:%2.2lf", Percent_duty_cycle_LEFT_wheel, Percent_duty_cycle_RIGHT_wheel);
+
       rclcpp::Time _now = this->get_clock()->now();
       auto velocity_message = sensor_msgs::msg::JointState();
       velocity_message.header.stamp = _now;
@@ -284,19 +216,10 @@ class robot_base_node : public rclcpp::Node
       velocity_message.velocity.push_back((double)CURRENT_velocity_LEFT_wheel);
       velocity_message.velocity.push_back((double)CURRENT_velocity_RIGHT_wheel);
       
-      RCLCPP_INFO(this->get_logger(), "current_velocity_timer_callback: Left Wheel Velocity: %.4f, Right Wheel Velocity: %.4f",
-              CURRENT_velocity_LEFT_wheel, CURRENT_velocity_RIGHT_wheel);
-      
       current_velocity_publisher_->publish(velocity_message);
     }
     rclcpp::TimerBase::SharedPtr current_velocity_timer_;
     rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr current_velocity_publisher_;
-    
-    // New Code Addtion: ****************************************************
-    rclcpp::TimerBase::SharedPtr watchdog_timer_;
-    rclcpp::Time last_msg_time_;
-    bool motor_running_;
-    // *****************************************************
 };
 
 int main(int argc, char * argv[])
