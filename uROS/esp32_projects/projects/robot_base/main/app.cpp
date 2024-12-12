@@ -18,9 +18,6 @@
 #include "driver/ledc.h"
 #include "DFRobot_BMX160.h"
 
-// New Code Addition<Chetan> : *************************************************************
-#include "esp_task_wdt.h"
-// *****************************************************************************************
 //////////////////////////////
 #include <rcl/rcl.h>
 #include <rclc/rclc.h>
@@ -72,9 +69,6 @@
 #define PWM_RESOLUTION pow(2, (float)PWM_RESOLUTION_BITS)
 #define PWM_FREQUENCY 20000 // Should be lesser than 80MHz/(2^PWM_RESOLUTION)
 
-// New Code Addition<Chetan> : *************************************************************
-#define WDT_TIMEOUT_SEC 5
-// *****************************************************************************************
 
 int64_t Motor1_Encoder_Value = 0, Motor2_Encoder_Value = 0;
 float Motor_Duty_Cycle[NUMBER_OF_MOTORS];
@@ -93,45 +87,11 @@ sensor_msgs__msg__JointState wheel_speed;
 struct timespec wheel_speed_message_time_stamp;
 struct timespec current_time_stamp;
 
-// New Code Addition<Chetan> : *************************************************************
-double last_command_time = 0;
-const esp_task_wdt_config_t wdt_config = {
-    .timeout_ms = WDT_TIMEOUT_SEC * 1000,
-    .trigger_panic = true
-};
-void Setup_WDT()
-{
-    // Initialize the Task Watchdog Timer
-    esp_task_wdt_init(&wdt_config); // Enable panic handler
-    esp_task_wdt_add(NULL); // Add the current task to the WDT
-}
-void Feed_WDT()
-{
-    // Feed the watchdog to prevent reset
-    esp_task_wdt_reset();
-}
-void initialize_motor() {
-	Motor_Duty_Cycle[0] = 0;
-	Motor_Duty_Cycle[1] = 0;
-}
-void check_motor_timeout() {
-    double current_time = this->get_clock()->now();
-    if ((current_time - last_command_time_).seconds() > 1.0) {
-		Motor_Duty_Cycle[0] = 0;
-		Motor_Duty_Cycle[1] = 0;
-    }
-}
-// *****************************************************************************************
 
 void Set_Inverted_PWM(ledc_mode_t _mode, ledc_channel_t _channel, float _percent_duty)
 {
 	uint32_t _duty = uint32_t((PWM_RESOLUTION - 1) * 1.0/100 * (100 - _percent_duty));
 	
-	// New Code Addition : **********************************************************
-	// uint32_t _duty = (uint32_t)((PWM_RESOLUTION - 1) * (100.0 - _percent_duty) / 100.0);
-	ESP_LOGI(TAG, "Setting PWM duty cycle: %.2f%%", _percent_duty);
-	// ************************************************************************************
-
 	ledc_set_duty_and_update(_mode, _channel, _duty, 0);
 }
 void Set_Motor_Speed()
@@ -139,11 +99,6 @@ void Set_Motor_Speed()
 	float _left_motor_percent_duty_cycle = LIMIT(Motor_Duty_Cycle[0], -100, 100);
 	float _right_motor_percent_duty_cycle = LIMIT(Motor_Duty_Cycle[1], -100, 100);
 	
-	// New Code Addition : **********************************************************
-	// float _left_motor_percent_duty_cycle = LIMIT(Motor_Duty_Cycle[0], -100.0f, 100.0f);
-    // float _right_motor_percent_duty_cycle = LIMIT(Motor_Duty_Cycle[1], -100.0f, 100.0f);
-	ESP_LOGI(TAG, "Setting motor speed: Motor 1: %.2f, Motor 2: %.2f", Motor_Duty_Cycle[0], Motor_Duty_Cycle[1]);
-	// ************************************************************************************
 
 	if(_left_motor_percent_duty_cycle >= 0)
 	{ // CCW
@@ -309,40 +264,20 @@ static void IRAM_ATTR Motor2_Encoder_ISR_Handler(void *arg)
 }
 void TASK_motor_command_reception_timeout(void *arguments)
 {
-	// New Code Addition<Chetan>:************************************************
-	esp_task_wdt_add(NULL);
-	// **************************************************************************
 	while(true)
 	{
 		clock_gettime(CLOCK_REALTIME, &current_time_stamp);
-		// New Code Addition<Chetan>:************************************************
-		long elapsed_ms = (current_time_stamp.tv_sec * 1000 + current_time_stamp.tv_nsec / 1000000) -
-                  (wheel_speed_message_time_stamp.tv_sec * 1000 + wheel_speed_message_time_stamp.tv_nsec / 1000000);
-		if (elapsed_ms > 200)
+
+		// Old Code:************************************************
+		if((current_time_stamp.tv_sec - wheel_speed_message_time_stamp.tv_sec) >= 0.200) // 200ms timeout period
 		{
 			Motor_Duty_Cycle[0] = 0;
 			Motor_Duty_Cycle[1] = 0;
-			esp_task_wdt_reset();
 		}
 		// **************************************************************************
-
-		// Old Code:************************************************
-		// if((current_time_stamp.tv_sec - wheel_speed_message_time_stamp.tv_sec) >= 0.200) // 200ms timeout period
-		// {
-		// 	Motor_Duty_Cycle[0] = 0;
-		// 	Motor_Duty_Cycle[1] = 0;
-		// }
-		// **************************************************************************
 		Set_Motor_Speed();
-		vTaskDelay(pdMS_TO_TICKS(50));
-
-		// New Code Addition<Chetan>:************************************************
-		esp_task_wdt_reset();
-		// **************************************************************************
+		vTaskDelay(pdMS_TO_TICKS(50));***
 	}
-	// New Code Addition<Chetan>:************************************************
-	esp_task_wdt_delete(NULL);
-	// **************************************************************************
 	vTaskDelete(NULL);
 }
 void TASK_IMU_data_acquisition(void *arg)
@@ -351,24 +286,12 @@ void TASK_IMU_data_acquisition(void *arg)
 	uint16_t delta_T = int(1000 * IMU_DAQ_Period);
 	TickType_t lastWakeTime;
 	TickType_t loopPeriod = pdMS_TO_TICKS(delta_T);
-
-	// New Code Addition<Chetan>:************************************************
-	esp_task_wdt_add(NULL);
-	// **************************************************************************
-
 	while(true)
 	{
 		bmx160.getAllData(&mag_uT, &gyro_DPS, &accel_G);
 		// printf("accel_G:%.2f %.2f %.2f \t gyro_DPS:%.2f %.2f %.2f \t mag_uT:%.2f %.2f %.2f \n", accel_G.x, accel_G.y, accel_G.z, gyro_DPS.x, gyro_DPS.y, gyro_DPS.z, mag_uT.x, mag_uT.y, mag_uT.z);
 		vTaskDelayUntil(&lastWakeTime, loopPeriod);
-
-		// New Code Addition<Chetan>:************************************************
-		esp_task_wdt_reset();
-		// **************************************************************************
 	}
-	// New Code Addition<Chetan>:************************************************
-	esp_task_wdt_delete(NULL);
-	// **************************************************************************
 	vTaskDelete(NULL);
 }
 void Setup_PWM()
@@ -514,10 +437,6 @@ extern "C" void app_main(void)
 	Setup_Digital_IO();
 	Setup_UART();
 	Setup_IMU();
-	// New Code Addition<Chetan>:**********************************************************
-	esp_task_wdt_init(&wdt_config);
-	clock_gettime(CLOCK_REALTIME, &wheel_speed_message_time_stamp);
-	// ************************************************************************************
 	xTaskCreatePinnedToCore(TASK_microROS, "microROS task", CONFIG_MICRO_ROS_APP_STACK, NULL, CONFIG_MICRO_ROS_APP_TASK_PRIO, NULL, 0);
 	xTaskCreate(TASK_motor_command_reception_timeout, "Check motor command reception timeout", 2048, NULL, 4, NULL);
  	xTaskCreatePinnedToCore(TASK_IMU_data_acquisition, "IMU raw data acquisition", 2048, NULL, 5, NULL, 0);
