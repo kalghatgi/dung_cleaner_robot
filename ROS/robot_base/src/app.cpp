@@ -59,16 +59,8 @@ class robot_base_node : public rclcpp::Node
         50ms, std::bind(&robot_base_node::current_velocity_timer_callback, this));
       
      // New Code Addtion: **************************************************************
-      RCLCPP_INFO(this->get_logger(), "Shutting down, stopping motors...");
-      auto velocity_message = sensor_msgs::msg::JointState();
-      velocity_message.header.stamp = this->get_clock()->now();
-      velocity_message.effort.push_back(0.0);
-      velocity_message.effort.push_back(0.0);
-      wheel_velocity_publisher_->publish(velocity_message);
-      // Create a timer to check for timeouts
       watchdog_timer_ = this->create_wall_timer(
-          std::chrono::milliseconds(100),
-          std::bind(&robot_base_node::watchdogCallback, this));
+        100ms, std::bind(&robot_base_node::watchdogCallback, this));
       // Initialize motor to stop
       stopMotors();
     // *********************************************************************************
@@ -76,6 +68,14 @@ class robot_base_node : public rclcpp::Node
     }
 
   private:
+    // New Code Addtion: ****************************************************
+    std::string velocity_input_topic_;
+    rclcpp::Time last_msg_time_;
+    bool motor_running_;
+    rclcpp::TimerBase::SharedPtr watchdog_timer_;
+    rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr wheel_velocity_publisher_;
+    // **********************************************************************
+
     const double WHEEL_RADIUS = 0.088; // meters
     const double WHEEL_SEPERATION = 0.682; // meters
     const uint16_t ENCODER_PPR = 2000; // Reference: https://robokits.co.in/motors/rhino-planetary-geared-24v-motor/100w-24v-encoder-servo-motor/rhino-servo-24v-60rpm-100w-ig52-extra-heavy-duty-planetary-encoder-servo-motor-160kgcm#:~:text=Quad%20Encoder%20requires-,2000,-Pulses%20Per%20Revolution
@@ -133,7 +133,7 @@ class robot_base_node : public rclcpp::Node
       NEW_command_angular_Z = cmd_vel_msg->angular.z;
 
       // New Code Addtion: **************************************************************
-      _velocity_previous_time = this->get_clock()->now();
+      // _velocity_previous_time = this->get_clock()->now();
       last_msg_time_ = this->get_clock()->now();
       motor_running_ = true;
       // Send commands to the motor based on msg
@@ -150,12 +150,13 @@ class robot_base_node : public rclcpp::Node
     // New Code Addtion: **************************************************************
     void watchdogCallback()
     {
-        if (motor_running_ && (this->get_clock()->now() - last_msg_time_ > rclcpp::Duration::from_seconds(0.5)))
-        {
-            RCLCPP_WARN(this->get_logger(), "No command received. Stopping motors.");
-            stopMotors();
-            motor_running_ = false;
-        }
+      auto now = this->get_clock()->now();
+      if (motor_running_ && (now() - last_msg_time_ > rclcpp::Duration::from_seconds(0.5)))
+      {
+          RCLCPP_WARN(this->get_logger(), "No command received. Stopping motors.");
+          stopMotors();
+          motor_running_ = false;
+      }
     }
     void controlMotors(double linear, double angular)
     {
