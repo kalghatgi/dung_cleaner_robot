@@ -74,9 +74,9 @@
 
 // New Code Addition<Chetan> : *************************************************************
 #define WDT_TIMEOUT_SEC 5
-static const char *TAG = "motor_control";
-float Motor_Duty_Cycle[2] = {0, 0};
-struct timespec current_time_stamp, wheel_speed_message_time_stamp;
+// static const char *TAG = "motor_control";
+// float Motor_Duty_Cycle[2] = {0, 0};
+// struct timespec current_time_stamp, wheel_speed_message_time_stamp;
 // *****************************************************************************************
 
 int64_t Motor1_Encoder_Value = 0, Motor2_Encoder_Value = 0;
