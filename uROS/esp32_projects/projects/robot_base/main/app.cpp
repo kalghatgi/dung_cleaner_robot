@@ -129,12 +129,12 @@ void Set_Inverted_PWM(ledc_mode_t _mode, ledc_channel_t _channel, float _percent
 }
 void Set_Motor_Speed()
 {
-	// float _left_motor_percent_duty_cycle = LIMIT(Motor_Duty_Cycle[0], -100, 100);
-	// float _right_motor_percent_duty_cycle = LIMIT(Motor_Duty_Cycle[1], -100, 100);
+	float _left_motor_percent_duty_cycle = LIMIT(Motor_Duty_Cycle[0], -100, 100);
+	float _right_motor_percent_duty_cycle = LIMIT(Motor_Duty_Cycle[1], -100, 100);
 	
 	// New Code Addition : **********************************************************
-	float _left_motor_percent_duty_cycle = LIMIT(Motor_Duty_Cycle[0], -100.0f, 100.0f);
-    float _right_motor_percent_duty_cycle = LIMIT(Motor_Duty_Cycle[1], -100.0f, 100.0f);
+	// float _left_motor_percent_duty_cycle = LIMIT(Motor_Duty_Cycle[0], -100.0f, 100.0f);
+    // float _right_motor_percent_duty_cycle = LIMIT(Motor_Duty_Cycle[1], -100.0f, 100.0f);
 	ESP_LOGI(TAG, "Setting motor speed: Motor 1: %.2f, Motor 2: %.2f", Motor_Duty_Cycle[0], Motor_Duty_Cycle[1]);
 	// ************************************************************************************
 
@@ -315,6 +315,7 @@ void TASK_motor_command_reception_timeout(void *arguments)
 		{
 			Motor_Duty_Cycle[0] = 0;
 			Motor_Duty_Cycle[1] = 0;
+			esp_task_wdt_reset();
 		}
 		// **************************************************************************
 
@@ -325,12 +326,12 @@ void TASK_motor_command_reception_timeout(void *arguments)
 		// 	Motor_Duty_Cycle[1] = 0;
 		// }
 		// **************************************************************************
-
 		Set_Motor_Speed();
+		vTaskDelay(pdMS_TO_TICKS(50));
+
 		// New Code Addition<Chetan>:************************************************
 		esp_task_wdt_reset();
 		// **************************************************************************
-		vTaskDelay(pdMS_TO_TICKS(50));
 	}
 	// New Code Addition<Chetan>:************************************************
 	esp_task_wdt_delete(NULL);
@@ -343,18 +344,20 @@ void TASK_IMU_data_acquisition(void *arg)
 	uint16_t delta_T = int(1000 * IMU_DAQ_Period);
 	TickType_t lastWakeTime;
 	TickType_t loopPeriod = pdMS_TO_TICKS(delta_T);
+
 	// New Code Addition<Chetan>:************************************************
 	esp_task_wdt_add(NULL);
 	// **************************************************************************
+
 	while(true)
 	{
 		bmx160.getAllData(&mag_uT, &gyro_DPS, &accel_G);
+		// printf("accel_G:%.2f %.2f %.2f \t gyro_DPS:%.2f %.2f %.2f \t mag_uT:%.2f %.2f %.2f \n", accel_G.x, accel_G.y, accel_G.z, gyro_DPS.x, gyro_DPS.y, gyro_DPS.z, mag_uT.x, mag_uT.y, mag_uT.z);
+		vTaskDelayUntil(&lastWakeTime, loopPeriod);
+
 		// New Code Addition<Chetan>:************************************************
 		esp_task_wdt_reset();
 		// **************************************************************************
-		// printf("accel_G:%.2f %.2f %.2f \t gyro_DPS:%.2f %.2f %.2f \t mag_uT:%.2f %.2f %.2f \n", accel_G.x, accel_G.y, accel_G.z, gyro_DPS.x, gyro_DPS.y, gyro_DPS.z, mag_uT.x, mag_uT.y, mag_uT.z);
-
-		vTaskDelayUntil(&lastWakeTime, loopPeriod);
 	}
 	// New Code Addition<Chetan>:************************************************
 	esp_task_wdt_delete(NULL);
