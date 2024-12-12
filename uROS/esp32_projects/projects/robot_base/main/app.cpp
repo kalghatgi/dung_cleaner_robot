@@ -95,9 +95,6 @@ struct timespec current_time_stamp;
 
 // New Code Addition<Chetan> : *************************************************************
 double last_command_time = 0;
-float clamp(float value, float min, float max) {
-    return (value < min) ? min : (value > max) ? max : value;
-}
 const esp_task_wdt_config_t wdt_config = {
     .timeout_ms = WDT_TIMEOUT_SEC * 1000,
     .trigger_panic = true
@@ -114,23 +111,26 @@ void Feed_WDT()
     esp_task_wdt_reset();
 }
 void initialize_motor() {
-    set_motor_duty_cycle(0); // Function to stop motor
+	Motor_Duty_Cycle[0] = 0;
+	Motor_Duty_Cycle[1] = 0;
 }
 void set_motor_from_effort(double effort) {
     // Clamp effort to [-100, 100] and normalize to [-1.0, 1.0] if required
     effort = std::clamp(effort, -100.0, 100.0);
     double duty_cycle = effort / 100.0;
-    set_motor_duty_cycle(duty_cycle); // Update motor driver
+	Motor_Duty_Cycle[0] = duty_cycle;
+	Motor_Duty_Cycle[1] = duty_cycle;
 }
 void motor_command_callback(const std_msgs::msg::Float64::SharedPtr msg) {
-    last_command_time = get_current_time(); // Update last command time
+    last_command_time = this->get_clock()->now(); // Update last command time
     set_motor_from_effort(msg->data);
 }
 
 void check_motor_timeout() {
-    double current_time = get_current_time();
-    if (current_time - last_command_time > TIMEOUT_DURATION) {
-        set_motor_duty_cycle(0); // Stop motor after timeout
+    double current_time = this->get_clock()->now();
+    if ((current_time - last_command_time_).seconds() > 1.0) {
+		Motor_Duty_Cycle[0] = 0;
+		Motor_Duty_Cycle[1] = 0;
     }
 }
 // *****************************************************************************************
