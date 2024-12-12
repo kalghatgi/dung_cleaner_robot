@@ -17,7 +17,6 @@
 #include "driver/i2c.h"
 #include "driver/ledc.h"
 #include "DFRobot_BMX160.h"
-
 //////////////////////////////
 #include <rcl/rcl.h>
 #include <rclc/rclc.h>
@@ -43,10 +42,10 @@
 #define I2C_SCL GPIO_NUM_22				// Digital IO (I2C)
 #define I2C_CLOCK_SPEED 400000				// Digital IO (I2C)
 //////////////////////////////////////////////// ACTUATORS ////////////////////////////////////////////////
-#define MOTOR2_PWM_GPIO GPIO_NUM_25			// PWM
-#define MOTOR2_DIRECTION_GPIO GPIO_NUM_26			// Digital Output
-#define MOTOR1_PWM_GPIO GPIO_NUM_16			// PWM
-#define MOTOR1_DIRECTION_GPIO GPIO_NUM_17			// Digital Output
+#define MOTOR2_PWM_GPIO GPIO_NUM_26			// PWM
+#define MOTOR2_DIRECTION_GPIO GPIO_NUM_25			// Digital Output
+#define MOTOR1_PWM_GPIO GPIO_NUM_17			// PWM
+#define MOTOR1_DIRECTION_GPIO GPIO_NUM_16			// Digital Output
 
 #define Pi 3.141592653589793238
 #define NUMBER_OF_MOTORS 2
@@ -69,7 +68,6 @@
 #define PWM_RESOLUTION pow(2, (float)PWM_RESOLUTION_BITS)
 #define PWM_FREQUENCY 20000 // Should be lesser than 80MHz/(2^PWM_RESOLUTION)
 
-
 int64_t Motor1_Encoder_Value = 0, Motor2_Encoder_Value = 0;
 float Motor_Duty_Cycle[NUMBER_OF_MOTORS];
 static const char* TAG = "IMU";
@@ -87,18 +85,15 @@ sensor_msgs__msg__JointState wheel_speed;
 struct timespec wheel_speed_message_time_stamp;
 struct timespec current_time_stamp;
 
-
 void Set_Inverted_PWM(ledc_mode_t _mode, ledc_channel_t _channel, float _percent_duty)
 {
 	uint32_t _duty = uint32_t((PWM_RESOLUTION - 1) * 1.0/100 * (100 - _percent_duty));
-	
 	ledc_set_duty_and_update(_mode, _channel, _duty, 0);
 }
 void Set_Motor_Speed()
 {
 	float _left_motor_percent_duty_cycle = LIMIT(Motor_Duty_Cycle[0], -100, 100);
 	float _right_motor_percent_duty_cycle = LIMIT(Motor_Duty_Cycle[1], -100, 100);
-	
 
 	if(_left_motor_percent_duty_cycle >= 0)
 	{ // CCW
@@ -209,13 +204,13 @@ void TASK_microROS(void *args)
 	// create and initialize the timers for each publisher
 	rcl_timer_t encoder_raw_publisher_timer;
 	const unsigned int encoder_raw_publish_period = 50; // milliseconds for 20Hz publish rate
-	RCCHECK(rclc_timer_init_default2(&encoder_raw_publisher_timer, &support, RCL_MS_TO_NS(encoder_raw_publish_period), ROS2_encoder_raw_Publisher_Callback));
+	RCCHECK(rclc_timer_init_default(&encoder_raw_publisher_timer, &support, RCL_MS_TO_NS(encoder_raw_publish_period), ROS2_encoder_raw_Publisher_Callback));
 	rcl_timer_t imu_raw_publisher_timer;
 	const unsigned int imu_raw_publish_period = 10; // milliseconds for 100Hz publish rate
-	RCCHECK(rclc_timer_init_default2(&imu_raw_publisher_timer, &support, RCL_MS_TO_NS(imu_raw_publish_period), ROS2_imu_raw_Publisher_Callback));
+	RCCHECK(rclc_timer_init_default(&imu_raw_publisher_timer, &support, RCL_MS_TO_NS(imu_raw_publish_period), ROS2_imu_raw_Publisher_Callback));
 	rcl_timer_t mag_raw_publisher_timer;
 	const unsigned int mag_raw_publish_period = 10; // milliseconds for 100Hz publish rate
-	RCCHECK(rclc_timer_init_default2(&mag_raw_publisher_timer, &support, RCL_MS_TO_NS(mag_raw_publish_period), ROS2_mag_raw_Publisher_Callback));
+	RCCHECK(rclc_timer_init_default(&mag_raw_publisher_timer, &support, RCL_MS_TO_NS(mag_raw_publish_period), ROS2_mag_raw_Publisher_Callback));
 
 	// create and allocate storage space for incoming and outgoing messages via topics
 	// (only if they have a provision for specifying the same)
@@ -267,16 +262,16 @@ void TASK_motor_command_reception_timeout(void *arguments)
 	while(true)
 	{
 		clock_gettime(CLOCK_REALTIME, &current_time_stamp);
-
-		// Old Code:************************************************
-		if((current_time_stamp.tv_sec - wheel_speed_message_time_stamp.tv_sec) >= 0.200) // 200ms timeout period
+		while((current_time_stamp.tv_sec - wheel_speed_message_time_stamp.tv_sec) < 0.200) // 200ms timeout period
 		{
-			Motor_Duty_Cycle[0] = 0;
-			Motor_Duty_Cycle[1] = 0;
+			clock_gettime(CLOCK_REALTIME, &current_time_stamp);
+			vTaskDelay(pdMS_TO_TICKS(10));
 		}
-		// **************************************************************************
+		Motor_Duty_Cycle[0] = 0;
+		Motor_Duty_Cycle[1] = 0;
 		Set_Motor_Speed();
-		vTaskDelay(pdMS_TO_TICKS(50));***
+
+		vTaskDelay(pdMS_TO_TICKS(50));
 	}
 	vTaskDelete(NULL);
 }
@@ -289,7 +284,9 @@ void TASK_IMU_data_acquisition(void *arg)
 	while(true)
 	{
 		bmx160.getAllData(&mag_uT, &gyro_DPS, &accel_G);
+
 		// printf("accel_G:%.2f %.2f %.2f \t gyro_DPS:%.2f %.2f %.2f \t mag_uT:%.2f %.2f %.2f \n", accel_G.x, accel_G.y, accel_G.z, gyro_DPS.x, gyro_DPS.y, gyro_DPS.z, mag_uT.x, mag_uT.y, mag_uT.z);
+
 		vTaskDelayUntil(&lastWakeTime, loopPeriod);
 	}
 	vTaskDelete(NULL);
@@ -436,8 +433,10 @@ extern "C" void app_main(void)
 	Setup_INTR();
 	Setup_Digital_IO();
 	Setup_UART();
-	Setup_IMU();
+	// for some reason the microROS TASK fails to initialize from 'node' and onwards, if GPIO of CTS and RTS is configured on the fly.
+	// therefore, make sure that EITHER the GPIOs have finished configuring OR the microROS task has initialized completely, once function at a time and not simultaneously.
 	xTaskCreatePinnedToCore(TASK_microROS, "microROS task", CONFIG_MICRO_ROS_APP_STACK, NULL, CONFIG_MICRO_ROS_APP_TASK_PRIO, NULL, 0);
 	xTaskCreate(TASK_motor_command_reception_timeout, "Check motor command reception timeout", 2048, NULL, 4, NULL);
+	Setup_IMU(); // make sure that this function and following task is executed only at the end, because this function won't proceed further unless communication with IMU has established.
  	xTaskCreatePinnedToCore(TASK_IMU_data_acquisition, "IMU raw data acquisition", 2048, NULL, 5, NULL, 0);
 }
