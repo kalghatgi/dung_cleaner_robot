@@ -137,7 +137,7 @@ class robot_base_node : public rclcpp::Node
       last_msg_time_ = this->get_clock()->now();
       motor_running_ = true;
       // Send commands to the motor based on msg
-      controlMotors(cmd_vel_msg->linear.x, cmd_vel_msg->angular.z)
+      controlMotors(cmd_vel_msg->linear.x, cmd_vel_msg->angular.z);
       // *********************************************************************************
 
       if (std::abs(NEW_command_linear_X) > 0.1 || std::abs(NEW_command_angular_Z) > 0.1) {
