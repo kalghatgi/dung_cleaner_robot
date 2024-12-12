@@ -66,7 +66,7 @@ class robot_base_node : public rclcpp::Node
       
      // New Code Addtion: **************************************************************
       watchdog_timer_ = this->create_wall_timer(
-        100ms, std::bind(&robot_base_node::watchdogCallback, this));
+        std::chrono::milliseconds(100), std::bind(&NodeName::watchdogCallback, this));
       // Initialize motor to stop
       // stopMotors();
     // *********************************************************************************
@@ -155,28 +155,19 @@ class robot_base_node : public rclcpp::Node
     void watchdogCallback()
     {
       auto now = this->get_clock()->now();
-      this->declare_parameter("watchdog_timeout", 5); // default to 0.5 seconds
+      this->declare_parameter("watchdog_timeout", 5); // default to 5 seconds
       double watchdog_timeout = this->get_parameter("watchdog_timeout").as_double();
-      if (motor_running_ && (now - last_msg_time_ > rclcpp::Duration::from_seconds(watchdog_timeout)))
-      {
-          RCLCPP_WARN(this->get_logger(), "No command received. Stopping motors.");
-          // stopMotors();
-          motor_running_ = false;
+      
+      if (now - last_msg_time_ > rclcpp::Duration::from_seconds(watchdog_timeout)) {
+        if (motor_running_) {
+          RCLCPP_WARN(this->get_logger(), "No new command received. Continuing with the last command.");
+          // Retain the last received command and keep running
+          calculate_CommandPercentDutyCycle(); // Continue calculating and publishing duty cycle
+        }
+      } else {
+        motor_running_ = true; // Reset motor_running_ flag if within timeout period
       }
     }
-    // void controlMotors()
-    // {
-    //     RCLCPP_INFO(this->get_logger(),
-    //                 "controlMotors: Linear=%.2f, Angular=%.2f, LeftDuty=%.2f%%, RightDuty=%.2f%%",
-    //                 linear, angular, left_motor_duty, right_motor_duty);
-    //     stopMotors();
-    // }
-
-    // void stopMotors()
-    // {
-    //     RCLCPP_INFO(this->get_logger(), "Stopping motors.");
-    //     controlMotors(0.0, 0.0);
-    // }
     // *********************************************************************************
 
     
