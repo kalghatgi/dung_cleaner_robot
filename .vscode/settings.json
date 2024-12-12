@@ -1,5 +1,9 @@
 {
     "files.associations": {
-        "format": "cpp"
+        "format": "cpp",
+        "chrono": "cpp",
+        "limits": "cpp",
+        "utility": "cpp",
+        "xutility": "cpp"
     }
 }

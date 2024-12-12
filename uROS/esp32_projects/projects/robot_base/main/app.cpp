@@ -118,10 +118,11 @@ void Feed_WDT()
 
 void Set_Inverted_PWM(ledc_mode_t _mode, ledc_channel_t _channel, float _percent_duty)
 {
-	// uint32_t _duty = uint32_t((PWM_RESOLUTION - 1) * 1.0/100 * (100 - _percent_duty));
+	uint32_t _duty = uint32_t((PWM_RESOLUTION - 1) * 1.0/100 * (100 - _percent_duty));
 	
 	// New Code Addition : **********************************************************
-	uint32_t _duty = (uint32_t)((PWM_RESOLUTION - 1) * (100.0 - _percent_duty) / 100.0);
+	// uint32_t _duty = (uint32_t)((PWM_RESOLUTION - 1) * (100.0 - _percent_duty) / 100.0);
+	ESP_LOGI(TAG, "Setting PWM duty cycle: %.2f%%", _percent_duty);
 	// ************************************************************************************
 
 	ledc_set_duty_and_update(_mode, _channel, _duty, 0);
@@ -307,11 +308,24 @@ void TASK_motor_command_reception_timeout(void *arguments)
 	while(true)
 	{
 		clock_gettime(CLOCK_REALTIME, &current_time_stamp);
-		if((current_time_stamp.tv_sec - wheel_speed_message_time_stamp.tv_sec) >= 0.200) // 200ms timeout period
+		// New Code Addition<Chetan>:************************************************
+		long elapsed_ms = (current_time_stamp.tv_sec * 1000 + current_time_stamp.tv_nsec / 1000000) -
+                  (wheel_speed_message_time_stamp.tv_sec * 1000 + wheel_speed_message_time_stamp.tv_nsec / 1000000);
+		if (elapsed_ms > 200)
 		{
 			Motor_Duty_Cycle[0] = 0;
 			Motor_Duty_Cycle[1] = 0;
 		}
+		// **************************************************************************
+
+		// Old Code:************************************************
+		// if((current_time_stamp.tv_sec - wheel_speed_message_time_stamp.tv_sec) >= 0.200) // 200ms timeout period
+		// {
+		// 	Motor_Duty_Cycle[0] = 0;
+		// 	Motor_Duty_Cycle[1] = 0;
+		// }
+		// **************************************************************************
+
 		Set_Motor_Speed();
 		// New Code Addition<Chetan>:************************************************
 		esp_task_wdt_reset();
