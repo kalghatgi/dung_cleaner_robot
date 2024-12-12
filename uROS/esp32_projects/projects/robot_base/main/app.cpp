@@ -97,10 +97,15 @@ struct timespec wheel_speed_message_time_stamp;
 struct timespec current_time_stamp;
 
 // New Code Addition<Chetan> : *************************************************************
+const esp_task_wdt_config_t wdt_config = {
+    .timeout_ms = WDT_TIMEOUT_SEC * 1000,
+    .trigger_panic = true
+};
+
 void Setup_WDT()
 {
     // Initialize the Task Watchdog Timer
-    esp_task_wdt_init(WDT_TIMEOUT_SEC, true); // Enable panic handler
+    esp_task_wdt_init(&wdt_config); // Enable panic handler
     esp_task_wdt_add(NULL); // Add the current task to the WDT
 }
 
@@ -129,7 +134,7 @@ void Set_Motor_Speed()
 	// New Code Addition : **********************************************************
 	float _left_motor_percent_duty_cycle = LIMIT(Motor_Duty_Cycle[0], -100.0f, 100.0f);
     float _right_motor_percent_duty_cycle = LIMIT(Motor_Duty_Cycle[1], -100.0f, 100.0f);
-	ESP_LOGI(TAG, "Setting motor speed: Motor 1: %.2f, Motor 2: %.2f", Motor_Duty_Cycle[0], Motor_Duty_Cycle[1]);}
+	ESP_LOGI(TAG, "Setting motor speed: Motor 1: %.2f, Motor 2: %.2f", Motor_Duty_Cycle[0], Motor_Duty_Cycle[1]);
 	// ************************************************************************************
 
 	if(_left_motor_percent_duty_cycle >= 0)
@@ -486,7 +491,7 @@ extern "C" void app_main(void)
 	Setup_UART();
 	Setup_IMU();
 	// New Code Addition<Chetan>:**********************************************************
-	esp_task_wdt_init(WDT_TIMEOUT_S, true);
+	esp_task_wdt_init(&wdt_config);
 	clock_gettime(CLOCK_REALTIME, &wheel_speed_message_time_stamp);
 	// ************************************************************************************
 	xTaskCreatePinnedToCore(TASK_microROS, "microROS task", CONFIG_MICRO_ROS_APP_STACK, NULL, CONFIG_MICRO_ROS_APP_TASK_PRIO, NULL, 0);
