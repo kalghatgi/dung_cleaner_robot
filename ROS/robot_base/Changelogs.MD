@@ -1,3 +1,8 @@
+# v1.3
+* Cleanup of the code.
+* Changed the PID controller to P controller.
+* Updated the wheel radius and wheel separation for this robot.
+
 # v1.2
 * Updated the Encoder_PPR and Gear_ratio for the current setup.
 

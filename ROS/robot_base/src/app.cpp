@@ -68,8 +68,8 @@ class robot_base_node : public rclcpp::Node
     }
 
   private:
-    const double WHEEL_RADIUS = 0.088; // meters
-    const double WHEEL_SEPERATION = 0.682; // meters
+    const double WHEEL_RADIUS = 0.200; // meters
+    const double WHEEL_SEPERATION = 0.555; // meters
     const uint16_t ENCODER_PPR = 2000; // Reference: https://robokits.co.in/motors/rhino-planetary-geared-24v-motor/100w-24v-encoder-servo-motor/rhino-servo-24v-60rpm-100w-ig52-extra-heavy-duty-planetary-encoder-servo-motor-160kgcm#:~:text=Quad%20Encoder%20requires-,2000,-Pulses%20Per%20Revolution
     const uint16_t MOTOR_GEAR_RATIO = 47; // Reference: https://robokits.co.in/motors/rhino-planetary-geared-24v-motor/100w-24v-encoder-servo-motor/rhino-servo-24v-60rpm-100w-ig52-extra-heavy-duty-planetary-encoder-servo-motor-160kgcm#:~:text=ratio%20is%201%20%3A-,47,-the%20Optical%20encoder
     const uint16_t ENCODER_TICKS_PER_WHEEL_ROTATION = ENCODER_PPR * MOTOR_GEAR_RATIO;
@@ -98,12 +98,12 @@ class robot_base_node : public rclcpp::Node
 
       NEW_encoder_value_LEFT_wheel = encoder_raw_msg->data[0];
       NEW_encoder_value_RIGHT_wheel = encoder_raw_msg->data[1];
-      // if(_encoders_first_value)
-      // {
-      //   PREVIOUS_encoder_value_LEFT_wheel = NEW_encoder_value_LEFT_wheel;
-      //   PREVIOUS_encoder_value_RIGHT_wheel = NEW_encoder_value_RIGHT_wheel;
-      //   _encoders_first_value = false;
-      // }
+      if(_encoders_first_value)
+      {
+        PREVIOUS_encoder_value_LEFT_wheel = NEW_encoder_value_LEFT_wheel;
+        PREVIOUS_encoder_value_RIGHT_wheel = NEW_encoder_value_RIGHT_wheel;
+        _encoders_first_value = false;
+      }
       // RCLCPP_INFO(this->get_logger(), "encoder_raw_callback: %ld %ld", NEW_encoder_value_LEFT_wheel, NEW_encoder_value_RIGHT_wheel);
 
       CURRENT_velocity_LEFT_wheel = -(NEW_encoder_value_LEFT_wheel - PREVIOUS_encoder_value_LEFT_wheel) * WHEEL_METERS_PER_TICK / _dt; // meters per second
@@ -126,35 +126,10 @@ class robot_base_node : public rclcpp::Node
       last_command_time_ = this->get_clock()->now();
 
       calculate_CommandPercentDutyCycle();
-      publish_wheel_velocities();
       // ***************************************************************************
       // RCLCPP_INFO(this->get_logger(), "cmd_vel_callback: Lx:%.2f Az:%.2f", NEW_command_linear_X, NEW_command_angular_Z);
     }
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_subscription_;
-
-    // New Code Addition: ********************************************************
-    void calculate_CommandPercentDutyCycle()
-    {
-      const float Kp = 0.025, Kd = 0.000125, Ki = 0.00005;
-      float velocity_error_LEFT = NEW_command_linear_X - CURRENT_velocity_LEFT_wheel;
-      float velocity_error_RIGHT = NEW_command_angular_Z - CURRENT_velocity_RIGHT_wheel;
-
-      Duty_LEFT_Wheel += Kp * velocity_error_LEFT;
-      Duty_RIGHT_Wheel += Kp * velocity_error_RIGHT;
-
-      Percent_duty_cycle_LEFT_wheel = LIMIT(Duty_LEFT_Wheel * 100, -100, 100);
-      Percent_duty_cycle_RIGHT_wheel = LIMIT(Duty_RIGHT_Wheel * 100, -100, 100);
-    }
-
-    void publish_wheel_velocities()
-    {
-      rclcpp::Time now = this->get_clock()->now();
-      auto velocity_message = sensor_msgs::msg::JointState();
-      velocity_message.header.stamp = now;
-      velocity_message.effort.push_back(Percent_duty_cycle_LEFT_wheel);
-      velocity_message.effort.push_back(Percent_duty_cycle_RIGHT_wheel);
-      wheel_velocity_publisher_->publish(velocity_message);
-    }
 
     void watchdog_timer_callback()
     {
@@ -166,7 +141,6 @@ class robot_base_node : public rclcpp::Node
         command_received_ = false;
 
         calculate_CommandPercentDutyCycle();
-        publish_wheel_velocities();
       }
     }
     // ***************************************************************************
@@ -205,46 +179,48 @@ class robot_base_node : public rclcpp::Node
     rclcpp::TimerBase::SharedPtr wheel_odometry_timer_;
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr wheel_odometry_publisher_;
 
-    // old working code: ********************************************************
-    // void calculate_CommandPercentDutyCycle()
-    // {
-    //   float CURRENT_velocity_error_LEFT_wheel, Derivative_velocity_error_LEFT_wheel;
-    //   float CURRENT_velocity_error_RIGHT_wheel, Derivative_velocity_error_RIGHT_wheel;
-    //   rclcpp::Time _now = this->get_clock()->now();
-    //   float _dt = _now.seconds() - _velocity_previous_time.seconds();
-    //   _velocity_previous_time = _now;
-    //   _dt = 0.05; // manual override on basis of known rate (this is better because the accuracy of time as calculated above is far from expected value)
-    //   // Inverse Jacobian: Velocity of individual wheels, calculated from received velocity command
-    //   NEXT_velocity_LEFT_wheel = (NEW_command_linear_X - (NEW_command_angular_Z * WHEEL_SEPERATION / 2)); // meters per second
-    //   NEXT_velocity_RIGHT_wheel = -(NEW_command_linear_X + (NEW_command_angular_Z * WHEEL_SEPERATION / 2)); // '-ve' sign because this one has to spin reverse inorder to move the robot along a direction.
-    //   /* **************************************************** LEFT wheel **************************************************** */
-    //   CURRENT_velocity_error_LEFT_wheel = NEXT_velocity_LEFT_wheel - CURRENT_velocity_LEFT_wheel;
-    //   Integration_velocity_error_LEFT_wheel += (CURRENT_velocity_error_LEFT_wheel * _dt);
-    //   Derivative_velocity_error_LEFT_wheel = (CURRENT_velocity_error_LEFT_wheel - PREVIOUS_velocity_error_LEFT_wheel) / _dt;
-    //   PREVIOUS_velocity_error_LEFT_wheel = CURRENT_velocity_error_LEFT_wheel;
-    //   /* **************************************************** RIGHT wheel **************************************************** */
-    //   CURRENT_velocity_error_RIGHT_wheel = NEXT_velocity_RIGHT_wheel - CURRENT_velocity_RIGHT_wheel;
-    //   Integration_velocity_error_RIGHT_wheel += (CURRENT_velocity_error_RIGHT_wheel * _dt);
-    //   Derivative_velocity_error_RIGHT_wheel = (CURRENT_velocity_error_RIGHT_wheel - PREVIOUS_velocity_error_RIGHT_wheel) / _dt;
-    //   PREVIOUS_velocity_error_RIGHT_wheel = CURRENT_velocity_error_RIGHT_wheel;
-    //   /* ********** P controller ********** */
-    //   // const float Kp = 0.015;
-    //   // Duty_LEFT_Wheel = Kp * CURRENT_velocity_error_LEFT_wheel;
-    //   // Duty_RIGHT_Wheel = Kp * CURRENT_velocity_error_RIGHT_wheel;
-    //   /* ********** PD controller ********** */
-    //   // const float Kp = 0.015, Kd = 0.000125;
-    //   // Duty_LEFT_Wheel = Kp * CURRENT_velocity_error_LEFT_wheel + Kd * Derivative_velocity_error_LEFT_wheel;
-    //   // Duty_RIGHT_Wheel = Kp * CURRENT_velocity_error_RIGHT_wheel + Kd * Derivative_velocity_error_RIGHT_wheel;
-    //   /* ********** PID controller ********** */
-    //   const float Kp = 0.025, Kd = 0.000125, Ki = 0.00005;
-    //   Duty_LEFT_Wheel += Kp * CURRENT_velocity_error_LEFT_wheel + Ki * Integration_velocity_error_LEFT_wheel + Kd * Derivative_velocity_error_LEFT_wheel;
-    //   Duty_RIGHT_Wheel += Kp * CURRENT_velocity_error_RIGHT_wheel + Ki * Integration_velocity_error_RIGHT_wheel + Kd * Derivative_velocity_error_RIGHT_wheel;
-    //   /* ********** %Duty calculation ********** */
-    //   Percent_duty_cycle_LEFT_wheel = LIMIT((Duty_LEFT_Wheel*100), -100, 100);
-    //   Percent_duty_cycle_RIGHT_wheel = LIMIT((-Duty_RIGHT_Wheel*100), -100, 100); // '-ve' sign for right wheel because it has to spin in opposite direction
-    //   // RCLCPP_INFO(this->get_logger(), "e_L:%.5f  e_R:%.5f\td_L:%.1f  d_R:%.1f", CURRENT_velocity_error_LEFT_wheel, CURRENT_velocity_error_RIGHT_wheel, Percent_duty_cycle_LEFT_wheel, Percent_duty_cycle_RIGHT_wheel);
-    // }
-    // **************************************************************************
+    void calculate_CommandPercentDutyCycle()
+    {
+        float CURRENT_velocity_error_LEFT_wheel, Derivative_velocity_error_LEFT_wheel;
+        float CURRENT_velocity_error_RIGHT_wheel, Derivative_velocity_error_RIGHT_wheel;
+        rclcpp::Time _now = this->get_clock()->now();
+        float _dt = _now.seconds() - _velocity_previous_time.seconds();
+        _velocity_previous_time = _now;
+        _dt = 0.05; // manual override on basis of known rate (this is better because the accuracy of time as calculated above is far from expected value)
+        // Inverse Jacobian: Velocity of individual wheels, calculated from received velocity command
+        NEXT_velocity_LEFT_wheel = (NEW_command_linear_X - (NEW_command_angular_Z * WHEEL_SEPERATION / 2)); // meters per second
+        NEXT_velocity_RIGHT_wheel = -(NEW_command_linear_X + (NEW_command_angular_Z * WHEEL_SEPERATION / 2)); // '-ve' sign because this one has to spin reverse inorder to move the robot along a direction.
+        /* **************************************************** LEFT wheel **************************************************** */
+        CURRENT_velocity_error_LEFT_wheel = NEXT_velocity_LEFT_wheel - CURRENT_velocity_LEFT_wheel;
+        Integration_velocity_error_LEFT_wheel += (CURRENT_velocity_error_LEFT_wheel * _dt);
+        Derivative_velocity_error_LEFT_wheel = (CURRENT_velocity_error_LEFT_wheel - PREVIOUS_velocity_error_LEFT_wheel) / _dt;
+        PREVIOUS_velocity_error_LEFT_wheel = CURRENT_velocity_error_LEFT_wheel;
+        /* **************************************************** RIGHT wheel **************************************************** */
+        CURRENT_velocity_error_RIGHT_wheel = NEXT_velocity_RIGHT_wheel - CURRENT_velocity_RIGHT_wheel;
+        Integration_velocity_error_RIGHT_wheel += (CURRENT_velocity_error_RIGHT_wheel * _dt);
+        Derivative_velocity_error_RIGHT_wheel = (CURRENT_velocity_error_RIGHT_wheel - PREVIOUS_velocity_error_RIGHT_wheel) / _dt;
+        PREVIOUS_velocity_error_RIGHT_wheel = CURRENT_velocity_error_RIGHT_wheel;
+        /* ********** P controller ********** */
+        const float Kp = 0.025;
+        Duty_LEFT_Wheel = Kp * CURRENT_velocity_error_LEFT_wheel;
+        Duty_RIGHT_Wheel = Kp * CURRENT_velocity_error_RIGHT_wheel;
+        /* ********** PI controller ********** */
+        // const float Kp = 0.015, Ki = 0.00005;
+        // Duty_LEFT_Wheel = Kp * CURRENT_velocity_error_LEFT_wheel + Ki * Integration_velocity_error_LEFT_wheel;
+        // Duty_RIGHT_Wheel = Kp * CURRENT_velocity_error_RIGHT_wheel + Ki * Integration_velocity_error_RIGHT_wheel;
+        /* ********** PD controller ********** */
+        // const float Kp = 0.015, Kd = 0.000125;
+        // Duty_LEFT_Wheel = Kp * CURRENT_velocity_error_LEFT_wheel + Kd * Derivative_velocity_error_LEFT_wheel;
+        // Duty_RIGHT_Wheel = Kp * CURRENT_velocity_error_RIGHT_wheel + Kd * Derivative_velocity_error_RIGHT_wheel;
+        /* ********** PID controller ********** */
+        // const float Kp = 0.025, Kd = 0.000125, Ki = 0.00005;
+        // Duty_LEFT_Wheel += Kp * CURRENT_velocity_error_LEFT_wheel + Ki * Integration_velocity_error_LEFT_wheel + Kd * Derivative_velocity_error_LEFT_wheel;
+        // Duty_RIGHT_Wheel += Kp * CURRENT_velocity_error_RIGHT_wheel + Ki * Integration_velocity_error_RIGHT_wheel + Kd * Derivative_velocity_error_RIGHT_wheel;
+        /* ********** %Duty calculation ********** */
+        Percent_duty_cycle_LEFT_wheel = LIMIT((Duty_LEFT_Wheel*100), -100, 100);
+        Percent_duty_cycle_RIGHT_wheel = LIMIT((-Duty_RIGHT_Wheel*100), -100, 100); // '-ve' sign for right wheel because it has to spin in opposite direction
+        // RCLCPP_INFO(this->get_logger(), "e_L:%.5f  e_R:%.5f\td_L:%.1f  d_R:%.1f", CURRENT_velocity_error_LEFT_wheel, CURRENT_velocity_error_RIGHT_wheel, Percent_duty_cycle_LEFT_wheel, Percent_duty_cycle_RIGHT_wheel);
+    }
     
     void wheel_velocity_timer_callback()
     {
