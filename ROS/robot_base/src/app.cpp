@@ -122,7 +122,6 @@ class robot_base_node : public rclcpp::Node
       NEW_command_angular_Z = cmd_vel_msg->angular.z;
 
       // New Code Addition: ********************************************************
-      command_received_ = true;
       last_command_time_ = this->get_clock()->now();
 
       calculate_CommandPercentDutyCycle();
@@ -134,11 +133,10 @@ class robot_base_node : public rclcpp::Node
     void watchdog_timer_callback()
     {
       rclcpp::Time now = this->get_clock()->now();
-      if (command_received_ && (now - last_command_time_).seconds() > WATCHDOG_TIMEOUT)
+      if ((now.seconds() - last_command_time_.seconds()) > WATCHDOG_TIMEOUT)
       {
         NEW_command_linear_X = 0.0;
         NEW_command_angular_Z = 0.0;
-        command_received_ = false;
 
         calculate_CommandPercentDutyCycle();
       }
@@ -201,13 +199,13 @@ class robot_base_node : public rclcpp::Node
         Derivative_velocity_error_RIGHT_wheel = (CURRENT_velocity_error_RIGHT_wheel - PREVIOUS_velocity_error_RIGHT_wheel) / _dt;
         PREVIOUS_velocity_error_RIGHT_wheel = CURRENT_velocity_error_RIGHT_wheel;
         /* ********** P controller ********** */
-        const float Kp = 0.025;
+        const float Kp = 0.015;
         Duty_LEFT_Wheel = Kp * CURRENT_velocity_error_LEFT_wheel;
         Duty_RIGHT_Wheel = Kp * CURRENT_velocity_error_RIGHT_wheel;
         /* ********** PI controller ********** */
-        // const float Kp = 0.015, Ki = 0.00005;
-        // Duty_LEFT_Wheel = Kp * CURRENT_velocity_error_LEFT_wheel + Ki * Integration_velocity_error_LEFT_wheel;
-        // Duty_RIGHT_Wheel = Kp * CURRENT_velocity_error_RIGHT_wheel + Ki * Integration_velocity_error_RIGHT_wheel;
+        //const float Kp = 0.015, Ki = 0.00005;
+        //Duty_LEFT_Wheel = Kp * CURRENT_velocity_error_LEFT_wheel + Ki * Integration_velocity_error_LEFT_wheel;
+        //Duty_RIGHT_Wheel = Kp * CURRENT_velocity_error_RIGHT_wheel + Ki * Integration_velocity_error_RIGHT_wheel;
         /* ********** PD controller ********** */
         // const float Kp = 0.015, Kd = 0.000125;
         // Duty_LEFT_Wheel = Kp * CURRENT_velocity_error_LEFT_wheel + Kd * Derivative_velocity_error_LEFT_wheel;

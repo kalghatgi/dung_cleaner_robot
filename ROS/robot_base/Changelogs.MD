@@ -1,3 +1,6 @@
+# v1.4
+* corrected the watchdog function.
+
 # v1.3
 * Cleanup of the code.
 * Changed the PID controller to P controller.
