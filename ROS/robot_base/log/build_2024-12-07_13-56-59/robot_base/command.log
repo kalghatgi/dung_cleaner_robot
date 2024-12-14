@@ -1,4 +1,0 @@
-Invoking command in '/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base -- -j4 -l4
-Invoked command in '/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base -- -j4 -l4
-Invoking command in '/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base
-Invoked command in '/home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/akash/dung_cleaner_robot/ROS/robot_base/build/robot_base
