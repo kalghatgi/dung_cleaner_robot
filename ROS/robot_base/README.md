@@ -1,1 +1,0 @@
-# app.cpp is for converting the /cmd_vel message to motor speeds and control the Brushed DC motors, as well as for obtaining the encoder data and calculating the odometry.

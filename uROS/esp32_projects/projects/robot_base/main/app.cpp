@@ -87,7 +87,7 @@ struct timespec current_time_stamp;
 
 void Set_Inverted_PWM(ledc_mode_t _mode, ledc_channel_t _channel, float _percent_duty)
 {
-	uint32_t _duty = uint32_t((PWM_RESOLUTION - 1) * 1.0/100 * (100 - _percent_duty));
+	uint32_t _duty = uint32_t((PWM_RESOLUTION - 1) * (_percent_duty / 100.0f));
 	ledc_set_duty_and_update(_mode, _channel, _duty, 0);
 }
 void Set_Motor_Speed()
@@ -97,22 +97,22 @@ void Set_Motor_Speed()
 
 	if(_left_motor_percent_duty_cycle >= 0)
 	{ // CCW
-		Set_Inverted_PWM(PWM_HS_MODE, MOTOR1_PWM_CHANNEL, abs(_left_motor_percent_duty_cycle));
+		Set_Inverted_PWM(PWM_HS_MODE, MOTOR1_PWM_CHANNEL, fabs(_left_motor_percent_duty_cycle));
 		gpio_set_level(MOTOR1_DIRECTION_GPIO, 0);
 	}
 	else
 	{ // CW
-		Set_Inverted_PWM(PWM_HS_MODE, MOTOR1_PWM_CHANNEL, 0);
+		Set_Inverted_PWM(PWM_HS_MODE, MOTOR1_PWM_CHANNEL, fabs(_left_motor_percent_duty_cycle));
 		gpio_set_level(MOTOR1_DIRECTION_GPIO, 1);
 	}
 	if(_right_motor_percent_duty_cycle >= 0)
 	{ // CCW
-		Set_Inverted_PWM(PWM_HS_MODE, MOTOR2_PWM_CHANNEL, abs(_right_motor_percent_duty_cycle));
+		Set_Inverted_PWM(PWM_HS_MODE, MOTOR2_PWM_CHANNEL, fabs(_right_motor_percent_duty_cycle));
 		gpio_set_level(MOTOR2_DIRECTION_GPIO, 0);
 	}
 	else
 	{ // CW
-		Set_Inverted_PWM(PWM_HS_MODE, MOTOR2_PWM_CHANNEL, 0);
+		Set_Inverted_PWM(PWM_HS_MODE, MOTOR2_PWM_CHANNEL, fabs(_right_motor_percent_duty_cycle));
 		gpio_set_level(MOTOR2_DIRECTION_GPIO, 1);
 	}
 }
