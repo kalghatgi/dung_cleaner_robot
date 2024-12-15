@@ -1,3 +1,6 @@
+# v1.5
+* Corrected the function that sets the duty cycle to each motor.
+
 # v1.4
 * Improved the function that checks the wheel_velocity timeout.
 
