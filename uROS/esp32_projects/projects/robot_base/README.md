@@ -1,1 +1,31 @@
-# This node is made for driving the Brushed DC motors, collecting the MEMS data (IMU+Mag), and other functions required by the robot's base.
+## This node is made for driving the Brushed DC motors, collecting the MEMS data (IMU+Mag), and other functions required by the robot's base.
+
+# Connections:
+## Power [Motor 1 (Left)]
+* Supply: 24V [Amber] [Battery -> driver]
+* Ground: [Black] [Battery -> driver]
+* PWM: GPIO17 [Yellow] [ESP -> Driver]
+* Direction: GPIO16 [Brown] [ESP -> Driver]
+* Ground [Black] [ESP -> Driver]
+## Encoder [Motor 1 (Left)]
+* Supply: 3.3V [Red] [ESP -> Encoder]
+* Ground: [Black] [ESP -> Encoder]
+* A: GPIO36 [Green] [Encoder -> ESP]
+* B: GPIO39 [Blue] [Encoder -> ESP]
+## Power [Motor 2 (Right)]
+* Supply: 24V [Amber] [Battery -> driver]
+* Ground: [Black] [Battery -> driver]
+* PWM: GPIO26 [Yellow] [ESP -> Driver]
+* Direction: GPIO25 [Brown] [ESP -> Driver]
+* Ground [Black] [ESP -> Driver]
+## Encoder [Motor 2 (Right)]
+* Supply: 3.3V [Red] [ESP -> Encoder]
+* Ground [Black] [ESP -> Encoder]
+* A: GPIO18 [Green] [Encoder -> ESP]
+* B: GPIO19 [Blue] [Encoder -> ESP]
+## IMU
+* Supply: 3.3V [Red] [ESP -> IMU]
+* Ground: [Black] [ESP -> IMU]
+* SDA: GPIO36 [Green] [IMU <-> ESP]
+* SCL: GPIO39 [Blue] [ESP -> IMU]
+* Device's orientation: X pointing towards the front, Y towards left, Z towards the top of the robot.
