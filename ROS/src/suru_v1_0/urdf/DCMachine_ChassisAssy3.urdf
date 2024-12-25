@@ -1,0 +1,444 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="DCMachine_ChassisAssy3">
+  <!-- Define the center of the main robot chassis projected on the ground -->	
+  <link name="base_footprint"/>
+
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="-0.071042 -0.003458 0.29314"
+        rpy="0 0 0" />
+      <mass
+        value="7.4678" />
+      <inertia
+        ixx="0.60509"
+        ixy="-0.0092587"
+        ixz="0.18184"
+        iyy="0.90966"
+        iyz="0.0061174"
+        izz="0.76878" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://suru_v1_0/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79608 0.82353 0.93725 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://suru_v1_0/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint 
+    name="base_joint" 
+    type="fixed">
+    <parent 
+      link="base_footprint"/>
+    <child 
+      link="base_link" />
+    <origin 
+      xyz="0.0 0.0 0.075" 
+      rpy="0 0 3.14159"/>
+  </joint>
+  <link
+    name="Lidar_link">
+    <inertial>
+      <origin
+        xyz="4.3703E-05 3.9109E-07 -0.030142"
+        rpy="0 0 0" />
+      <mass
+        value="0.016942" />
+      <inertia
+        ixx="6.7498E-06"
+        ixy="4.1275E-10"
+        ixz="-3.3392E-09"
+        iyy="6.6963E-06"
+        iyz="-1.284E-10"
+        izz="1.0274E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://suru_v1_0/meshes/Lidar_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79608 0.82353 0.93725 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://suru_v1_0/meshes/Lidar_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Lidar_joint"
+    type="fixed">
+    <origin
+      xyz="0.57569 0.032864 0.20635"
+      rpy="0 -0.087266 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="Lidar_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="imu_link">
+    <inertial>
+      <origin
+        xyz="0 -5.3809E-19 -0.0005"
+        rpy="0 0 0" />
+      <mass
+        value="0.00019686" />
+      <inertia
+        ixx="1.6823E-09"
+        ixy="3.1487E-26"
+        ixz="2.9081E-24"
+        iyy="6.6823E-09"
+        iyz="-7.6801E-27"
+        izz="8.3318E-09" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://suru_v1_0/meshes/imu_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79608 0.82353 0.93725 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://suru_v1_0/meshes/imu_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="imu_joint"
+    type="fixed">
+    <origin
+      xyz="-0.34662 0 0.682"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="imu_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="LDWheel_link">
+    <inertial>
+      <origin
+        xyz="-6.9389E-18 1.3878E-17 -0.0275"
+        rpy="0 0 0" />
+      <mass
+        value="1.2472" />
+      <inertia
+        ixx="0.0032987"
+        ixy="-9.4868E-20"
+        ixz="-2.6982E-19"
+        iyy="0.0032987"
+        iyz="9.4165E-21"
+        izz="0.0062599" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://suru_v1_0/meshes/LDWheel_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79608 0.82353 0.93725 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://suru_v1_0/meshes/LDWheel_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="LDwheel_joint"
+    type="continuous">
+    <origin
+      xyz="0 0.305 0"
+      rpy="-1.5708 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="LDWheel_link" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      effort="0.1"
+      velocity="0.1" />
+    <dynamics
+      damping="0.1"
+      friction="0.1" />
+  </joint>
+  <link
+    name="RDwheel_link">
+    <inertial>
+      <origin
+        xyz="-6.93889390390723E-18 1.38777878078145E-17 0.0275"
+        rpy="0 0 0" />
+      <mass
+        value="1.24724011920055" />
+      <inertia
+        ixx="0.00329865472841151"
+        ixy="-2.03287907341032E-19"
+        ixz="-1.26969018217939E-22"
+        iyy="0.00329865472841151"
+        iyz="1.30592719044522E-19"
+        izz="0.00625989081903105" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://suru_v1_0/meshes/RDwheel_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.796078431372549 0.823529411764706 0.937254901960784 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://suru_v1_0/meshes/RDwheel_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RDwheel_joint"
+    type="continuous">
+    <origin
+      xyz="0 -0.305 0"
+      rpy="-1.5708 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="RDwheel_link" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      effort="0.1"
+      velocity="0.1" />
+    <dynamics
+      damping="0.1"
+      friction="0.1" />
+  </joint>
+  <link
+    name="Backcastor_link">
+    <inertial>
+      <origin
+        xyz="5.55111512312578E-17 -1.04083408558608E-17 0.02"
+        rpy="0 0 0" />
+      <mass
+        value="0.156204027643944" />
+      <inertia
+        ixx="6.94087648783948E-05"
+        ixy="-1.68438824387141E-08"
+        ixz="5.29770780684553E-22"
+        iyy="6.94519067047098E-05"
+        iyz="-6.67976189330212E-21"
+        izz="0.000100612250150483" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://suru_v1_0/meshes/Backcastor_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.796078431372549 0.823529411764706 0.937254901960784 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://suru_v1_0/meshes/Backcastor_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="backcastor_joint"
+    type="fixed">
+    <origin
+      xyz="-0.443 -0.02 -0.0925"
+      rpy="-1.5708 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="Backcastor_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="FRcastor_link">
+    <inertial>
+      <origin
+        xyz="0 0 0.0125"
+        rpy="0 0 0" />
+      <mass
+        value="0.0226494176183697" />
+      <inertia
+        ixx="2.86010634001758E-06"
+        ixy="5.78496627265425E-10"
+        ixz="8.66066143272748E-22"
+        iyy="2.86648047151363E-06"
+        iyz="-2.83027272713431E-23"
+        izz="3.4875920313739E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://suru_v1_0/meshes/FRcastor_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.796078431372549 0.823529411764706 0.937254901960784 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://suru_v1_0/meshes/FRcastor_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="FRcastor_joint"
+    type="fixed">
+    <origin
+      xyz="0.3075 -0.2195 -0.058"
+      rpy="-1.5708 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="FRcastor_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="FLCastor_Link">
+    <inertial>
+      <origin
+        xyz="5.55111512312578E-17 -6.93889390390723E-18 -0.0125"
+        rpy="0 0 0" />
+      <mass
+        value="0.0226494176183697" />
+      <inertia
+        ixx="2.86281326249822E-06"
+        ixy="-3.20335899843479E-09"
+        ixz="1.25996937305907E-22"
+        iyy="2.86377354903303E-06"
+        iyz="-3.22113772864065E-23"
+        izz="3.48759203137393E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://suru_v1_0/meshes/FLCastor_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.796078431372549 0.823529411764706 0.937254901960784 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://suru_v1_0/meshes/FLCastor_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="FLcastor_joint"
+    type="fixed">
+    <origin
+      xyz="0.3075 0.2195 -0.058"
+      rpy="-1.5708 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="FLCastor_Link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+</robot>

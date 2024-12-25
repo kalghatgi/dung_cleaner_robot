@@ -17,7 +17,7 @@ def generate_launch_description():
   lidar_launch_dir = os.path.join(lidar_package_dir, 'launch')
   robot_bringup_dir = get_package_share_directory('suru_v1_0')
   robot_launch_dir = os.path.join(robot_bringup_dir, 'launch')
-  urdf_file_path = os.path.join(robot_bringup_dir, 'urdf', 'DCMachine_ChassisAssy2.urdf')
+  urdf_file_path = os.path.join(robot_bringup_dir, 'urdf', 'DCMachine_ChassisAssy3.urdf')
   map_file_path = os.path.join(robot_bringup_dir, 'maps', 'smalltown_world.yaml')
   params_file_path = os.path.join(robot_bringup_dir, 'params', 'robot_navigation_parameters.yaml') # work on this
   rviz_file_path = os.path.join(robot_bringup_dir, 'rviz', 'urdf_config.rviz')
@@ -54,7 +54,7 @@ def generate_launch_description():
  
   declare_slam_cmd = DeclareLaunchArgument(
     name='slam',
-    default_value='False',
+    default_value='True',
     description='Whether to run SLAM')
 
   declare_map_yaml_cmd = DeclareLaunchArgument(
@@ -105,7 +105,8 @@ def generate_launch_description():
     default_value='True',
     description='Whether to start RVIZ')
 
-  # Specify the actions    
+  # Specify the actions
+  # Subscribe to the joint states of the robot, and publish the 3D pose of each link.
   start_robot_state_publisher_ROS_node = Node(
     condition=IfCondition(use_robot_state_pub),
     package='robot_state_publisher',
@@ -113,9 +114,23 @@ def generate_launch_description():
     name='robot_state_publisher',
     namespace=namespace,
     output='screen',
-    parameters=[{'use_sim_time': use_sim_time}],
-    remappings=remappings,
-    arguments=[urdf_file_path])
+    parameters=[{
+      'use_sim_time': use_sim_time,
+      'robot_description': launch_ros.parameter_descriptions.ParameterValue(
+        value=launch.substitutions.Command(['xacro ', urdf_file_path]),
+        value_type=str
+      )
+    }],
+    remappings=remappings)
+    
+  start_joint_state_publisher_ROS_node = Node(
+    condition=IfCondition(use_robot_state_pub),
+    package='joint_state_publisher_gui',
+    executable='joint_state_publisher_gui',
+    name='joint_state_publisher_gui',
+    namespace=namespace,
+    output='screen',
+    parameters=[{'use_sim_time': use_sim_time}])
 
   start_robot_base_ROS_node = Node(
     package='robot_base',
@@ -187,6 +202,7 @@ def generate_launch_description():
   # ld.add_action(start_madgwick_filter_node_cmd) # or this
   ld.add_action(start_lidar_ROS_node)
   ld.add_action(start_robot_state_publisher_ROS_node)
+  ld.add_action(start_joint_state_publisher_ROS_node)
   ld.add_action(start_nav2_bringup_ROS_node)
   ld.add_action(start_robot_ekf_cmd)
   ld.add_action(start_robot_base_uROS_node)
