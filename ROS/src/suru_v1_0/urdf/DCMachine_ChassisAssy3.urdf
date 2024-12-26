@@ -206,7 +206,7 @@
   </link>
   <joint
     name="LDwheel_joint"
-    type="continuous">
+    type="fixed"> <!--continuous-->
     <origin
       xyz="0 0.305 0"
       rpy="-1.5708 0 0" />
@@ -265,7 +265,7 @@
   </link>
   <joint
     name="RDwheel_joint"
-    type="continuous">
+    type="fixed"> <!--continuous-->
     <origin
       xyz="0 -0.305 0"
       rpy="-1.5708 0 0" />
