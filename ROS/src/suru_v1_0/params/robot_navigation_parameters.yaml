@@ -364,7 +364,7 @@ velocity_smoother:
     deadband_velocity: [0.0, 0.0, 0.0]
     velocity_timeout: 1.0
 
-slam_toolbox:
+slam_toolbox: # reference: mapper_params_online_async.yaml
   ros__parameters:
 
     # Plugin params
@@ -380,8 +380,10 @@ slam_toolbox:
     map_frame: map
     base_frame: base_footprint
     scan_topic: /scan
-    mode: mapping
-    # mode: localization
+    use_map_saver: true
+    mode: mapping # else localization
+    publish_tf: true
+    tf_broadcast: true
 
     # if you'd like to immediately start continuing a map at a given pose
     # or at the dock, but they are mutually exclusive, if pose is given
@@ -395,6 +397,7 @@ slam_toolbox:
     transform_publish_period: 0.02 #if 0 never publishes odometry
     map_update_interval: 5.0
     resolution: 0.05
+    min_laser_range: 0.0 #for rastering images
     max_laser_range: 20.0 #for rastering images
     minimum_time_interval: 0.5
     transform_timeout: 0.2

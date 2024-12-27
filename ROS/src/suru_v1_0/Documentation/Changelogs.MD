@@ -1,3 +1,6 @@
+# v1.4
+* Modified the slam_toolbox parameters for enabling the map creation process.
+
 # v1.3
 * Changed the lidar frame_id to Lidar_link, as mentioned in the URDF, by adding an argument to the lidar_launch command inside suru_slam_launch.py.
 * Changed the wheel joint inside URDF from continuous to fixed, for parsing all the joints of the urdf correctly.
