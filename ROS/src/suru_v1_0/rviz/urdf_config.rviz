@@ -5,11 +5,18 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
-        - /Status1
-        - /TF1
-        - /LaserScan1
+        - /Map1
       Splitter Ratio: 0.5
-    Tree Height: 987
+    Tree Height: 507
+  - Class: nav2_rviz_plugins/Navigation 2
+    Name: Navigation 2
+  - Class: slam_toolbox::SlamToolboxPlugin
+    Name: SlamToolboxPlugin
+  - Class: rviz_common/Views
+    Expanded:
+      - /Current View1
+    Name: Views
+    Splitter Ratio: 0.5
 Visualization Manager:
   Class: ""
   Displays:
@@ -112,13 +119,19 @@ Visualization Manager:
           Value: true
         FRcastor_link:
           Value: true
+        LDWheel_link:
+          Value: true
         Lidar_link:
+          Value: true
+        RDwheel_link:
           Value: true
         base_footprint:
           Value: true
         base_link:
           Value: true
         imu_link:
+          Value: true
+        map:
           Value: true
         odom:
           Value: true
@@ -128,19 +141,24 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        odom:
-          base_footprint:
-            base_link:
-              Backcastor_link:
-                {}
-              FLCastor_Link:
-                {}
-              FRcastor_link:
-                {}
-              Lidar_link:
-                {}
-              imu_link:
-                {}
+        map:
+          odom:
+            base_footprint:
+              base_link:
+                Backcastor_link:
+                  {}
+                FLCastor_Link:
+                  {}
+                FRcastor_link:
+                  {}
+                LDWheel_link:
+                  {}
+                Lidar_link:
+                  {}
+                RDwheel_link:
+                  {}
+                imu_link:
+                  {}
       Update Interval: 0
       Value: true
     - Alpha: 1
@@ -153,16 +171,16 @@ Visualization Manager:
       Channel Name: intensity
       Class: rviz_default_plugins/LaserScan
       Color: 255; 255; 255
-      Color Transformer: ""
+      Color Transformer: Intensity
       Decay Time: 0
       Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 4096
+      Max Intensity: 47
       Min Color: 0; 0; 0
       Min Intensity: 0
       Name: LaserScan
-      Position Transformer: ""
+      Position Transformer: XYZ
       Selectable: true
       Size (Pixels): 3
       Size (m): 0.009999999776482582
@@ -177,10 +195,31 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
+    - Alpha: 0.699999988079071
+      Class: rviz_default_plugins/Map
+      Color Scheme: map
+      Draw Behind: true
+      Enabled: true
+      Name: Map
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /map
+      Update Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /map_updates
+      Use Timestamp: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: base_link
+    Fixed Frame: map
     Frame Rate: 30
   Name: root
   Tools:
@@ -216,34 +255,35 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Class: rviz_default_plugins/Orbit
-      Distance: 10
+      Angle: 0
+      Class: rviz_default_plugins/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
-      Focal Point:
-        X: 0
-        Y: 0
-        Z: 0
-      Focal Shape Fixed Size: true
-      Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.7853981852531433
+      Scale: 75.3828125
       Target Frame: <Fixed Frame>
-      Value: Orbit (rviz)
-      Yaw: 0.7853981852531433
+      Value: TopDownOrtho (rviz_default_plugins)
+      X: -1.8310067653656006
+      Y: 1.3905112743377686
     Saved: ~
 Window Geometry:
   Displays:
+    collapsed: true
+  Height: 736
+  Hide Left Dock: true
+  Hide Right Dock: true
+  Navigation 2:
     collapsed: false
-  Height: 1216
-  Hide Left Dock: false
-  Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd00000001000000000000015600000466fc0200000001fb000000100044006900730070006c006100790073010000003d00000466000000c900ffffff000002a40000046600000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
-  Width: 1024
-  X: 0
+  QMainWindow State: 000000ff00000000fd00000002000000000000021700000286fc0200000003fb000000100044006900730070006c006100790073000000003d00000286000000c900fffffffb00000018004e0061007600690067006100740069006f006e00200032000000010c000001390000013900fffffffb000000220053006c0061006d0054006f006f006c0062006f00780050006c007500670069006e000000010c000001850000018500ffffff00000001000001cb00000286fc0200000001fb0000000a00560069006500770073000000003d00000286000000a400ffffff000004d20000028600000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  SlamToolboxPlugin:
+    collapsed: false
+  Views:
+    collapsed: true
+  Width: 1234
+  X: 46
   Y: 27

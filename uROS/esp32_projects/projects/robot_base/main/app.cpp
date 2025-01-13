@@ -147,9 +147,9 @@ void ROS2_imu_raw_Publisher_Callback(rcl_timer_t *timer, int64_t last_call_time)
 		imu_raw.header.stamp.sec = ts.tv_sec;
 		imu_raw.header.stamp.nanosec = ts.tv_nsec;
 
-		imu_raw.linear_acceleration.x = accel_G.x * 9.80665; // send in meters/sec^2
-		imu_raw.linear_acceleration.y = accel_G.y * 9.80665;
-		imu_raw.linear_acceleration.z = accel_G.z * 9.80665;
+		imu_raw.linear_acceleration.x = -1.0f * accel_G.x * 9.80665f; // send in meters/sec^2
+		imu_raw.linear_acceleration.y = accel_G.y * 9.80665f;
+		imu_raw.linear_acceleration.z = accel_G.z * 9.80665f;
 		imu_raw.angular_velocity.x = gyro_DPS.x * (M_PI/180); // send in radians/second
 		imu_raw.angular_velocity.y = gyro_DPS.y * (M_PI/180);
 		imu_raw.angular_velocity.z = gyro_DPS.z * (M_PI/180);

@@ -1,3 +1,6 @@
+# v1.6
+* Converted the imu data from NWU to ENU frame as required by the robot_localisation_node (ekf). [Reference: https://answers.ros.org/question/378777/#:~:text=which%20specifies%20the-,ENU%20frame,-.%20That%20means%20you]
+
 # v1.5
 * Corrected the function that sets the duty cycle to each motor.
 

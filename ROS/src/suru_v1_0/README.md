@@ -1,5 +1,5 @@
 # ROS:
-sudo apt install ros-humble-desktop ros-humble-navigation2 ros-humble-nav2-bringup ros-humble-joint-state-publisher ros-humble-robot-localization ros-humble-xacro ros-humble-imu-complementary-filter ros-humble-imu-filter-madgwick ros-humble-rmw-cyclonedds-cpp
+sudo apt install ros-humble-desktop ros-humble-navigation2 ros-humble-nav2-bringup ros-humble-joint-state-publisher ros-humble-robot-localization ros-humble-xacro ros-humble-imu-complementary-filter ros-humble-imu-filter-madgwick ros-humble-rmw-cyclonedds-cpp ros-humble-laser-filters 
 
 # microROS:
 source /opt/ros/humble/setup.bash
