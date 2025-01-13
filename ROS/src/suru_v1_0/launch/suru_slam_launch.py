@@ -20,7 +20,7 @@ def generate_launch_description():
   laser_filters_dir = get_package_share_directory('laser_filters')
   laser_filters_launch_dir = os.path.join(laser_filters_dir, 'examples')
   urdf_file_path = os.path.join(robot_bringup_dir, 'urdf', 'DCMachine_ChassisAssy3.urdf')
-  map_file_path = os.path.join(robot_bringup_dir, 'maps', 'smalltown_world.yaml')
+  map_file_path = os.path.join(robot_bringup_dir, 'maps', 'terrace_map.yaml')
   params_file_path = os.path.join(robot_bringup_dir, 'params', 'robot_navigation_parameters.yaml')
   laser_filter_params_file_path = os.path.join(robot_bringup_dir, 'params', 'laser_filter.yaml')
   rviz_file_path = os.path.join(robot_bringup_dir, 'rviz', 'urdf_config.rviz')

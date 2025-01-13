@@ -36,11 +36,9 @@ if(BUILD_TESTING)
       launch
       maps
       meshes
-      models
       params
       rviz
       urdf
-      worlds
     DESTINATION share/${PROJECT_NAME}
   )
 endif()
