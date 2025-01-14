@@ -4,7 +4,7 @@ import launch
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
-from launch.conditions import IfCondition, UnlessCondition
+from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
@@ -23,7 +23,6 @@ def generate_launch_description():
   ekf_file_path = os.path.join(robot_bringup_dir, 'config', 'ekf_wheel_imu.yaml')
 
   # Create the launch configuration variables
-  slam = LaunchConfiguration('slam')
   namespace = LaunchConfiguration('namespace')
   use_namespace = LaunchConfiguration('use_namespace')
   use_robot_state_pub = LaunchConfiguration('use_robot_state_pub')
@@ -49,12 +48,6 @@ def generate_launch_description():
     name='use_namespace',
     default_value='False',
     description='Whether to apply a namespace to the navigation stack'
-  )
-
-  declare_slam_cmd = DeclareLaunchArgument(
-    name='slam',
-    default_value='True',
-    description='Whether to run SLAM'
   )
 
   declare_map_yaml_cmd = DeclareLaunchArgument(
@@ -189,7 +182,7 @@ def generate_launch_description():
     launch_arguments={
       'namespace': namespace,
       'use_namespace': use_namespace,
-      'slam': slam,
+      'slam': 'True',
       'map': map_yaml_file,
       'use_sim_time': use_sim_time,
       'params_file': params_file,
@@ -203,7 +196,6 @@ def generate_launch_description():
   # Declare the launch options
   ld.add_action(declare_namespace_cmd)
   ld.add_action(declare_use_namespace_cmd)
-  ld.add_action(declare_slam_cmd)
   ld.add_action(declare_map_yaml_cmd)
   ld.add_action(declare_use_sim_time_cmd)
   ld.add_action(declare_params_file_cmd)
