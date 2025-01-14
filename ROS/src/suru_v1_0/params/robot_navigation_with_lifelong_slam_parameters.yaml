@@ -29,7 +29,6 @@ amcl:
     robot_model_type: "nav2_amcl::DifferentialMotionModel"
     save_pose_rate: 0.5
     sigma_hit: 0.2
-    publish_tf: true
     tf_broadcast: true
     transform_tolerance: 1.0
     update_min_a: 0.2
@@ -40,14 +39,6 @@ amcl:
     z_short: 0.05
     scan_topic: scan
 
-amcl_map_client:
-  ros__parameters:
-    use_sim_time: False
-
-amcl_rclcpp_node:
-  ros__parameters:
-    use_sim_time: False
-
 bt_navigator:
   ros__parameters:
     use_sim_time: False
@@ -56,14 +47,11 @@ bt_navigator:
     odom_topic: /odometry/filtered
     bt_loop_duration: 10
     default_server_timeout: 20
-    enable_groot_monitoring: True
-    groot_zmq_publisher_port: 1666
-    groot_zmq_server_port: 1667
+    wait_for_service_timeout: 1000
     # 'default_nav_through_poses_bt_xml' and 'default_nav_to_pose_bt_xml' are use defaults:
     # nav2_bt_navigator/navigate_to_pose_w_replanning_and_recovery.xml
     # nav2_bt_navigator/navigate_through_poses_w_replanning_and_recovery.xml
     # They can be set here or via a RewrittenYaml remap from a parent launch file to Nav2.
-    # default_bt_xml_filename: "navigate_through_poses_w_replanning_and_recovery.xml"
     plugin_lib_names:
       - nav2_compute_path_to_pose_action_bt_node
       - nav2_compute_path_through_poses_action_bt_node
@@ -155,20 +143,20 @@ controller_server:
       debug_trajectory_details: True
       min_vel_x: 0.0
       min_vel_y: 0.0
-      max_vel_x: 0.5
+      max_vel_x: 0.26
       max_vel_y: 0.0
-      max_vel_theta: 0.6
+      max_vel_theta: 1.0
       min_speed_xy: 0.0
-      max_speed_xy: 0.6
+      max_speed_xy: 0.26
       min_speed_theta: 0.0
       # Add high threshold velocity for turtlebot 3 issue.
       # https://github.com/ROBOTIS-GIT/turtlebot3_simulations/issues/75
-      acc_lim_x: 0.25
+      acc_lim_x: 2.5
       acc_lim_y: 0.0
-      acc_lim_theta: 0.3
-      decel_lim_x: -0.25
+      acc_lim_theta: 3.2
+      decel_lim_x: -2.5
       decel_lim_y: 0.0
-      decel_lim_theta: -0.3
+      decel_lim_theta: -3.2
       vx_samples: 20
       vy_samples: 5
       vtheta_samples: 20
@@ -201,15 +189,15 @@ local_costmap:
       robot_base_frame: base_link
       use_sim_time: False
       rolling_window: true
-      width: 5 # size of the obstacle window
-      height: 5
+      width: 3
+      height: 3
       resolution: 0.05
-      robot_radius: 0.7 # that green circle on the map indicating the robot boundary
+      robot_radius: 0.22
       plugins: ["voxel_layer", "inflation_layer"]
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
-        inflation_radius: 0.75
+        inflation_radius: 0.55
       voxel_layer:
         plugin: "nav2_costmap_2d::VoxelLayer"
         enabled: True
@@ -234,12 +222,6 @@ local_costmap:
         plugin: "nav2_costmap_2d::StaticLayer"
         map_subscribe_transient_local: True
       always_send_full_costmap: True
-  local_costmap_client:
-    ros__parameters:
-      use_sim_time: False
-  local_costmap_rclcpp_node:
-    ros__parameters:
-      use_sim_time: False
 
 global_costmap:
   global_costmap:
@@ -248,7 +230,7 @@ global_costmap:
       publish_frequency: 1.0
       global_frame: map
       robot_base_frame: base_link
-      use_sim_time: False
+      use_sim_time: True
       robot_radius: 0.22
       resolution: 0.05
       track_unknown_space: true
@@ -263,9 +245,9 @@ global_costmap:
           clearing: True
           marking: True
           data_type: "LaserScan"
-          raytrace_max_range: 12.0 # to create obstacle map from laser scan
+          raytrace_max_range: 3.0
           raytrace_min_range: 0.0
-          obstacle_max_range: 12.0
+          obstacle_max_range: 2.5
           obstacle_min_range: 0.0
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
@@ -273,14 +255,15 @@ global_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
-        inflation_radius: 0.50 # no contact zone around obstacles to avoid collision
+        inflation_radius: 0.55
       always_send_full_costmap: True
 
 map_server:
   ros__parameters:
     use_sim_time: False
     # Overridden in launch by the "map" launch configuration or provided default value.
-    yaml_filename: "turtlebot3_world.yaml"
+    # To use in yaml, remove the default "map" value in the tb3_simulation_launch.py file & provide full path to map below.
+    yaml_filename: ""
 
 map_saver:
   ros__parameters:
@@ -344,7 +327,7 @@ waypoint_follower:
   ros__parameters:
     loop_rate: 20
     stop_on_failure: false
-    waypoint_task_executor_plugin: "wait_at_waypoint"   
+    waypoint_task_executor_plugin: "wait_at_waypoint"
     wait_at_waypoint:
       plugin: "nav2_waypoint_follower::WaitAtWaypoint"
       enabled: True

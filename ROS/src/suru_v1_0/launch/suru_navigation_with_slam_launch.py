@@ -20,7 +20,7 @@ def generate_launch_description():
   map_file_path = os.path.join(robot_bringup_dir, 'maps', 'terrace_map.yaml')
   params_file_path = os.path.join(robot_bringup_dir, 'params', 'robot_navigation_with_lifelong_slam_parameters.yaml')
   laser_filter_params_file_path = os.path.join(robot_bringup_dir, 'params', 'laser_filter.yaml')
-  rviz_file_path = os.path.join(robot_bringup_dir, 'rviz', 'rviz_config.rviz')
+  rviz_file_path = os.path.join(robot_bringup_dir, 'rviz', 'nav2_default_view.rviz')
   ekf_file_path = os.path.join(robot_bringup_dir, 'config', 'ekf_wheel_imu.yaml')
 
   # Create the launch configuration variables
@@ -65,7 +65,7 @@ def generate_launch_description():
 
   declare_use_sim_time_cmd = DeclareLaunchArgument(
     name='use_sim_time',
-    default_value='True',
+    default_value='False',
     description='Use simulation (Gazebo) clock if true'
   )
 
