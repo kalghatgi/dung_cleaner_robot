@@ -464,9 +464,9 @@ public:
                 }
             }
 
-            start_scan_time = this->now();
+            start_scan_time = this->get_clock()->now();
             op_result = drv->grabScanDataHq(nodes, count);
-            end_scan_time = this->now();
+            end_scan_time = this->get_clock()->now();
             scan_duration = (end_scan_time - start_scan_time).seconds();
 
             if (op_result == SL_RESULT_OK) {
