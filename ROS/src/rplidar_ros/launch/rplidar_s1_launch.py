@@ -15,6 +15,7 @@ def generate_launch_description():
     serial_port = LaunchConfiguration('serial_port', default='/dev/ttyUSB0')
     serial_baudrate = LaunchConfiguration('serial_baudrate', default='256000') 
     frame_id = LaunchConfiguration('frame_id', default='laser')
+    topic_name = LaunchConfiguration('topic_name', default='scan')
     inverted = LaunchConfiguration('inverted', default='false')
     angle_compensate = LaunchConfiguration('angle_compensate', default='true')
 
@@ -38,6 +39,11 @@ def generate_launch_description():
             'frame_id',
             default_value=frame_id,
             description='Specifying frame_id of lidar'),
+        
+        DeclareLaunchArgument(
+            'topic_name',
+            default_value=topic_name,
+            description='Specifying topic of lidar'),
 
         DeclareLaunchArgument(
             'inverted',
@@ -57,6 +63,7 @@ def generate_launch_description():
                          'serial_port': serial_port,
                          'serial_baudrate': serial_baudrate,
                          'frame_id': frame_id,
+                         'topic_name': topic_name,
                          'inverted': inverted,
                          'angle_compensate': angle_compensate}],
             output='screen'),

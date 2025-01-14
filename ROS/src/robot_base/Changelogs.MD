@@ -1,3 +1,7 @@
+# v1.5
+* Corrected the wheel radius and encoder specifications.
+* Made necessary corrections to improve the wheel odometry calculations.
+
 # v1.4
 * corrected the watchdog function.
 

@@ -68,12 +68,12 @@ class robot_base_node : public rclcpp::Node
     }
 
   private:
-    const double WHEEL_RADIUS = 0.200; // meters
+    const double WHEEL_RADIUS = 0.100; // meters
     const double WHEEL_SEPERATION = 0.555; // meters
-    const uint16_t ENCODER_PPR = 2000; // Reference: https://robokits.co.in/motors/rhino-planetary-geared-24v-motor/100w-24v-encoder-servo-motor/rhino-servo-24v-60rpm-100w-ig52-extra-heavy-duty-planetary-encoder-servo-motor-160kgcm#:~:text=Quad%20Encoder%20requires-,2000,-Pulses%20Per%20Revolution
-    const uint16_t MOTOR_GEAR_RATIO = 47; // Reference: https://robokits.co.in/motors/rhino-planetary-geared-24v-motor/100w-24v-encoder-servo-motor/rhino-servo-24v-60rpm-100w-ig52-extra-heavy-duty-planetary-encoder-servo-motor-160kgcm#:~:text=ratio%20is%201%20%3A-,47,-the%20Optical%20encoder
-    const uint16_t ENCODER_TICKS_PER_WHEEL_ROTATION = ENCODER_PPR * MOTOR_GEAR_RATIO;
-    const double WHEEL_METERS_PER_TICK = (2 * M_PI * WHEEL_RADIUS) / (ENCODER_PPR * MOTOR_GEAR_RATIO); // meters
+    const uint16_t ENCODER_PPR = (2000 / 4); // Reference: https://robokits.co.in/motors/rhino-planetary-geared-24v-motor/100w-24v-encoder-servo-motor/rhino-servo-24v-60rpm-100w-ig52-extra-heavy-duty-planetary-encoder-servo-motor-160kgcm#:~:text=Quad%20Encoder%20requires-,2000,-Pulses%20Per%20Revolution
+    const uint16_t MOTOR_GEAR_RATIO = 46.566; // Reference: https://robokits.co.in/motors/rhino-planetary-geared-24v-motor/100w-24v-encoder-servo-motor/rhino-servo-24v-60rpm-100w-ig52-extra-heavy-duty-planetary-encoder-servo-motor-160kgcm#:~:text=ratio%20is%201%20%3A-,47,-the%20Optical%20encoder
+    const uint32_t ENCODER_TICKS_PER_WHEEL_ROTATION = (ENCODER_PPR * MOTOR_GEAR_RATIO);
+    const double WHEEL_METERS_PER_TICK = (2 * M_PI * WHEEL_RADIUS) / ENCODER_TICKS_PER_WHEEL_ROTATION; // meters
     int64_t NEW_encoder_value_LEFT_wheel = 0, NEW_encoder_value_RIGHT_wheel = 0;
     int64_t PREVIOUS_encoder_value_LEFT_wheel = 0, PREVIOUS_encoder_value_RIGHT_wheel = 0;
     double NEW_command_linear_X = 0, NEW_command_angular_Z = 0;
@@ -91,10 +91,11 @@ class robot_base_node : public rclcpp::Node
 
     void encoder_raw_callback(std_msgs::msg::Int64MultiArray::SharedPtr encoder_raw_msg)
     {
+      wheel_odom.setWheelParams(WHEEL_SEPERATION, WHEEL_RADIUS, WHEEL_RADIUS);
       rclcpp::Time _now = this->get_clock()->now();
       double _dt = _now.seconds() - _encoders_previous_time.seconds();
       _encoders_previous_time = _now;
-      // _dt = 0.05; // manual override on basis of known rate (this is better because the accuracy of time as calculated above is far from expected value)
+      _dt = 0.05; // manual override on basis of known rate (this is better because the accuracy of time as calculated above is far from expected value)
 
       NEW_encoder_value_LEFT_wheel = encoder_raw_msg->data[0];
       NEW_encoder_value_RIGHT_wheel = encoder_raw_msg->data[1];
@@ -107,9 +108,9 @@ class robot_base_node : public rclcpp::Node
       // RCLCPP_INFO(this->get_logger(), "encoder_raw_callback: %ld %ld", NEW_encoder_value_LEFT_wheel, NEW_encoder_value_RIGHT_wheel);
 
       CURRENT_velocity_LEFT_wheel = -(NEW_encoder_value_LEFT_wheel - PREVIOUS_encoder_value_LEFT_wheel) * WHEEL_METERS_PER_TICK / _dt; // meters per second
-      CURRENT_velocity_RIGHT_wheel = -(NEW_encoder_value_RIGHT_wheel - PREVIOUS_encoder_value_RIGHT_wheel) * WHEEL_METERS_PER_TICK / _dt;
+      CURRENT_velocity_RIGHT_wheel = (NEW_encoder_value_RIGHT_wheel - PREVIOUS_encoder_value_RIGHT_wheel) * WHEEL_METERS_PER_TICK / _dt;
       // wheel_odom.updateFromVelocity(CURRENT_velocity_LEFT_wheel, CURRENT_velocity_RIGHT_wheel, _now);
-      wheel_odom.updateFromVelocity(CURRENT_velocity_LEFT_wheel/20, -CURRENT_velocity_RIGHT_wheel/20, _dt);
+      wheel_odom.updateFromVelocity(CURRENT_velocity_LEFT_wheel * _dt, CURRENT_velocity_RIGHT_wheel * _dt, _dt);
 
       PREVIOUS_encoder_value_LEFT_wheel = NEW_encoder_value_LEFT_wheel;
       PREVIOUS_encoder_value_RIGHT_wheel = NEW_encoder_value_RIGHT_wheel;
