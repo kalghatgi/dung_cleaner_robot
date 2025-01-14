@@ -19,7 +19,7 @@ def generate_launch_description():
   map_file_path = os.path.join(robot_bringup_dir, 'maps', 'terrace_map.yaml')
   params_file_path = os.path.join(robot_bringup_dir, 'params', 'robot_slam_parameters.yaml')
   laser_filter_params_file_path = os.path.join(robot_bringup_dir, 'params', 'laser_filter.yaml')
-  rviz_file_path = os.path.join(robot_bringup_dir, 'rviz', 'urdf_config.rviz')
+  rviz_file_path = os.path.join(robot_bringup_dir, 'rviz', 'rviz_config.rviz')
   ekf_file_path = os.path.join(robot_bringup_dir, 'config', 'ekf_wheel_imu.yaml')
 
   # Create the launch configuration variables

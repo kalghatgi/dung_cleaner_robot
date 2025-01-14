@@ -19,7 +19,7 @@ def generate_launch_description():
   map_file_path = os.path.join(robot_bringup_dir, 'maps', 'terrace_map.yaml')
   params_file_path = os.path.join(robot_bringup_dir, 'params', 'robot_navigation_with_lifelong_slam_parameters.yaml')
   laser_filter_params_file_path = os.path.join(robot_bringup_dir, 'params', 'laser_filter.yaml')
-  rviz_file_path = os.path.join(robot_bringup_dir, 'rviz', 'urdf_config.rviz')
+  rviz_file_path = os.path.join(robot_bringup_dir, 'rviz', 'rviz_config.rviz')
   ekf_file_path = os.path.join(robot_bringup_dir, 'config', 'ekf_wheel_imu.yaml')
 
   # Create the launch configuration variables
@@ -188,6 +188,14 @@ def generate_launch_description():
     }.items()
   )
 
+  start_map_to_odom_transform_publisher_ROS_node = Node(
+    package='tf2_ros',
+    executable='static_transform_publisher',
+    name='map_to_odom_tf_publisher',
+    arguments=['0', '0', '0', '0', '0', '0', '1', 'map', 'odom'],
+    output='screen',
+  )
+
   # Create the launch description and populate
   ld = LaunchDescription()
 
@@ -212,6 +220,7 @@ def generate_launch_description():
   ld.add_action(start_robot_ekf_cmd)
   ld.add_action(start_complementary_filter_ROS_node)
   ld.add_action(start_robot_state_publisher_ROS_node)
+  ld.add_action(start_map_to_odom_transform_publisher_ROS_node)
   ld.add_action(start_nav2_bringup_ROS_node)
 
   return ld
