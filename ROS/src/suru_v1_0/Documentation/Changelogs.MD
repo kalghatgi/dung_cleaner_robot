@@ -1,3 +1,7 @@
+# v1.5
+* Cleanup of launch files and directories by removing the unused contents.
+* Added a params and launch file for navigation with lifelong SLAM.
+
 # v1.4
 * Modified the slam_toolbox parameters for enabling the map creation process.
 

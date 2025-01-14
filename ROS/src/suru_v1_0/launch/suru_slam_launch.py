@@ -12,21 +12,15 @@ from launch_ros.actions import Node
 def generate_launch_description():
   # Get all paths
   nav2_bringup_dir = get_package_share_directory('nav2_bringup')
-  nav2_launch_dir = os.path.join(nav2_bringup_dir, 'launch')
   lidar_package_dir = get_package_share_directory('rplidar_ros')
-  lidar_launch_dir = os.path.join(lidar_package_dir, 'launch')
   robot_bringup_dir = get_package_share_directory('suru_v1_0')
-  robot_launch_dir = os.path.join(robot_bringup_dir, 'launch')
   laser_filters_dir = get_package_share_directory('laser_filters')
-  laser_filters_launch_dir = os.path.join(laser_filters_dir, 'examples')
   urdf_file_path = os.path.join(robot_bringup_dir, 'urdf', 'DCMachine_ChassisAssy3.urdf')
   map_file_path = os.path.join(robot_bringup_dir, 'maps', 'terrace_map.yaml')
-  params_file_path = os.path.join(robot_bringup_dir, 'params', 'robot_navigation_parameters.yaml')
+  params_file_path = os.path.join(robot_bringup_dir, 'params', 'robot_slam_parameters.yaml')
   laser_filter_params_file_path = os.path.join(robot_bringup_dir, 'params', 'laser_filter.yaml')
   rviz_file_path = os.path.join(robot_bringup_dir, 'rviz', 'urdf_config.rviz')
-  ekf_file_path = os.path.join(robot_bringup_dir, 'config/ekf_wheel_imu.yaml')
-  madgwick_filter_dir = get_package_share_directory('imu_filter_madgwick')
-  madgwick_filter_config = os.path.join(madgwick_filter_dir, 'config', 'imu_filter.yaml')
+  ekf_file_path = os.path.join(robot_bringup_dir, 'config', 'ekf_wheel_imu.yaml')
 
   # Create the launch configuration variables
   slam = LaunchConfiguration('slam')
@@ -37,7 +31,6 @@ def generate_launch_description():
   use_sim_time = LaunchConfiguration('use_sim_time')
   params_file = LaunchConfiguration('params_file')
   autostart = LaunchConfiguration('autostart')
-  laser_filter_params_file = LaunchConfiguration('laser_filter_params_file')
 
   # Launch configuration variables specific to simulation
   rviz_config_file = LaunchConfiguration('rviz_config_file')
@@ -146,31 +139,6 @@ def generate_launch_description():
     remappings=remappings
   )
 
-  start_joint_state_publisher_ROS_node = Node(
-    condition=IfCondition(use_robot_state_pub),
-    package='joint_state_publisher',
-    executable='joint_state_publisher',
-    name='joint_state_publisher',
-    namespace=namespace,
-    output='screen',
-    parameters=[{
-      'use_sim_time': use_sim_time,
-      'robot_description': launch_ros.parameter_descriptions.ParameterValue(
-        value=launch.substitutions.Command(['xacro ', urdf_file_path]),
-        value_type=str
-      )
-    }]
-  )
-
-  start_joint_state_publisher_gui_ROS_node = Node(
-    condition=UnlessCondition(use_robot_state_pub),
-    package='joint_state_publisher_gui',
-    executable='joint_state_publisher_gui',
-    name='joint_state_publisher_gui',
-    namespace=namespace,
-    output='screen',
-    parameters=[{'use_sim_time': use_sim_time}])
-
   start_robot_base_ROS_node = Node(
     package='robot_base',
     executable='robot_base_node',
@@ -194,25 +162,12 @@ def generate_launch_description():
     ]
   )
 
-  start_madgwick_filter_ROS_node = Node(
-    package='imu_filter_madgwick',
-    executable='imu_filter_madgwick_node',
-    parameters=[madgwick_filter_config])
-
-  start_laser_filter_ROS_node = Node(
-    package='laser_filters',
-    executable='scan_to_scan_filter_chain',
-    name='laser_filter_node',
-    parameters=[laser_filter_params_file_path],
-    output='screen'
-  )
-
-  start_laser_filter_python_node = IncludeLaunchDescription(
-    PythonLaunchDescriptionSource(os.path.join(laser_filters_launch_dir, 'angular_filter_example.launch.py'))
+  start_laser_filter_ROS_node = IncludeLaunchDescription(
+    PythonLaunchDescriptionSource(os.path.join(laser_filters_dir, 'examples', 'angular_filter_example.launch.py'))
   )
 
   start_lidar_ROS_node = IncludeLaunchDescription(
-    PythonLaunchDescriptionSource(os.path.join(lidar_launch_dir, 'rplidar_s1_launch.py')),
+    PythonLaunchDescriptionSource(os.path.join(lidar_package_dir, 'launch', 'rplidar_s1_launch.py')),
     launch_arguments={
       'topic_name': 'scan_raw',
       'frame_id': 'Lidar_link' # from the urdf
@@ -220,7 +175,7 @@ def generate_launch_description():
   )
 
   start_rviz_ROS_node = IncludeLaunchDescription(
-    PythonLaunchDescriptionSource(os.path.join(robot_launch_dir, 'rviz_launch.py')),
+    PythonLaunchDescriptionSource(os.path.join(robot_bringup_dir, 'launch', 'rviz_launch.py')),
     condition=IfCondition(use_rviz),
     launch_arguments={
       'namespace': '',
@@ -230,7 +185,7 @@ def generate_launch_description():
   )
 
   start_nav2_bringup_ROS_node = IncludeLaunchDescription(
-    PythonLaunchDescriptionSource(os.path.join(nav2_launch_dir, 'bringup_launch.py')),
+    PythonLaunchDescriptionSource(os.path.join(nav2_bringup_dir, 'launch', 'bringup_launch.py')),
     launch_arguments={
       'namespace': namespace,
       'use_namespace': use_namespace,
@@ -260,7 +215,7 @@ def generate_launch_description():
 
   # Add the actions to launch all of the navigation nodes
   ld.add_action(start_rviz_ROS_node)
-  ld.add_action(start_laser_filter_python_node)
+  ld.add_action(start_laser_filter_ROS_node)
   ld.add_action(start_lidar_ROS_node)
   ld.add_action(start_robot_base_uROS_node)
   ld.add_action(start_robot_base_ROS_node)
