@@ -185,11 +185,10 @@ def generate_launch_description():
   )
 
   start_navigation_ROS_node = IncludeLaunchDescription(
-    PythonLaunchDescriptionSource(os.path.join(nav2_bringup_dir, 'launch', 'bringup_launch.py')),
+    PythonLaunchDescriptionSource(os.path.join(nav2_bringup_dir, 'launch', 'navigation_launch.py')),
     launch_arguments={
       'namespace': namespace,
       'map': map_yaml_file,
-      'slam': 'False',
       'use_sim_time': use_sim_time,
       'params_file': params_file,
       'autostart': autostart,
@@ -199,7 +198,7 @@ def generate_launch_description():
   )
 
   start_slam_ROS_node = IncludeLaunchDescription(
-    PythonLaunchDescriptionSource(os.path.join(slam_toolbox_dir, 'launch', 'online_async_launch.py')),
+    PythonLaunchDescriptionSource(os.path.join(slam_toolbox_dir, 'launch', 'online_async_launch.py')), # this node does the localisation
     launch_arguments={
       'namespace': namespace,
       'use_sim_time': use_sim_time,
