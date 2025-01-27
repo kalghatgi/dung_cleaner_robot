@@ -200,7 +200,7 @@ class robot_base_node : public rclcpp::Node
         Derivative_velocity_error_RIGHT_wheel = (CURRENT_velocity_error_RIGHT_wheel - PREVIOUS_velocity_error_RIGHT_wheel) / _dt;
         PREVIOUS_velocity_error_RIGHT_wheel = CURRENT_velocity_error_RIGHT_wheel;
         /* ********** P controller ********** */
-        const float Kp = 0.015;
+        const float Kp = 0.75;
         Duty_LEFT_Wheel = Kp * CURRENT_velocity_error_LEFT_wheel;
         Duty_RIGHT_Wheel = Kp * CURRENT_velocity_error_RIGHT_wheel;
         /* ********** PI controller ********** */
@@ -216,8 +216,8 @@ class robot_base_node : public rclcpp::Node
         // Duty_LEFT_Wheel += Kp * CURRENT_velocity_error_LEFT_wheel + Ki * Integration_velocity_error_LEFT_wheel + Kd * Derivative_velocity_error_LEFT_wheel;
         // Duty_RIGHT_Wheel += Kp * CURRENT_velocity_error_RIGHT_wheel + Ki * Integration_velocity_error_RIGHT_wheel + Kd * Derivative_velocity_error_RIGHT_wheel;
         /* ********** %Duty calculation ********** */
-        Percent_duty_cycle_LEFT_wheel = LIMIT((Duty_LEFT_Wheel*100), -100, 100);
-        Percent_duty_cycle_RIGHT_wheel = LIMIT((-Duty_RIGHT_Wheel*100), -100, 100); // '-ve' sign for right wheel because it has to spin in opposite direction
+        Percent_duty_cycle_LEFT_wheel = LIMIT((-Duty_LEFT_Wheel*100), -100, 100);
+        Percent_duty_cycle_RIGHT_wheel = LIMIT((Duty_RIGHT_Wheel*100), -100, 100); // '-ve' sign for right wheel because it has to spin in opposite direction
         // RCLCPP_INFO(this->get_logger(), "e_L:%.5f  e_R:%.5f\td_L:%.1f  d_R:%.1f", CURRENT_velocity_error_LEFT_wheel, CURRENT_velocity_error_RIGHT_wheel, Percent_duty_cycle_LEFT_wheel, Percent_duty_cycle_RIGHT_wheel);
     }
     

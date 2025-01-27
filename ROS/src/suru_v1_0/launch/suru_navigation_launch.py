@@ -17,7 +17,7 @@ def generate_launch_description():
   laser_filters_dir = get_package_share_directory('laser_filters')
   urdf_file_path = os.path.join(robot_bringup_dir, 'urdf', 'DCMachine_ChassisAssy3.urdf')
   map_file_path = os.path.join(robot_bringup_dir, 'maps', 'terrace_map.yaml')
-  params_file_path = os.path.join(robot_bringup_dir, 'params', 'robot_navigation_with_lifelong_slam_parameters.yaml')
+  params_file_path = os.path.join(robot_bringup_dir, 'params', 'robot_navigation_parameters.yaml')
   laser_filter_params_file_path = os.path.join(robot_bringup_dir, 'params', 'laser_filter.yaml')
   rviz_file_path = os.path.join(robot_bringup_dir, 'rviz', 'nav2_default_view.rviz')
   ekf_file_path = os.path.join(robot_bringup_dir, 'config', 'ekf_wheel_imu.yaml')

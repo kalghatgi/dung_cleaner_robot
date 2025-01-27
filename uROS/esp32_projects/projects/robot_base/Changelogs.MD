@@ -1,3 +1,6 @@
+# v1.7
+* Corrected the changes of v1.6, where the REP-103 format was to be applied to the gyro data instead of acceleration data.
+
 # v1.6
 * Converted the imu data from NWU to ENU frame as required by the robot_localisation_node (ekf). [Reference: https://answers.ros.org/question/378777/#:~:text=which%20specifies%20the-,ENU%20frame,-.%20That%20means%20you]
 
