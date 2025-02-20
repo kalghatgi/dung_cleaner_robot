@@ -12,17 +12,19 @@ from launch_ros.actions import Node
 def generate_launch_description():
   # Get all paths
   nav2_bringup_dir = get_package_share_directory('nav2_bringup')
+  slam_toolbox_dir = get_package_share_directory('slam_toolbox')
   lidar_package_dir = get_package_share_directory('rplidar_ros')
   robot_bringup_dir = get_package_share_directory('suru_v1_0')
   laser_filters_dir = get_package_share_directory('laser_filters')
   urdf_file_path = os.path.join(robot_bringup_dir, 'urdf', 'DCMachine_ChassisAssy3.urdf')
   map_file_path = os.path.join(robot_bringup_dir, 'maps', 'terrace_map.yaml')
-  params_file_path = os.path.join(robot_bringup_dir, 'params', 'robot_navigation_parameters.yaml')
+  params_file_path = os.path.join(robot_bringup_dir, 'params', 'robot_navigation_with_lifelong_slam_parameters.yaml')
   laser_filter_params_file_path = os.path.join(robot_bringup_dir, 'params', 'laser_filter.yaml')
   rviz_file_path = os.path.join(robot_bringup_dir, 'rviz', 'nav2_default_view.rviz')
   ekf_file_path = os.path.join(robot_bringup_dir, 'config', 'ekf_wheel_imu.yaml')
 
   # Create the launch configuration variables
+  slam = LaunchConfiguration('slam')
   namespace = LaunchConfiguration('namespace')
   use_robot_state_pub = LaunchConfiguration('use_robot_state_pub')
   map_yaml_file = LaunchConfiguration('map')
@@ -47,6 +49,12 @@ def generate_launch_description():
     name='use_namespace',
     default_value='False',
     description='Whether to apply a namespace to the navigation stack'
+  )
+
+  declare_slam_cmd = DeclareLaunchArgument(
+    name='slam',
+    default_value='False',
+    description='Whether to run SLAM'
   )
 
   declare_map_yaml_cmd = DeclareLaunchArgument(
@@ -176,15 +184,27 @@ def generate_launch_description():
     }.items()
   )
 
-  start_nav2_bringup_ROS_node = IncludeLaunchDescription(
-    PythonLaunchDescriptionSource(os.path.join(nav2_bringup_dir, 'launch', 'bringup_launch.py')),
+  start_navigation_ROS_node = IncludeLaunchDescription(
+    PythonLaunchDescriptionSource(os.path.join(nav2_bringup_dir, 'launch', 'navigation_launch.py')),
     launch_arguments={
       'namespace': namespace,
-      'slam': 'False',
       'map': map_yaml_file,
       'use_sim_time': use_sim_time,
       'params_file': params_file,
-      'autostart': autostart
+      'autostart': autostart,
+      'use_composition': 'True',
+      'use_respawn': 'False'
+    }.items()
+  )
+
+  start_slam_ROS_node = IncludeLaunchDescription(
+    PythonLaunchDescriptionSource(os.path.join(slam_toolbox_dir, 'launch', 'online_async_launch.py')), # this node does the localisation
+    launch_arguments={
+      'namespace': namespace,
+      'use_sim_time': use_sim_time,
+      'autostart': autostart,
+      'use_respawn': 'False',
+      'params_file': params_file
     }.items()
   )
 
@@ -192,7 +212,7 @@ def generate_launch_description():
     package='tf2_ros',
     executable='static_transform_publisher',
     name='map_to_odom_tf_publisher',
-    arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom'],
+    arguments=['0', '0', '0', '0', '0', '0', '1', 'map', 'odom'],
     output='screen',
   )
 
@@ -202,6 +222,7 @@ def generate_launch_description():
   # Declare the launch options
   ld.add_action(declare_namespace_cmd)
   ld.add_action(declare_use_namespace_cmd)
+  ld.add_action(declare_slam_cmd)
   ld.add_action(declare_map_yaml_cmd)
   ld.add_action(declare_use_sim_time_cmd)
   ld.add_action(declare_params_file_cmd)
@@ -221,6 +242,7 @@ def generate_launch_description():
   ld.add_action(start_complementary_filter_ROS_node)
   ld.add_action(start_robot_state_publisher_ROS_node)
   ld.add_action(start_map_to_odom_transform_publisher_ROS_node)
-  ld.add_action(start_nav2_bringup_ROS_node)
+  ld.add_action(start_navigation_ROS_node)
+  ld.add_action(start_slam_ROS_node)
 
   return ld
