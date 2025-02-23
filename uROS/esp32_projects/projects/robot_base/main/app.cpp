@@ -34,17 +34,17 @@
 ////////////////////////////////////////////// ROS_DOMAIN_ID //////////////////////////////////////////////
 #define ROS_DOMAIN_ID 0
 ///////////////////////////////////////////////// SENSORS /////////////////////////////////////////////////
-#define MOTOR1_ENCODER_A_GPIO GPIO_NUM_36		// Digital Input
-#define MOTOR1_ENCODER_B_GPIO GPIO_NUM_39		// Digital Input
-#define MOTOR2_ENCODER_A_GPIO GPIO_NUM_18		// Digital Input
-#define MOTOR2_ENCODER_B_GPIO GPIO_NUM_19		// Digital Input
+#define MOTOR1_ENCODER_A_GPIO GPIO_NUM_39		// Digital Input (RIGHT)
+#define MOTOR1_ENCODER_B_GPIO GPIO_NUM_36		// Digital Input
+#define MOTOR2_ENCODER_A_GPIO GPIO_NUM_19		// Digital Input (LEFT)
+#define MOTOR2_ENCODER_B_GPIO GPIO_NUM_18		// Digital Input
 #define I2C_SDA GPIO_NUM_21				// Digital IO (I2C)
 #define I2C_SCL GPIO_NUM_22				// Digital IO (I2C)
 #define I2C_CLOCK_SPEED 400000				// Digital IO (I2C)
 //////////////////////////////////////////////// ACTUATORS ////////////////////////////////////////////////
-#define MOTOR2_PWM_GPIO GPIO_NUM_26			// PWM
+#define MOTOR2_PWM_GPIO GPIO_NUM_26			// PWM (LEFT)
 #define MOTOR2_DIRECTION_GPIO GPIO_NUM_25			// Digital Output
-#define MOTOR1_PWM_GPIO GPIO_NUM_17			// PWM
+#define MOTOR1_PWM_GPIO GPIO_NUM_17			// PWM (RIGHT)
 #define MOTOR1_DIRECTION_GPIO GPIO_NUM_16			// Digital Output
 
 #define Pi 3.141592653589793238

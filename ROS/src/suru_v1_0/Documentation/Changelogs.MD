@@ -1,3 +1,6 @@
+# v1.6
+* Added config and launch file for logitech based teleop.
+
 # v1.5
 * Cleanup of launch files and directories by removing the unused contents.
 * Added a params and launch file for navigation with lifelong SLAM.
