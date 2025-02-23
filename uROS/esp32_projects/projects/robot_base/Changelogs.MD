@@ -1,3 +1,6 @@
+# v1.8
+* Changed the encoder connector's pin configuration as per the schematics.
+
 # v1.7
 * Corrected the changes of v1.6, where the REP-103 format was to be applied to the gyro data instead of acceleration data.
 
