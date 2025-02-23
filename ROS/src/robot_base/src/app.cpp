@@ -107,10 +107,10 @@ class robot_base_node : public rclcpp::Node
       }
       // RCLCPP_INFO(this->get_logger(), "encoder_raw_callback: %ld %ld", NEW_encoder_value_LEFT_wheel, NEW_encoder_value_RIGHT_wheel);
 
-      CURRENT_velocity_LEFT_wheel = -(NEW_encoder_value_LEFT_wheel - PREVIOUS_encoder_value_LEFT_wheel) * WHEEL_METERS_PER_TICK / _dt; // meters per second
+      CURRENT_velocity_LEFT_wheel = (NEW_encoder_value_LEFT_wheel - PREVIOUS_encoder_value_LEFT_wheel) * WHEEL_METERS_PER_TICK / _dt; // meters per second
       CURRENT_velocity_RIGHT_wheel = (NEW_encoder_value_RIGHT_wheel - PREVIOUS_encoder_value_RIGHT_wheel) * WHEEL_METERS_PER_TICK / _dt;
       // wheel_odom.updateFromVelocity(CURRENT_velocity_LEFT_wheel, CURRENT_velocity_RIGHT_wheel, _now);
-      wheel_odom.updateFromVelocity(CURRENT_velocity_LEFT_wheel * _dt, CURRENT_velocity_RIGHT_wheel * _dt, _dt);
+      wheel_odom.updateFromVelocity(-CURRENT_velocity_LEFT_wheel * _dt, CURRENT_velocity_RIGHT_wheel * _dt, _dt);
 
       PREVIOUS_encoder_value_LEFT_wheel = NEW_encoder_value_LEFT_wheel;
       PREVIOUS_encoder_value_RIGHT_wheel = NEW_encoder_value_RIGHT_wheel;
@@ -187,8 +187,8 @@ class robot_base_node : public rclcpp::Node
         _velocity_previous_time = _now;
         _dt = 0.05; // manual override on basis of known rate (this is better because the accuracy of time as calculated above is far from expected value)
         // Inverse Jacobian: Velocity of individual wheels, calculated from received velocity command
-        NEXT_velocity_LEFT_wheel = (NEW_command_linear_X - (NEW_command_angular_Z * WHEEL_SEPERATION / 2)); // meters per second
-        NEXT_velocity_RIGHT_wheel = -(NEW_command_linear_X + (NEW_command_angular_Z * WHEEL_SEPERATION / 2)); // '-ve' sign because this one has to spin reverse inorder to move the robot along a direction.
+        NEXT_velocity_LEFT_wheel = (NEW_command_linear_X + (NEW_command_angular_Z * WHEEL_SEPERATION / 2)); // meters per second
+        NEXT_velocity_RIGHT_wheel = -(NEW_command_linear_X - (NEW_command_angular_Z * WHEEL_SEPERATION / 2)); // '-ve' sign because this one has to spin reverse inorder to move the robot along a direction.
         /* **************************************************** LEFT wheel **************************************************** */
         CURRENT_velocity_error_LEFT_wheel = NEXT_velocity_LEFT_wheel - CURRENT_velocity_LEFT_wheel;
         Integration_velocity_error_LEFT_wheel += (CURRENT_velocity_error_LEFT_wheel * _dt);

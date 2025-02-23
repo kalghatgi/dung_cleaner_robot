@@ -1,3 +1,7 @@
+# v1.6
+* Corrected the Inverse Jacobian formula to solve the issue with incorrect direction of motor's movement.
+* Corrected the velocity calculation formula which would otherwise cause jerky wheel velocity.
+
 # v1.5
 * Corrected the wheel radius and encoder specifications.
 * Made necessary corrections to improve the wheel odometry calculations.
