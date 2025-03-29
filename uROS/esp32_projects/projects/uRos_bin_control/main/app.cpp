@@ -28,16 +28,17 @@
 ////////////////////////////////////////////// ROS_DOMAIN_ID //////////////////////////////////////////////
 #define ROS_DOMAIN_ID 1
 ///////////////////////////////////////////////// SENSORS /////////////////////////////////////////////////
-#define MOTOR1_PWM_GPIO GPIO_NUM_12            // PWM
+#define MOTOR1_PWM_GPIO GPIO_NUM_12            // PWM (conveyor motor)
 #define MOTOR1_DIRECTION_GPIO GPIO_NUM_14      // Digital Output
-#define MOTOR2_PWM_GPIO GPIO_NUM_25            // PWM
+#define MOTOR2_PWM_GPIO GPIO_NUM_25            // PWM (bin motor)
 #define MOTOR2_DIRECTION_GPIO GPIO_NUM_26      // Digital Output
 #define MAX_LIMIT_SWITCH_GPIO GPIO_NUM_4       // Digital Input
 #define MIN_LIMIT_SWITCH_GPIO GPIO_NUM_15      // Digital Input
 #define DISTANCE_SENSOR_GPIO GPIO_NUM_18       // Digital Input
+#define BIN_EMPTY_BUTTON_GPIO GPIO_NUM_2      // Digital Input
 
 #define NUMBER_OF_MOTORS 2
-#define GPIO_DIGITAL_INPUT_PINS_MASK ((1ULL << MAX_LIMIT_SWITCH_GPIO) | (1ULL << MIN_LIMIT_SWITCH_GPIO) | (1ULL << DISTANCE_SENSOR_GPIO))
+#define GPIO_DIGITAL_INPUT_PINS_MASK ((1ULL << MAX_LIMIT_SWITCH_GPIO) | (1ULL << MIN_LIMIT_SWITCH_GPIO) | (1ULL << DISTANCE_SENSOR_GPIO) | (1ULL << BIN_EMPTY_BUTTON_GPIO))
 #define GPIO_DIGITAL_OUTPUT_PINS_MASK ((1ULL << MOTOR1_DIRECTION_GPIO) | (1ULL << MOTOR2_DIRECTION_GPIO))
 #define PWM_HS_TIMER LEDC_TIMER_0
 #define PWM_HS_MODE LEDC_HIGH_SPEED_MODE
@@ -51,7 +52,7 @@ float Motor_Duty_Cycle[NUMBER_OF_MOTORS];
 static const char* TAG = "bin_control";
 
 rcl_publisher_t motor_status_publisher;
-std_msgs__msg__Float32MultiArray motor_status;
+std_msgs_msg_Float32MultiArray motor_status;
 
 void Set_Inverted_PWM(ledc_mode_t _mode, ledc_channel_t _channel, float _percent_duty)
 {
@@ -88,36 +89,69 @@ void Set_Motor_Speed()
 
 void TASK_motor_control(void *args)
 {
+    bool _bottom_limit = false, _top_limit = false, _distance_limit = false, _bin_is_empty = false, _bin_empty_button_is_pressed = false;
     while (true)
     {
-        if (gpio_get_level(MIN_LIMIT_SWITCH_GPIO) == 1)
+        // if (gpio_get_level(MIN_LIMIT_SWITCH_GPIO) == 1)
+        // {
+        //     Motor_Duty_Cycle[0] = 50.0; // Move Motor1
+        //     Set_Motor_Speed();
+        //     while (gpio_get_level(DISTANCE_SENSOR_GPIO) == 0)
+        //     {
+        //         vTaskDelay(pdMS_TO_TICKS(10));
+        //     }
+        //     Motor_Duty_Cycle[0] = 0.0; // Stop Motor1
+        //     Set_Motor_Speed();
+        //     Motor_Duty_Cycle[1] = 50.0; // Move Motor2
+        //     Set_Motor_Speed();
+        //     while (gpio_get_level(MAX_LIMIT_SWITCH_GPIO) == 0)
+        //     {
+        //         vTaskDelay(pdMS_TO_TICKS(10));
+        //     }
+        //     Motor_Duty_Cycle[1] = 0.0; // Stop Motor2
+        //     Set_Motor_Speed();
+        //     vTaskDelay(pdMS_TO_TICKS(10000)); // Wait for 10 seconds
+        //     Motor_Duty_Cycle[1] = -50.0; // Move Motor2 in opposite direction
+        //     Set_Motor_Speed();
+        //     while (gpio_get_level(MIN_LIMIT_SWITCH_GPIO) == 0)
+        //     {
+        //         vTaskDelay(pdMS_TO_TICKS(10));
+        //     }
+        //     Motor_Duty_Cycle[1] = 0.0; // Stop Motor2
+        //     Set_Motor_Speed();
+        // }
+        // vTaskDelay(pdMS_TO_TICKS(50));
+
+
+        _bottom_limit_reached = gpio_get_level(MIN_LIMIT_SWITCH_GPIO);
+        _top_limit_reached = gpio_get_level(MAX_LIMIT_SWITCH_GPIO);
+        _distance_limit = gpio_get_level(DISTANCE_SENSOR_GPIO);
+        _bin_empty_button_is_pressed = gpio_get_level(BIN_EMPTY_BUTTON_GPIO);
+        if(true == _distance_limit)
         {
-            Motor_Duty_Cycle[0] = 50.0; // Move Motor1
-            Set_Motor_Speed();
-            while (gpio_get_level(DISTANCE_SENSOR_GPIO) == 0)
-            {
-                vTaskDelay(pdMS_TO_TICKS(10));
-            }
-            Motor_Duty_Cycle[0] = 0.0; // Stop Motor1
-            Set_Motor_Speed();
-            Motor_Duty_Cycle[1] = 50.0; // Move Motor2
-            Set_Motor_Speed();
-            while (gpio_get_level(MAX_LIMIT_SWITCH_GPIO) == 0)
-            {
-                vTaskDelay(pdMS_TO_TICKS(10));
-            }
-            Motor_Duty_Cycle[1] = 0.0; // Stop Motor2
-            Set_Motor_Speed();
-            vTaskDelay(pdMS_TO_TICKS(10000)); // Wait for 10 seconds
-            Motor_Duty_Cycle[1] = -50.0; // Move Motor2 in opposite direction
-            Set_Motor_Speed();
-            while (gpio_get_level(MIN_LIMIT_SWITCH_GPIO) == 0)
-            {
-                vTaskDelay(pdMS_TO_TICKS(10));
-            }
-            Motor_Duty_Cycle[1] = 0.0; // Stop Motor2
-            Set_Motor_Speed();
+            Motor_Duty_Cycle[0] = 0.0; // stop the conveyor motor
         }
+        if(true == _bin_empty_button_is_pressed) // say button (X)
+        {
+            Motor_Duty_Cycle[1] = 50.0; // lift the bin
+        }
+        if(true == _top_limit_reached)
+        {
+            Motor_Duty_Cycle[1] = 0.0; // stop lifting the bin
+        }
+        if(
+            (true == _top_limit_reached)
+            &&(false == _bin_empty_button_is_pressed) // button X is not pressed anymore
+        )
+        {
+            Motor_Duty_Cycle[1] = -50.0; // lower the bin
+        }
+        if(true == _bottom_limit_reached)
+        {
+            Motor_Duty_Cycle[1] = 0.0; // stop lowering the bin
+            Motor_Duty_Cycle[0] = 100.0; // restart the conveyor motor
+        }
+        Set_Motor_Speed();
         vTaskDelay(pdMS_TO_TICKS(50));
     }
     vTaskDelete(NULL);
@@ -172,8 +206,8 @@ void Setup_Digital_IO()
     {
         .pin_bit_mask = GPIO_DIGITAL_INPUT_PINS_MASK,
         .mode = GPIO_MODE_INPUT,
-        .pull_up_en = GPIO_PULLUP_DISABLE,
-        .pull_down_en = GPIO_PULLDOWN_ENABLE,
+        .pull_up_en = GPIO_PULLUP_ENABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
         .intr_type = GPIO_INTR_DISABLE,
     };
     gpio_config(&Digital_Input_Pins_Config);
@@ -230,8 +264,8 @@ void micro_ros_task(void *arg)
         "motor_status_topic");
 
     // Create a message
-    std_msgs__msg__Float32MultiArray msg;
-    std_msgs__msg__Float32MultiArray__init(&msg);
+    std_msgs_msg_Float32MultiArray msg;
+    std_msgs_msgFloat32MultiArray_init(&msg);
     msg.data.capacity = 2;
     msg.data.size = 2;
     msg.data.data = (float *)malloc(2 * sizeof(float));
@@ -245,7 +279,7 @@ void micro_ros_task(void *arg)
     }
 
     // Clean up
-    std_msgs__msg__Float32MultiArray__fini(&msg);
+    std_msgs_msgFloat32MultiArray_fini(&msg);
     rcl_publisher_fini(&publisher, &node);
     rcl_node_fini(&node);
     rclc_support_fini(&support);
@@ -259,5 +293,5 @@ extern "C" void app_main(void)
     Setup_UART();
 
     xTaskCreate(TASK_motor_control, "Motor Control Task", 2048, NULL, 5, NULL);
-    xTaskCreate(micro_ros_task, "Micro ROS Task", 4096, NULL, 5, NULL);
+    xTaskCreate(micro_ros_task, "Micro ROS Task", 4096, NULL, 5, NULL);
 }
