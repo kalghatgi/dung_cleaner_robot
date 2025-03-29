@@ -36,10 +36,11 @@
 #define MIN_LIMIT_SWITCH_GPIO GPIO_NUM_15      // Digital Input
 #define DISTANCE_SENSOR_GPIO GPIO_NUM_18       // Digital Input
 #define BIN_EMPTY_BUTTON_GPIO GPIO_NUM_2      // Digital Input
+#define RELAY_GPIO GPIO_NUM_33 // Relay control pin
 
 #define NUMBER_OF_MOTORS 2
 #define GPIO_DIGITAL_INPUT_PINS_MASK ((1ULL << MAX_LIMIT_SWITCH_GPIO) | (1ULL << MIN_LIMIT_SWITCH_GPIO) | (1ULL << DISTANCE_SENSOR_GPIO) | (1ULL << BIN_EMPTY_BUTTON_GPIO))
-#define GPIO_DIGITAL_OUTPUT_PINS_MASK ((1ULL << MOTOR1_DIRECTION_GPIO) | (1ULL << MOTOR2_DIRECTION_GPIO))
+#define GPIO_DIGITAL_OUTPUT_PINS_MASK ((1ULL << MOTOR1_DIRECTION_GPIO) | (1ULL << MOTOR2_DIRECTION_GPIO) | (1ULL << RELAY_GPIO))
 #define PWM_HS_TIMER LEDC_TIMER_0
 #define PWM_HS_MODE LEDC_HIGH_SPEED_MODE
 #define MOTOR1_PWM_CHANNEL LEDC_CHANNEL_0
@@ -52,7 +53,7 @@ float Motor_Duty_Cycle[NUMBER_OF_MOTORS];
 static const char* TAG = "bin_control";
 
 rcl_publisher_t motor_status_publisher;
-std_msgs_msg_Float32MultiArray motor_status;
+std_msgs__msg__Float32MultiArray motor_status;
 
 void Set_Inverted_PWM(ledc_mode_t _mode, ledc_channel_t _channel, float _percent_duty)
 {
@@ -69,93 +70,124 @@ void Set_Motor_Speed()
     { // CCW
         Set_Inverted_PWM(PWM_HS_MODE, MOTOR1_PWM_CHANNEL, fabs(_motor1_percent_duty_cycle));
         gpio_set_level(MOTOR1_DIRECTION_GPIO, 0);
+        ESP_LOGI(TAG, "Motor 1 moving CCW with duty cycle: %.2f%%", _motor1_percent_duty_cycle);
     }
     else
     { // CW
         Set_Inverted_PWM(PWM_HS_MODE, MOTOR1_PWM_CHANNEL, fabs(_motor1_percent_duty_cycle));
         gpio_set_level(MOTOR1_DIRECTION_GPIO, 1);
+        ESP_LOGI(TAG, "Motor 1 moving CW with duty cycle: %.2f%%", _motor1_percent_duty_cycle);
     }
     if(_motor2_percent_duty_cycle >= 0)
     { // CCW
         Set_Inverted_PWM(PWM_HS_MODE, MOTOR2_PWM_CHANNEL, fabs(_motor2_percent_duty_cycle));
         gpio_set_level(MOTOR2_DIRECTION_GPIO, 0);
+        ESP_LOGI(TAG, "Motor 2 moving CCW with duty cycle: %.2f%%", _motor2_percent_duty_cycle);
     }
     else
     { // CW
         Set_Inverted_PWM(PWM_HS_MODE, MOTOR2_PWM_CHANNEL, fabs(_motor2_percent_duty_cycle));
         gpio_set_level(MOTOR2_DIRECTION_GPIO, 1);
+        ESP_LOGI(TAG, "Motor 2 moving CW with duty cycle: %.2f%%", _motor2_percent_duty_cycle);
     }
 }
 
 void TASK_motor_control(void *args)
 {
-    bool _bottom_limit = false, _top_limit = false, _distance_limit = false, _bin_is_empty = false, _bin_empty_button_is_pressed = false;
+    bool bottom_limit_reached = false;
+    bool top_limit_reached = false;
+    bool distance_limit = false;
+    bool bin_empty_button_pressed = false;
+    static bool relay_on = false;
+
     while (true)
     {
-        // if (gpio_get_level(MIN_LIMIT_SWITCH_GPIO) == 1)
-        // {
-        //     Motor_Duty_Cycle[0] = 50.0; // Move Motor1
-        //     Set_Motor_Speed();
-        //     while (gpio_get_level(DISTANCE_SENSOR_GPIO) == 0)
-        //     {
-        //         vTaskDelay(pdMS_TO_TICKS(10));
-        //     }
-        //     Motor_Duty_Cycle[0] = 0.0; // Stop Motor1
-        //     Set_Motor_Speed();
-        //     Motor_Duty_Cycle[1] = 50.0; // Move Motor2
-        //     Set_Motor_Speed();
-        //     while (gpio_get_level(MAX_LIMIT_SWITCH_GPIO) == 0)
-        //     {
-        //         vTaskDelay(pdMS_TO_TICKS(10));
-        //     }
-        //     Motor_Duty_Cycle[1] = 0.0; // Stop Motor2
-        //     Set_Motor_Speed();
-        //     vTaskDelay(pdMS_TO_TICKS(10000)); // Wait for 10 seconds
-        //     Motor_Duty_Cycle[1] = -50.0; // Move Motor2 in opposite direction
-        //     Set_Motor_Speed();
-        //     while (gpio_get_level(MIN_LIMIT_SWITCH_GPIO) == 0)
-        //     {
-        //         vTaskDelay(pdMS_TO_TICKS(10));
-        //     }
-        //     Motor_Duty_Cycle[1] = 0.0; // Stop Motor2
-        //     Set_Motor_Speed();
-        // }
-        // vTaskDelay(pdMS_TO_TICKS(50));
+        bottom_limit_reached = gpio_get_level(MIN_LIMIT_SWITCH_GPIO);
+        top_limit_reached = gpio_get_level(MAX_LIMIT_SWITCH_GPIO);
+        distance_limit = gpio_get_level(DISTANCE_SENSOR_GPIO);
+        bin_empty_button_pressed = gpio_get_level(BIN_EMPTY_BUTTON_GPIO);
 
+        ESP_LOGI(TAG, "Bottom limit switch: %d", bottom_limit_reached);
+        ESP_LOGI(TAG, "Top limit switch: %d", top_limit_reached);
+        ESP_LOGI(TAG, "Distance sensor: %d", distance_limit);
+        ESP_LOGI(TAG, "Bin empty button pressed: %d", bin_empty_button_pressed);
 
-        _bottom_limit_reached = gpio_get_level(MIN_LIMIT_SWITCH_GPIO);
-        _top_limit_reached = gpio_get_level(MAX_LIMIT_SWITCH_GPIO);
-        _distance_limit = gpio_get_level(DISTANCE_SENSOR_GPIO);
-        _bin_empty_button_is_pressed = gpio_get_level(BIN_EMPTY_BUTTON_GPIO);
-        if(true == _distance_limit)
+        // New logic to control motor1 and relay output
+        // Logic 1: Distance sensor is true, lower limit is false, top limit is true, bin button is false
+        // if (distance_limit && !bottom_limit_reached && top_limit_reached && !bin_empty_button_pressed)
+        if (!bin_empty_button_pressed)
         {
-            Motor_Duty_Cycle[0] = 0.0; // stop the conveyor motor
+            if (distance_limit && !bottom_limit_reached && top_limit_reached)
+            {
+                Motor_Duty_Cycle[0] = 50.0; // Motor1 at 10% duty cycle
+                Motor_Duty_Cycle[1] = 0.0;  // Motor2 off
+                gpio_set_level(RELAY_GPIO, 1); // Turn on the relay
+                ESP_LOGI(TAG, "Condition 1: Conveyor ON, Relay ON for 500 ticks.");
+                vTaskDelay(pdMS_TO_TICKS(500)); // Delay for 500 ticks
+
+                gpio_set_level(RELAY_GPIO, 0); // Turn off the relay
+                ESP_LOGI(TAG, "Relay OFF for 2000 ticks.");
+                vTaskDelay(pdMS_TO_TICKS(1000)); // Delay for 2000 ticks
+            }
+            else if(!distance_limit && !bottom_limit_reached && top_limit_reached)
+            {
+                Motor_Duty_Cycle[0] = 0.0; // Stop Motor1
+                gpio_set_level(RELAY_GPIO, 1); // Turn on the relay
+                ESP_LOGI(TAG, "Condition 2: Bin Full Conveyor stopped.");
+                vTaskDelay(pdMS_TO_TICKS(100)); // Delay for 100 ticks
+
+                gpio_set_level(RELAY_GPIO, 0); // Turn off the relay
+                ESP_LOGI(TAG, "Relay OFF for 2000 ticks.");
+                vTaskDelay(pdMS_TO_TICKS(200)); // Delay for 2000 ticks
+            }
         }
-        if(true == _bin_empty_button_is_pressed) // say button (X)
+        else if (bin_empty_button_pressed)
         {
-            Motor_Duty_Cycle[1] = 50.0; // lift the bin
+            if(!bottom_limit_reached && top_limit_reached && !distance_limit)
+            {
+                Motor_Duty_Cycle[0] = 0.0;
+                Motor_Duty_Cycle[1] = 50.0;
+                gpio_set_level(RELAY_GPIO, 0); // Turn off the relay
+                ESP_LOGI(TAG, "Condition 3: Bin full, Lift Bin.");
+                if(!top_limit_reached && bottom_limit_reached)
+                {
+                    Motor_Duty_Cycle[0] = 0.0;
+                    Motor_Duty_Cycle[1] = 0.0;
+                    gpio_set_level(RELAY_GPIO, 1); // Turn on the relay
+                    vTaskDelay(pdMS_TO_TICKS(700)); // Delay for 1000 ticks
+                    gpio_set_level(RELAY_GPIO, 0); // Turn off the relay
+                    vTaskDelay(pdMS_TO_TICKS(3000)); // Delay for 1000 ticks
+                }
+            }
         }
-        if(true == _top_limit_reached)
+        else if(!bin_empty_button_pressed && bottom_limit_reached)
         {
-            Motor_Duty_Cycle[1] = 0.0; // stop lifting the bin
+            Motor_Duty_Cycle[0] = 0.0;
+            Motor_Duty_Cycle[1] = -50.0;
+            gpio_set_level(RELAY_GPIO, 1); // Turn off the relay
+            ESP_LOGI(TAG, "Condition 4: Bin Empty, Lower Bin");
+            vTaskDelay(pdMS_TO_TICKS(1000)); // Delay for 1000 ticks
+            if (!bottom_limit_reached)
+            {
+                Motor_Duty_Cycle[0] = 0.0;
+                Motor_Duty_Cycle[1] = 0.0;
+                gpio_set_level(RELAY_GPIO, 0); // Turn off the relay
+                ESP_LOGI(TAG, "Condition 5: Bin Empty.");
+            }
         }
-        if(
-            (true == _top_limit_reached)
-            &&(false == _bin_empty_button_is_pressed) // button X is not pressed anymore
-        )
+        else // Distance sensor is true
         {
-            Motor_Duty_Cycle[1] = -50.0; // lower the bin
+            gpio_set_level(RELAY_GPIO, 0); // Turn off the relay permanently
+            relay_on = false;
+            ESP_LOGI(TAG, "Relay OFF: Distance sensor is true.");
         }
-        if(true == _bottom_limit_reached)
-        {
-            Motor_Duty_Cycle[1] = 0.0; // stop lowering the bin
-            Motor_Duty_Cycle[0] = 100.0; // restart the conveyor motor
-        }
+
         Set_Motor_Speed();
-        vTaskDelay(pdMS_TO_TICKS(50));
+        vTaskDelay(pdMS_TO_TICKS(2000));
     }
     vTaskDelete(NULL);
 }
+
 
 void Setup_PWM()
 {
@@ -206,11 +238,18 @@ void Setup_Digital_IO()
     {
         .pin_bit_mask = GPIO_DIGITAL_INPUT_PINS_MASK,
         .mode = GPIO_MODE_INPUT,
-        .pull_up_en = GPIO_PULLUP_ENABLE,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
         .intr_type = GPIO_INTR_DISABLE,
     };
     gpio_config(&Digital_Input_Pins_Config);
+
+    // Configure individual pull-ups and pull-downs as needed
+    gpio_set_pull_mode(MAX_LIMIT_SWITCH_GPIO, GPIO_PULLUP_ONLY);  // GPIO 4 - pull-up
+    gpio_set_pull_mode(MIN_LIMIT_SWITCH_GPIO, GPIO_PULLUP_ONLY);  // GPIO 15 - pull-up
+    gpio_set_pull_mode(BIN_EMPTY_BUTTON_GPIO, GPIO_PULLUP_ONLY);  // GPIO 2 - pull-up
+    gpio_set_pull_mode(DISTANCE_SENSOR_GPIO, GPIO_PULLDOWN_ONLY); // GPIO 18 - pull-down
+
     ESP_LOGI("IO_config", "Digital Inputs - check");
 
     ////////////////////////////////// DIGITAL OUTPUTS //////////////////////////////////
@@ -264,8 +303,8 @@ void micro_ros_task(void *arg)
         "motor_status_topic");
 
     // Create a message
-    std_msgs_msg_Float32MultiArray msg;
-    std_msgs_msgFloat32MultiArray_init(&msg);
+    std_msgs__msg__Float32MultiArray msg;
+    std_msgs__msg__Float32MultiArray__init(&msg);
     msg.data.capacity = 2;
     msg.data.size = 2;
     msg.data.data = (float *)malloc(2 * sizeof(float));
@@ -279,7 +318,7 @@ void micro_ros_task(void *arg)
     }
 
     // Clean up
-    std_msgs_msgFloat32MultiArray_fini(&msg);
+    std_msgs__msg__Float32MultiArray__fini(&msg);
     rcl_publisher_fini(&publisher, &node);
     rcl_node_fini(&node);
     rclc_support_fini(&support);
@@ -293,5 +332,5 @@ extern "C" void app_main(void)
     Setup_UART();
 
     xTaskCreate(TASK_motor_control, "Motor Control Task", 2048, NULL, 5, NULL);
-    xTaskCreate(micro_ros_task, "Micro ROS Task", 4096, NULL, 5, NULL);
+    xTaskCreate(micro_ros_task, "Micro ROS Task", 4096, NULL, 5, NULL);
 }
