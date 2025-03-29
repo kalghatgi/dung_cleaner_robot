@@ -24,3 +24,4 @@
       dead_man_switch: "B4" # LB
       fast_mode: "B7" # RT
       slow_mode: "B5" # RB
+      bin_motor: "B2"  # X button (button 2) used for bin motor control

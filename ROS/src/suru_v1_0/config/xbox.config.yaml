@@ -3,9 +3,9 @@ teleop_twist_joy_node:
     axis_linear:  # Left thumb stick vertical
       x: 1
     scale_linear:
-      x: 1.5
+      x: 1.0
     scale_linear_turbo:
-      x: 2.5
+      x: 2.0
 
     axis_angular:  # Left thumb stick horizontal
       yaw: 0
@@ -14,3 +14,6 @@ teleop_twist_joy_node:
 
     enable_button: 1  # button 'A'
     enable_turbo_button: 10  # button "Left joystick"
+    bin_motor: "B2"  # X button (button>
+
+

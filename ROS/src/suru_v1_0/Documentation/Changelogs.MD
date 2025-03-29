@@ -1,3 +1,7 @@
+# v1.7
+* Adjustd the costmap so that the obot does not create a path too close to the walls.
+* Added B2 button for bin control.
+
 # v1.6
 * Added config and launch file for logitech based teleop.
 
