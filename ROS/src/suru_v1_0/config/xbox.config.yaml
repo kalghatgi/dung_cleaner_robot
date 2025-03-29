@@ -15,5 +15,3 @@ teleop_twist_joy_node:
     enable_button: 1  # button 'A'
     enable_turbo_button: 10  # button "Left joystick"
     bin_motor: "B2"  # X button (button>
-
-
