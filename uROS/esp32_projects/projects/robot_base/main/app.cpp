@@ -195,11 +195,11 @@ void TASK_microROS(void *args)
 	RCCHECK(rclc_node_init_default(&node, "AMR__robot_base__microROS_node", "", &support));
 
 	// create publishers
-	RCCHECK(rclc_publisher_init_default(&encoder_raw_publisher, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int64MultiArray), "/amr/encoder_raw"));
-	RCCHECK(rclc_publisher_init_default(&imu_raw_publisher, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Imu), "/imu/data_raw"));
-	RCCHECK(rclc_publisher_init_default(&mag_raw_publisher, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, MagneticField), "/imu/mag"));
+	RCCHECK(rclc_publisher_init_default(&encoder_raw_publisher, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int64MultiArray), "amr/encoder_raw"));
+	RCCHECK(rclc_publisher_init_default(&imu_raw_publisher, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Imu), "imu/data_raw"));
+	RCCHECK(rclc_publisher_init_default(&mag_raw_publisher, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, MagneticField), "imu/mag"));
 	// create subscribers
-	RCCHECK(rclc_subscription_init_default(&wheel_speed_subscriber, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, JointState), "/amr/wheel_speed"));
+	RCCHECK(rclc_subscription_init_default(&wheel_speed_subscriber, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, JointState), "amr/wheel_speed"));
 
 	// create and initialize the timers for each publisher
 	rcl_timer_t encoder_raw_publisher_timer;

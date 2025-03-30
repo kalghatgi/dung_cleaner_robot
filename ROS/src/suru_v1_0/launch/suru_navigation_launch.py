@@ -131,7 +131,6 @@ def generate_launch_description():
     package='robot_state_publisher',
     executable='robot_state_publisher',
     name='robot_state_publisher',
-    namespace=namespace,
     output='screen',
     parameters=[{
       'use_sim_time': use_sim_time,
@@ -147,9 +146,8 @@ def generate_launch_description():
     package='robot_base',
     executable='robot_base_node',
     name='robot_base_ROS_node',
-    namespace=namespace,
     parameters=[{
-      'velocity_input_topic': '/cmd_vel'
+      'velocity_input_topic': 'cmd_vel'
     }]
   )
 
@@ -203,9 +201,11 @@ def generate_launch_description():
   start_map_to_odom_transform_publisher_ROS_node = Node(
     package='tf2_ros',
     executable='static_transform_publisher',
-    name='map_to_odom_tf_publisher',
+    name=f"{auto_namespace}_map_to_odom_tf_publisher",
+    # arguments=['0', '0', '0', '0', '0', '0', f"{auto_namespace}/map", f"{auto_namespace}/odom"],
     arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom'],
     output='screen',
+    remappings=remappings
   )
 
   # Create the launch description and populate
@@ -229,19 +229,19 @@ def generate_launch_description():
 
     start_robot_state_publisher_ROS_node,
     start_robot_base_ROS_node,
-    start_robot_base_uROS_node,
+    start_robot_base_uROS_node, #
     start_robot_ekf_ROS_node,
     start_complementary_filter_ROS_node,
     start_map_to_odom_transform_publisher_ROS_node,
 
-    # Include launch files under namespace
-    start_rviz_ROS_node,
+    # Include launch files under namespace,
     start_laser_filter_ROS_node,
     start_lidar_ROS_node,
-    start_nav2_bringup_ROS_node,
   ])
 
   # Add the actions to launch all of the nodes under a namespace
   ld.add_action(start_namespaced_nodes)
+  ld.add_action(start_nav2_bringup_ROS_node)
+  ld.add_action(start_rviz_ROS_node)
 
   return ld
