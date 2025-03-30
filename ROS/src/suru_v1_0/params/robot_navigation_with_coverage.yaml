@@ -347,3 +347,27 @@ velocity_smoother:
     odom_duration: 0.1
     deadband_velocity: [0.0, 0.0, 0.0]
     velocity_timeout: 1.0
+
+coverage_server:
+  ros__parameters:
+    use_sim_time: False
+    default_headland_width: 0.25
+    robot_width: 0.75
+    operation_width: 0.75
+    min_turning_radius: 0.375
+    linear_curv_change: 200.0
+    coordinates_in_cartesian_frame: true
+    default_allow_overlap: false
+    default_swath_angle_type: "SET_ANGLE"
+    default_swath_angle: 0.0 # We know its aligned for the demo
+
+row_coverage_server:
+  ros__parameters:
+    use_sim_time: False
+    robot_width: 0.75
+    operation_width: 0.75
+    min_turning_radius: 0.375
+    linear_curv_change: 200.0
+    coordinates_in_cartesian_frame: true
+    default_swath_type: "CENTER"
+    default_offset: 0.0

@@ -1,3 +1,7 @@
+# v1.8
+* Added params and launch file for navigation coverage planner.
+* Updated Inflation radius for local and global costmap.
+
 # v1.7
 * Adjustd the costmap so that the obot does not create a path too close to the walls.
 * Added B2 button for bin control.
