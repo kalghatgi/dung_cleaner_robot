@@ -2,11 +2,9 @@
 
 This package contains the Complete Coverage Task Server & auxiliary tools utilizing the [Fields2Cover](https://github.com/Fields2Cover/Fields2Cover) complete coverage planning system which includes a great deal of options in headland, swath, route, and final path planning. You can find more information about Fields2Cover (F2C) in its [ReadTheDocs Documentation](https://fields2cover.github.io/index.html). It can accept both GPS and Cartesian coordinates and publishes the field, headland, swaths, and route as separate topics in cartesian coordinates for debugging and visualization. It can also compute coverage paths based on open-field polygons **or** based on annotated rows as might exist in a tree farm or other applications with both irregular and regular pre-established rows.
 
-This capability was created by [Open Navigation LLC](https://www.opennav.org/) in partnership with [Bonsai Robotics](https://www.bonsairobotics.ai/). Bonsai Robotics builds autonomous software for machines in adverse and GPS degraded conditions utilizing vision. Bonsai Robotics funded the development of this work for their own product and has graciously allowed Open Navigation to open-source it for the community to leverage in their own systems. Please thank Bonsai Robotics for their commendable donation to the ROS community! Bonsai is hiring [here](https://www.bonsairobotics.ai/careers).
+This capability was created by [Open Navigation LLC](https://www.opennav.org/) in partnership with [Bonsai Robotics](https://www.bonsairobotics.ai/). Bonsai Robotics builds autonomous software for machines in adverse and GPS degraded conditions utilizing vision. Bonsai Robotics funded the development of this work for their own product and has graciously allowed Open Navigation to open-source it for the community to leverage in their own systems. Please thank Bonsai Robotics for their commendable donation to the ROS community! Bonsai is hiring [here](https://www.bonsairobotics.ai/jobs).
 
 ![BonsaixOpenNavigation](https://github.com/ros-planning/navigation2/assets/14944147/b5c23851-0694-4b87-b5ab-fb7c957413f4)
-
-**⚠️ Need ROS 2, Nav2 help or support? Contact [Open Navigation](https://www.opennav.org/)! ⚠️**
 
 This server exposes all of the features of Fields2Cover as a Lifecycle-Component Nav2 Task Server like all others within the Nav2 Framework, so it should feel very familiar to those using Nav2 already. The server is split into modular stages with factories and enum types for all known options which can be easily expanded up over time scalably. It even could be expanded to include custom coverage capabilities separate of F2C if desired. This capability is split into 5 packages:
 
@@ -31,17 +29,6 @@ Have pre-annotated rows due to physical constraints and want to still compute th
 [![IMAGE ALT TEXT](./opennav_coverage_demo/test/demo_rows.png)](https://www.youtube.com/watch?v=NMznTft56jE)
 
 PS: Click on either image to see the demo videos! :-)
-
-https://github.com/user-attachments/assets/e44d8f10-c5b0-4345-81ad-25f3bcd06030
-
-### Fields2Cover Installation
-
-opennav_coverage works with Field2Cover v1.2.1. The newest version v2.0.0 is not supported at the moment.
-
-To install Fields2Cover, clone it into a colcon workspace and build with `colcon build`.
-
-- Humble & Iron: Use tag `v1.2.1`
-- Jazzy & rolling: Use branch `v1.2.1-devel`
 
 ## Interfaces
 
@@ -208,4 +195,5 @@ Within Nav2 and this work:
 - [ ] Migrate the tester.py and demo's python scripts into the simple navigator's capabilities
 - [ ] Add Nav2 System Test running the server
 - [ ] Add a tutorial about using the coverage server / navigator
+- [ ] Add server to Nav2 docs: configuration guide, migration guide, BT ports, groot index
 

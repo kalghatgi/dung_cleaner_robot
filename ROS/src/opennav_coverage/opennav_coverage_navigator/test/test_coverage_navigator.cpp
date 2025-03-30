@@ -50,10 +50,6 @@ inline std::vector<std::string> getLibs()
     "nav2_goal_updated_condition_bt_node",
     "nav2_globally_updated_goal_condition_bt_node",
     "nav2_is_path_valid_condition_bt_node",
-    "nav2_are_error_codes_active_condition_bt_node",
-    "nav2_would_a_controller_recovery_help_condition_bt_node",
-    "nav2_would_a_planner_recovery_help_condition_bt_node",
-    "nav2_would_a_smoother_recovery_help_condition_bt_node",
     "nav2_reinitialize_global_localization_service_bt_node",
     "nav2_rate_controller_bt_node",
     "nav2_distance_controller_bt_node",
@@ -95,9 +91,9 @@ TEST(CoverageNavigatorTests, TestBasicFunctionality)
   opennav_coverage_navigator::CoverageNavigator navigator;
   auto node = std::make_shared<rclcpp_lifecycle::LifecycleNode>("test_node");
   auto odom_smoother = std::make_shared<nav2_util::OdomSmoother>(node, 0.3, "odom");
-  nav2_core::NavigatorMuxer plugin_muxer;
+  backported_bt_navigator::NavigatorMuxer plugin_muxer;
 
-  nav2_core::FeedbackUtils feedback_utils;
+  backported_bt_navigator::FeedbackUtils feedback_utils;
   auto tf = std::make_shared<tf2_ros::Buffer>(node->get_clock());
   auto timer_interface = std::make_shared<tf2_ros::CreateTimerROS>(
     node->get_node_base_interface(), node->get_node_timers_interface());
@@ -131,9 +127,9 @@ TEST(CoverageNavigatorTests, TestBasicServer)
   opennav_coverage_navigator::CoverageNavigator navigator;
   auto node = std::make_shared<rclcpp_lifecycle::LifecycleNode>("test_node");
   auto odom_smoother = std::make_shared<nav2_util::OdomSmoother>(node, 0.3, "odom");
-  nav2_core::NavigatorMuxer plugin_muxer;
+  backported_bt_navigator::NavigatorMuxer plugin_muxer;
 
-  nav2_core::FeedbackUtils feedback_utils;
+  backported_bt_navigator::FeedbackUtils feedback_utils;
   auto tf = std::make_shared<tf2_ros::Buffer>(node->get_clock());
   auto timer_interface = std::make_shared<tf2_ros::CreateTimerROS>(
     node->get_node_base_interface(), node->get_node_timers_interface());

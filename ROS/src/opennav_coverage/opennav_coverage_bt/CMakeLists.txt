@@ -12,7 +12,7 @@ find_package(nav2_behavior_tree REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(opennav_coverage_msgs REQUIRED)
-find_package(behaviortree_cpp REQUIRED)
+find_package(behaviortree_cpp_v3 REQUIRED)
 
 # potentially replace with nav2_common, nav2_package()
 set(CMAKE_CXX_STANDARD 17)
@@ -33,7 +33,7 @@ set(dependencies
   nav_msgs
   geometry_msgs
   opennav_coverage_msgs
-  behaviortree_cpp
+  behaviortree_cpp_v3
 )
 
 add_library(opennav_compute_complete_coverage_action_bt_node SHARED src/compute_complete_coverage_path.cpp)
@@ -62,7 +62,6 @@ if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   find_package(ament_cmake_gtest REQUIRED)
   ament_lint_auto_find_test_dependencies()
-  add_subdirectory(test)
 endif()
 
 ament_export_include_directories(include)
