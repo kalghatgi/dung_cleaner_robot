@@ -4,11 +4,11 @@ import launch_ros.parameter_descriptions
 import launch
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
-from launch.conditions import IfCondition, UnlessCondition
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, GroupAction
+from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, TextSubstitution
-from launch_ros.actions import Node
+from launch_ros.actions import Node, PushRosNamespace
 
 def get_last_octet_of_ip():
     """Retrieve the last octet of the system's IP address for dynamic namespace generation."""
@@ -104,7 +104,14 @@ def generate_launch_description():
     description='Whether to start the robot state publisher'
   )
 
-  start_robot_ekf_cmd = Node(
+  declare_use_rviz_cmd = DeclareLaunchArgument(
+    name='use_rviz',
+    default_value='True',
+    description='Whether to start RVIZ'
+  )
+
+  # declare the nodes
+  start_robot_ekf_ROS_node = Node(
     package='robot_localization',
     executable='ekf_node',
     name='ekf_filter_node',
@@ -119,14 +126,6 @@ def generate_launch_description():
     arguments=["serial", "-D", "/dev/ttyUSB1", "-b", "460800"]
   )
 
-  declare_use_rviz_cmd = DeclareLaunchArgument(
-    name='use_rviz',
-    default_value='True',
-    description='Whether to start RVIZ'
-  )
-
-  # Specify the actions
-  # Subscribe to the joint states of the robot, and publish the 3D pose of each link.
   start_robot_state_publisher_ROS_node = Node(
     condition=IfCondition(use_robot_state_pub),
     package='robot_state_publisher',
@@ -224,16 +223,25 @@ def generate_launch_description():
   ld.add_action(declare_use_robot_state_pub_cmd)
   ld.add_action(declare_use_rviz_cmd)
 
-  # Add the actions to launch all of the navigation nodes
-  ld.add_action(start_rviz_ROS_node)
-  ld.add_action(start_laser_filter_ROS_node)
-  ld.add_action(start_lidar_ROS_node)
-  ld.add_action(start_robot_base_uROS_node)
-  ld.add_action(start_robot_base_ROS_node)
-  ld.add_action(start_robot_ekf_cmd)
-  ld.add_action(start_complementary_filter_ROS_node)
-  ld.add_action(start_robot_state_publisher_ROS_node)
-  ld.add_action(start_map_to_odom_transform_publisher_ROS_node)
-  ld.add_action(start_nav2_bringup_ROS_node)
+  # Group all nodes under the namespace
+  start_namespaced_nodes = GroupAction([
+    PushRosNamespace(auto_namespace),  # Force the namespace to all nodes inside
+
+    start_robot_state_publisher_ROS_node,
+    start_robot_base_ROS_node,
+    start_robot_base_uROS_node,
+    start_robot_ekf_ROS_node,
+    start_complementary_filter_ROS_node,
+    start_map_to_odom_transform_publisher_ROS_node,
+
+    # Include launch files under namespace
+    start_rviz_ROS_node,
+    start_laser_filter_ROS_node,
+    start_lidar_ROS_node,
+    start_nav2_bringup_ROS_node,
+  ])
+
+  # Add the actions to launch all of the nodes under a namespace
+  ld.add_action(start_namespaced_nodes)
 
   return ld
