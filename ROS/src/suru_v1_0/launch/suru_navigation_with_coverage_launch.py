@@ -19,7 +19,7 @@ def generate_launch_description():
     map_file_path = os.path.join(robot_bringup_dir, 'maps', 'terrace_map.yaml')
     params_file_path = os.path.join(robot_bringup_dir, 'params', 'robot_navigation_with_coverage.yaml')
     laser_filter_params_file_path = os.path.join(robot_bringup_dir, 'params', 'laser_filter.yaml')
-    rviz_file_path = os.path.join(robot_bringup_dir, 'rviz', 'nav2_default_view.rviz')
+    rviz_file_path = os.path.join(robot_bringup_dir, 'rviz', 'nav2_with_coverage.rviz')
     ekf_file_path = os.path.join(robot_bringup_dir, 'config', 'ekf_wheel_imu.yaml')
     coverage_demo_dir = get_package_share_directory('opennav_coverage_demo')  # Coverage planner package
 
@@ -184,22 +184,13 @@ def generate_launch_description():
 
     # Start navigation
     start_nav2_bringup_cmd = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(nav2_bringup_dir, 'launch', 'bringup_launch.py')),
+        PythonLaunchDescriptionSource(os.path.join(robot_bringup_dir, 'launch', 'bringup_with_coverage_launch.py')),
         launch_arguments={
             'namespace': namespace,
             'slam': 'False',
             'map': map_file_path,
             'use_sim_time': use_sim_time,
             'params_file': params_file_path,
-            'autostart': autostart
-        }.items()
-    )
-
-    # Start OpenNav Coverage Planner
-    start_coverage_planner_cmd = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(coverage_demo_dir, 'coverage_demo_launch.py')),
-        launch_arguments={
-            'namespace': namespace,
             'autostart': autostart
         }.items()
     )
