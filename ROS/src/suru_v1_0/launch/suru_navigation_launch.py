@@ -1,4 +1,5 @@
 import os
+import socket
 import launch_ros.parameter_descriptions
 import launch
 from ament_index_python.packages import get_package_share_directory
@@ -6,8 +7,18 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, TextSubstitution
 from launch_ros.actions import Node
+
+def get_last_octet_of_ip():
+    """Retrieve the last octet of the system's IP address for dynamic namespace generation."""
+    try:
+        hostname = socket.gethostname()
+        ip_address = socket.gethostbyname(hostname)
+        last_octet = ip_address.split(".")[-1]  # Extract last part
+        return f"robot_{last_octet}"
+    except Exception as e:
+        return "robot_default"  # Fallback in case of error
 
 def generate_launch_description():
   # Get all paths
@@ -21,9 +32,11 @@ def generate_launch_description():
   laser_filter_params_file_path = os.path.join(robot_bringup_dir, 'params', 'laser_filter.yaml')
   rviz_file_path = os.path.join(robot_bringup_dir, 'rviz', 'nav2_default_view.rviz')
   ekf_file_path = os.path.join(robot_bringup_dir, 'config', 'ekf_wheel_imu.yaml')
+  auto_namespace = get_last_octet_of_ip()
 
   # Create the launch configuration variables
   namespace = LaunchConfiguration('namespace')
+  use_namespace = LaunchConfiguration('use_namespace')
   use_robot_state_pub = LaunchConfiguration('use_robot_state_pub')
   map_yaml_file = LaunchConfiguration('map')
   use_sim_time = LaunchConfiguration('use_sim_time')
@@ -39,13 +52,13 @@ def generate_launch_description():
   # Declare the launch arguments
   declare_namespace_cmd = DeclareLaunchArgument(
     name='namespace',
-    default_value='',
-    description='Top-level namespace'
+    default_value=TextSubstitution(text=auto_namespace),
+    description='Top-level namespace, dynamically set from IP address'
   )
 
   declare_use_namespace_cmd = DeclareLaunchArgument(
     name='use_namespace',
-    default_value='False',
+    default_value='True',
     description='Whether to apply a namespace to the navigation stack'
   )
 
@@ -170,8 +183,8 @@ def generate_launch_description():
     PythonLaunchDescriptionSource(os.path.join(robot_bringup_dir, 'launch', 'rviz_launch.py')),
     condition=IfCondition(use_rviz),
     launch_arguments={
-      'namespace': '',
-      'use_namespace': 'False',
+      'namespace': namespace,
+      'use_namespace': use_namespace,
       'rviz_config': rviz_config_file
     }.items()
   )
