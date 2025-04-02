@@ -289,7 +289,7 @@ void DFRobot_BMX160::readReg(uint8_t reg, uint8_t *pBuf, uint16_t len)
 	i2c_master_write_byte(cmd, (BMX160_I2C_ADDR << 1) | I2C_MASTER_READ, I2C_MASTER_ACK);
 	i2c_master_read(cmd, pBuf, len, I2C_MASTER_LAST_NACK); // during read operation, only the last byte gets NACK but the prior ones get ACK
 	i2c_master_stop(cmd);
-	i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000/portTICK_PERIOD_MS);
+	i2c_master_cmd_begin(I2C_NUM_0, cmd, 10/portTICK_PERIOD_MS);
 	i2c_cmd_link_delete(cmd);  
 }
 
