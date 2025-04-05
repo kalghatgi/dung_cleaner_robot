@@ -8,6 +8,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/portmacro.h"
+#include "esp_timer.h"
 #include "sdkconfig.h"
 #include "esp_err.h"
 #include "esp_log.h"
@@ -20,18 +21,18 @@
 #include "cJSON.h"
 
 ///////////////////////////////////////////////// SENSORS /////////////////////////////////////////////////
-#define BASE_MOTOR1_ENCODER_A_GPIO GPIO_NUM_39 // Digital Input (RIGHT)
+#define BASE_MOTOR1_ENCODER_A_GPIO GPIO_NUM_39 // Digital Input (LEFT)
 #define BASE_MOTOR1_ENCODER_B_GPIO GPIO_NUM_36 // Digital Input
-#define BASE_MOTOR2_ENCODER_A_GPIO GPIO_NUM_19 // Digital Input (LEFT)
+#define BASE_MOTOR2_ENCODER_A_GPIO GPIO_NUM_19 // Digital Input (RIGHT)
 #define BASE_MOTOR2_ENCODER_B_GPIO GPIO_NUM_18 // Digital Input
 #define I2C_SDA GPIO_NUM_21 // Digital IO (I2C)
 #define I2C_SCL GPIO_NUM_22 // Digital IO (I2C)
 #define I2C_CLOCK_SPEED 400000 // Digital IO (I2C)
 //////////////////////////////////////////////// ACTUATORS ////////////////////////////////////////////////
-#define MOTOR1_PWM_GPIO GPIO_NUM_17 // PWM (RIGHT)
-#define BASE_MOTOR1_DIRECTION_GPIO GPIO_NUM_16 // Digital Output
-#define MOTOR2_PWM_GPIO GPIO_NUM_26	// PWM (LEFT)
-#define BASE_MOTOR2_DIRECTION_GPIO GPIO_NUM_25 // Digital Output
+#define BASE_MOTOR1_PWM_GPIO GPIO_NUM_26	// PWM (LEFT)
+#define BASE_MOTOR1_DIRECTION_GPIO GPIO_NUM_25 // Digital Output
+#define BASE_MOTOR2_PWM_GPIO GPIO_NUM_17 // PWM (RIGHT)
+#define BASE_MOTOR2_DIRECTION_GPIO GPIO_NUM_16 // Digital Output
 
 #define DEGREES_TO_RADIANS (M_PI / 180)
 #define PWM_HS_TIMER LEDC_TIMER_0
@@ -55,9 +56,10 @@
 #define UART_BAUD_RATE 460800
 #define UART_BUFFER_SIZE 4096
 #define UART_SENDER_PERIOD 10 // (milliseconds) the period at which the data should be sent to the ROS node over UART
-#define DT (UART_SENDER_PERIOD * 0.001f) // deltaT in seconds.
-#define ENCODER_PPR (2000 / 4) // Reference: https://robokits.co.in/motors/rhino-planetary-geared-24v-motor/100w-24v-encoder-servo-motor/rhino-servo-24v-60rpm-100w-ig52-extra-heavy-duty-planetary-encoder-servo-motor-160kgcm#:~:text=Quad%20Encoder%20requires-,2000,-Pulses%20Per%20Revolution
-#define ROTATION_PER_ENCODER_COUNT (1.0f / ENCODER_PPR)
+#define ENCODER_CPR 2000 // Reference: https://robokits.co.in/motors/rhino-planetary-geared-24v-motor/100w-24v-encoder-servo-motor/rhino-servo-24v-60rpm-100w-ig52-extra-heavy-duty-planetary-encoder-servo-motor-160kgcm#:~:text=Quad%20Encoder%20requires-,2000,-Pulses%20Per%20Revolution
+#define ENCODER_PPR (ENCODER_CPR / 4)
+#define MOTOR_GEAR_RATIO 46.566 // Reference: https://robokits.co.in/motors/rhino-planetary-geared-24v-motor/100w-24v-encoder-servo-motor/rhino-servo-24v-60rpm-100w-ig52-extra-heavy-duty-planetary-encoder-servo-motor-160kgcm#:~:text=ratio%20is%201%20%3A-,47,-the%20Optical%20encoder
+#define BASE_MOTOR_ROTATION_PER_ENCODER_COUNT (1.0f / (ENCODER_PPR * MOTOR_GEAR_RATIO)) // Base motor is just the motor without considering its gearbox
 
 typedef enum
 {
@@ -72,7 +74,7 @@ const gpio_num_t BASE_MOTOR_DIRECTION_GPIO[NUMBER_OF_MOTORS_AT_BASE] = {BASE_MOT
 // const ledc_channel_t PAYLOAD_MOTOR_PWM_CHANNEL[NUMBER_OF_MOTORS_AT_PAYLOAD] {BASE_MOTOR1_PWM_CHANNEL, BASE_MOTOR2_PWM_CHANNEL}
 // const gpio_num_t PAYLOAD_MOTOR_DIRECTION_GPIO[NUMBER_OF_MOTORS_AT_PAYLOAD] {BASE_MOTOR1_DIRECTION_GPIO, BASE_MOTOR2_DIRECTION_GPIO}
 int64_t instantaneous_encoder_count[NUMBER_OF_MOTORS_AT_BASE] = {0UL};
-int32_t previous_encoder_count[NUMBER_OF_MOTORS_AT_BASE] = {0U}, new_encoder_count[NUMBER_OF_MOTORS_AT_BASE] = {0U};
+int64_t previous_encoder_count[NUMBER_OF_MOTORS_AT_BASE] = {0U}, new_encoder_count[NUMBER_OF_MOTORS_AT_BASE] = {0U};
 int8_t base_motor_duty_cycle[NUMBER_OF_MOTORS_AT_BASE] = {0U},
     payload_motor_duty_cycle[NUMBER_OF_MOTORS_AT_PAYLOAD] = {0U};
 float base_motor_torque_command[NUMBER_OF_MOTORS_AT_BASE] = {0.0f},
@@ -97,6 +99,7 @@ struct timespec ros_node_last_received_message_time_stamp;
 struct timespec current_time_stamp;
 static TimerHandle_t uart_sender_timer;
 static QueueHandle_t uart_queue;
+uint64_t motor_control_current_time = 0, motor_control_previous_time = 0;
 
 /* 
 json from_ros_node = 
@@ -194,22 +197,26 @@ void motor_control(void)
         _error_previous[NUMBER_OF_MOTORS_AT_BASE] = {0.0f};
     static float _error_integral[NUMBER_OF_MOTORS_AT_BASE] = {0.0f};
 
+    motor_control_current_time = esp_timer_get_time();
+    float _dT = (motor_control_current_time - motor_control_previous_time)*0.000001;
+    motor_control_previous_time = motor_control_current_time;
+
     for(uint8_t _m=0; _m<NUMBER_OF_MOTORS_AT_BASE; _m++)
     {
         new_encoder_count[_m] = instantaneous_encoder_count[_m];
         int32_t _delta_count = new_encoder_count[_m] - previous_encoder_count[_m];
         previous_encoder_count[_m] = new_encoder_count[_m];
-        base_motor_velocity_feedback[_m] = (_delta_count * ROTATION_PER_ENCODER_COUNT / DT); // rotations per second
+        base_motor_velocity_feedback[_m] = (_delta_count * BASE_MOTOR_ROTATION_PER_ENCODER_COUNT / _dT); // rotations per second
 
         _error_instantaneous[_m] = (base_motor_velocity_command[_m] - base_motor_velocity_feedback[_m]);
-        _error_integral[_m] += (_error_instantaneous[_m] * DT);
-        float _error_derivative = ((_error_instantaneous[_m] - _error_previous[_m]) / DT);
+        _error_integral[_m] += (_error_instantaneous[_m] * _dT);
+        float _error_derivative = ((_error_instantaneous[_m] - _error_previous[_m]) / _dT);
 
         switch (pid_strategy)
         {
             case (P):
             {
-                const float Kp = 0.75f;
+                const float Kp = 2.25f;
                 base_motor_duty_cycle[_m] = (Kp * _error_instantaneous[_m]);
 
                 break;
@@ -265,9 +272,9 @@ static void IRAM_ATTR Motor1_Encoder_ISR_Handler(void *args)
 static void IRAM_ATTR Motor2_Encoder_ISR_Handler(void *args)
 {
 	if (gpio_get_level(BASE_MOTOR2_ENCODER_B_GPIO) > 0)
-		instantaneous_encoder_count[1]++;
-	else
 		instantaneous_encoder_count[1]--;
+	else
+		instantaneous_encoder_count[1]++;
 }
 void TASK__uart_reception_timeout(void *args)
 {
@@ -284,7 +291,6 @@ void TASK__uart_reception_timeout(void *args)
         {
             base_motor_velocity_command[_m] = 0.0f;
         }
-        motor_control();
 
 		vTaskDelay(pdMS_TO_TICKS(10));
 	}
@@ -301,6 +307,8 @@ void TASK__ros_node_data_receiver(void *args)
         {
             if(event.type == UART_DATA)
             {
+                clock_gettime(CLOCK_REALTIME, &ros_node_last_received_message_time_stamp);
+
                 int len = uart_read_bytes(UART_PORT, _rx_data, event.size, pdMS_TO_TICKS(5));
                 if(len > 0)
                 {
@@ -309,39 +317,56 @@ void TASK__ros_node_data_receiver(void *args)
                     cJSON *root = cJSON_Parse((const char *)_rx_data);
                     if(NULL == root)
                     {
-                        printf("Error while parsing data into JSON structure\r\n");
-                        return;
+                        printf("Error while parsing the JSON data\r\n");
                     }
-                    
-                    const cJSON *rbc = cJSON_GetObjectItem(root, "rbc");
-                    if (rbc)
+                    else
                     {
-                        const cJSON *wc = cJSON_GetObjectItem(rbc, "wc");
-                        if (wc)
+                        const cJSON *rbc = cJSON_GetObjectItem(root, "rbc");
+                        if (rbc)
                         {
-                            const cJSON *velocity = cJSON_GetObjectItem(wc, "v");
-                            if(velocity)
+                            const cJSON *wc = cJSON_GetObjectItem(rbc, "wc");
+                            if (wc)
                             {
-                                for(uint8_t _m=0; _m<NUMBER_OF_MOTORS_AT_BASE; _m++)
+                                const cJSON *torque = cJSON_GetObjectItem(wc, "t");
+                                if(torque)
                                 {
-                                    base_motor_velocity_command[_m] = cJSON_GetArrayItem(velocity, _m)->valuedouble;
+                                    for(uint8_t _m=0; _m<NUMBER_OF_MOTORS_AT_BASE; _m++)
+                                    {
+                                        base_motor_torque_command[_m] = cJSON_GetArrayItem(torque, _m)->valuedouble;
+                                    }
+                                }
+                                const cJSON *velocity = cJSON_GetObjectItem(wc, "v");
+                                if(velocity)
+                                {
+                                    for(uint8_t _m=0; _m<NUMBER_OF_MOTORS_AT_BASE; _m++)
+                                    {
+                                        base_motor_velocity_command[_m] = cJSON_GetArrayItem(velocity, _m)->valuedouble;
+                                    }
+                                }
+                                const cJSON *position = cJSON_GetObjectItem(wc, "p");
+                                if(position)
+                                {
+                                    for(uint8_t _m=0; _m<NUMBER_OF_MOTORS_AT_BASE; _m++)
+                                    {
+                                        base_motor_position_command[_m] = cJSON_GetArrayItem(position, _m)->valuedouble;
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    const cJSON *rpc = cJSON_GetObjectItem(root, "rpc");
-                    if (rpc)
-                    {
-                        const cJSON *cc = cJSON_GetObjectItem(rpc, "cc");
-                        if (cc)
+                        const cJSON *rpc = cJSON_GetObjectItem(root, "rpc");
+                        if (rpc)
                         {
-                            const cJSON *torque = cJSON_GetObjectItem(cc, "t");
-                            if(torque)
+                            const cJSON *cc = cJSON_GetObjectItem(rpc, "cc");
+                            if (cc)
                             {
-                                for(uint8_t _m=0; _m<NUMBER_OF_MOTORS_AT_PAYLOAD; _m++)
+                                const cJSON *torque = cJSON_GetObjectItem(cc, "t");
+                                if(torque)
                                 {
-                                    payload_motor_torque_command[_m] = cJSON_GetArrayItem(torque, _m)->valuedouble;
+                                    for(uint8_t _m=0; _m<NUMBER_OF_MOTORS_AT_PAYLOAD; _m++)
+                                    {
+                                        payload_motor_torque_command[_m] = cJSON_GetArrayItem(torque, _m)->valuedouble;
+                                    }
                                 }
                             }
                         }
@@ -353,16 +378,24 @@ void TASK__ros_node_data_receiver(void *args)
 }
 void TIMER__ros_node_data_sender_callback(TimerHandle_t xTimer)
 {
+    // The sender is always going to work even when there is no data received from the ROS node.
+    // This gives a periodicity to the motor control.
+    motor_control();
+
+    // Obtain all the IMU data.
     bmx160.getAllData(&mag_uT, &gyro_DPS, &accel_G);
 
     // add additional lines for obtaining the distance sensor readings, and the limit switch state.
 
+    // package the data into JSON format
     char _to_ros_node[UART_BUFFER_SIZE] = {'\0'};
     sprintf
     (
         _to_ros_node,
-        "{\"rbf\":{\"wf\":{\"t\":[0.0,0.0],\"v\":[%.2f,%.2f],\"p\":[0.0,0.0]},\"imu\":{\"a\":[%f,%f,%f],\"g\":[%f,%f,%f],\"m\":[%f,%f,%f]}},\"rpf\":{\"ls\":[%d,%d],\"ds\":%.1f}}\n",
+        "{\"rbf\":{\"wf\":{\"t\":[%i,%i],\"v\":[%.2f,%.2f],\"p\":[%lli,%lli]},\"imu\":{\"a\":[%f,%f,%f],\"g\":[%f,%f,%f],\"m\":[%f,%f,%f]}},\"rpf\":{\"ls\":[%d,%d],\"ds\":%.1f}}\n",
+        base_motor_duty_cycle[0], base_motor_duty_cycle[1],
         base_motor_velocity_feedback[0], base_motor_velocity_feedback[1],
+        (new_encoder_count[0] % ENCODER_PPR), (new_encoder_count[1] % ENCODER_PPR),
         (accel_G.x * 9.80665f), (accel_G.y * 9.80665f), (accel_G.z * 9.80665f), // meters per second^2
         (gyro_DPS.x * DEGREES_TO_RADIANS), (gyro_DPS.y * DEGREES_TO_RADIANS), (gyro_DPS.z * DEGREES_TO_RADIANS), // radians per second
         (mag_uT.x * 0.001f), (mag_uT.y * 0.001f), (mag_uT.z * 0.001f), // nano-Tesla
@@ -386,7 +419,7 @@ void Setup_PWM()
 	/////////////////// Channel configuration ///////////////////
 	// Channel 1 //
 	ledc_channel_config_t motor1_channel;
-	motor1_channel.gpio_num   = MOTOR1_PWM_GPIO;
+	motor1_channel.gpio_num   = BASE_MOTOR1_PWM_GPIO;
 	motor1_channel.speed_mode = PWM_HS_MODE;
 	motor1_channel.channel    = BASE_MOTOR1_PWM_CHANNEL;
 	motor1_channel.intr_type  = LEDC_INTR_DISABLE;
@@ -397,7 +430,7 @@ void Setup_PWM()
 	ledc_channel_config(&motor1_channel);
 	// Channel 2 //
 	ledc_channel_config_t motor2_channel;
-	motor2_channel.gpio_num   = MOTOR2_PWM_GPIO;
+	motor2_channel.gpio_num   = BASE_MOTOR2_PWM_GPIO;
 	motor2_channel.speed_mode = PWM_HS_MODE;
 	motor2_channel.channel    = BASE_MOTOR2_PWM_CHANNEL;
 	motor2_channel.intr_type  = LEDC_INTR_DISABLE;
