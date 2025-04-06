@@ -1,3 +1,8 @@
+# v2.0
+* Made changes to force namespace to all ROS nodes and launch files executed from the suru_navigation_launch.py
+* Changed the rviz file to the namespace supported one, provided in nav2_bringup directory.
+* Added the hardware_interface ROS node to the suru_navigation_launch.py
+
 # v1.8
 * Added params and launch file for navigation coverage planner.
 * Updated Inflation radius for local and global costmap.

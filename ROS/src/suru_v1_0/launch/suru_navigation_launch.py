@@ -30,7 +30,7 @@ def generate_launch_description():
   map_file_path = os.path.join(robot_bringup_dir, 'maps', 'terrace_map.yaml')
   params_file_path = os.path.join(robot_bringup_dir, 'params', 'robot_navigation_parameters.yaml')
   laser_filter_params_file_path = os.path.join(robot_bringup_dir, 'params', 'laser_filter.yaml')
-  rviz_file_path = os.path.join(robot_bringup_dir, 'rviz', 'nav2_default_view.rviz')
+  rviz_file_path = os.path.join(robot_bringup_dir, 'rviz', 'nav2_namespaced_view.rviz')
   ekf_file_path = os.path.join(robot_bringup_dir, 'config', 'ekf_wheel_imu.yaml')
   auto_namespace = get_last_octet_of_ip()
 
@@ -126,6 +126,15 @@ def generate_launch_description():
     arguments=["serial", "-D", "/dev/ttyUSB1", "-b", "460800"]
   )
 
+  start_hardware_interface_ROS_node = Node(
+    package='hardware_interface',
+    executable='hardware_interface_node',
+    name='hardware_interface_node',
+    parameters=[{
+      'velocity_input_topic': 'cmd_vel'
+    }]
+  )
+
   start_robot_state_publisher_ROS_node = Node(
     condition=IfCondition(use_robot_state_pub),
     package='robot_state_publisher',
@@ -198,8 +207,9 @@ def generate_launch_description():
   start_map_to_odom_transform_publisher_ROS_node = Node(
     package='tf2_ros',
     executable='static_transform_publisher',
-    name=f"{auto_namespace}_map_to_odom_tf_publisher",
+    # name=f"{auto_namespace}_map_to_odom_tf_publisher",
     # arguments=['0', '0', '0', '0', '0', '0', f"{auto_namespace}/map", f"{auto_namespace}/odom"],
+    name="map_to_odom_tf_publisher",
     arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom'],
     output='screen',
     remappings=remappings
@@ -225,8 +235,9 @@ def generate_launch_description():
 
     # All nodes
     start_robot_state_publisher_ROS_node,
-    start_robot_base_ROS_node,
-    start_robot_base_uROS_node, #
+    # start_robot_base_ROS_node,
+    # start_robot_base_uROS_node, #
+    start_hardware_interface_ROS_node,
     start_robot_ekf_ROS_node,
     start_complementary_filter_ROS_node,
     start_map_to_odom_transform_publisher_ROS_node,
