@@ -1,3 +1,6 @@
+# v1.2
+* Disabled inside menuconfig, the UART port used for log output.
+
 # v1.1
 * Corrected the GPIO config for left and right motors.
 * Adjusted the PID constants, and the dT parameter for motor control.
