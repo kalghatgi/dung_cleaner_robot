@@ -1,5 +1,5 @@
 # ROS:
-sudo apt install ros-humble-desktop ros-humble-navigation2 ros-humble-nav2-bringup ros-humble-joint-state-publisher ros-humble-robot-localization ros-humble-xacro ros-humble-imu-complementary-filter ros-humble-imu-filter-madgwick ros-humble-rmw-cyclonedds-cpp ros-humble-behaviortree-cpp
+sudo apt install ros-humble-desktop ros-humble-navigation2 ros-humble-nav2-bringup ros-humble-joint-state-publisher ros-humble-robot-localization ros-humble-xacro ros-humble-imu-complementary-filter ros-humble-imu-filter-madgwick ros-humble-rmw-cyclonedds-cpp ros-humble-behaviortree-cpp libboost-all-dev build-essential python3-colcon-common-extensions
 
 # microROS:
 source /opt/ros/humble/setup.bash
@@ -31,3 +31,7 @@ sudo make install
 cd dung_cleaner_robot/ROS
 gethumble
 colcon build --symlink-install
+
+# Permissions
+sudo usermod -a -G dialout $USER
+sudo chmod a+rw /dev/tty*

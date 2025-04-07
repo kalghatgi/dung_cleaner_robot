@@ -1,28 +1,7 @@
-# v2.0
-* Removed the publisher of wheel_speed and subscriber of encoder_raw inorder to ditch the microROS interface.
-* Added Serial interface library to exchange data with the hardware node over USB using JSON packets.
-
-# v1.6
-* Corrected the Inverse Jacobian formula to solve the issue with incorrect direction of motor's movement.
-* Corrected the velocity calculation formula which would otherwise cause jerky wheel velocity.
-
-# v1.5
-* Corrected the wheel radius and encoder specifications.
-* Made necessary corrections to improve the wheel odometry calculations.
-
-# v1.4
-* corrected the watchdog function.
-
-# v1.3
-* Cleanup of the code.
-* Changed the PID controller to P controller.
-* Updated the wheel radius and wheel separation for this robot.
-
-# v1.2
-* Updated the Encoder_PPR and Gear_ratio for the current setup.
-
 # v1.1
-* Made corrections to the files for solving the build errors.
+* Changed the data reading method.
+* Added a parameter to accept data from specified serial port.
+* Corrected the JSON parse syntax.
 
 # v1.0
-* Copied the project from repo: Autonomous Mobile Robot (private to Hsaka_Igtahglak)
+* Project reference from robot_base, a ROS node, to work directly with the devices connected to the USB ports.

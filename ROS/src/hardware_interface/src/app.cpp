@@ -4,6 +4,11 @@
 #include <math.h>
 #include <iostream>
 #include <thread>
+#include <string>
+#include <vector>
+#include <functional>
+#include <boost/asio.hpp>
+#include <boost/system/error_code.hpp>
 ///////////////////////////////////////////////////
 #include "rclcpp/rclcpp.hpp"
 #include "nav_msgs/msg/odometry.hpp"
@@ -12,7 +17,6 @@
 #include "sensor_msgs/msg/magnetic_field.hpp"
 #include "tf2/LinearMath/Quaternion.h"
 #include "odometry.hpp"
-#include <boost/asio.hpp>
 #include "nlohmann/json.hpp"
 
 #define LIMIT(x, min, max) ((x < min) ? min : (x > max) ? max : x)
@@ -31,30 +35,161 @@ class robot_base_node : public rclcpp::Node {
     bool command_received_ = false;
     rclcpp::Time last_command_time_;
     const double WATCHDOG_TIMEOUT = 0.5;
+    rclcpp::Time previous = this->get_clock()->now();
 
     public:
         // for transferring the parameter value into a variable for use inside the code
         rclcpp::Parameter _velocity_input_topic;
+        rclcpp::Parameter _usb_port;
         // for using inside the code, the value held by these parameters
         std::string velocity_input_topic_;
+        std::string usb_port_;
         boost::asio::io_context io_context_;
         boost::asio::serial_port serial_port_;
         boost::asio::streambuf rx_buffer_;
+        boost::system::error_code ec;
 
         void THREAD__serial_reader()
         {
             while(rclcpp::ok())
             {
-                async_read_until(this->serial_port_, this->rx_buffer_, "\n", std::bind(&robot_base_node::hardware_node_data_receiver_callback, this, std::placeholders::_1, std::placeholders::_2, std::ref(this->rx_buffer_)));
-                std::this_thread::sleep_for(std::chrono::milliseconds(5));
+                boost::system::error_code _ec;
+                std::size_t _bytes_transferred = boost::asio::read_until(this->serial_port_, this->rx_buffer_, '\n', _ec);
+
+                if(_ec)
+                {
+                    RCLCPP_ERROR(this->get_logger(), "UART receiver error");
+                    break;
+                }
+                else if(_bytes_transferred > 0)
+                {
+                    std::istream is(&this->rx_buffer_);
+                    std::string _received_line;
+                    std::getline(is, _received_line); // extract till \n
+                    if(_received_line[0] == '{')
+                    {
+                        cout<<"Received a potential json packet: "<<_received_line<<endl;
+
+                        // json from_hardware_node = json::parse(receivedPacket);
+                        // cout << "Received JSON: " << from_hardware_node.dump(4) << endl;
+                        
+                        rclcpp::Time _now = this->get_clock()->now();
+                        float _dt = _now.seconds() - previous.seconds();
+                        previous = _now;
+
+                        auto odometry_message = nav_msgs::msg::Odometry();
+                        odometry_message.header.stamp = _now;
+                        odometry_message.header.frame_id = "odom"; // only for the sake of not leaving the frame_id's as null
+                        odometry_message.child_frame_id = "base_footprint"; // because the proper odometry is actually published by the ekf with appropriate frame_id's
+                        // odometry_message.header.frame_id = "base_link";
+                        // odometry_message.child_frame_id = "left_wheel_link";
+                        // ekf doesn't care about this ^^^, but make changes to the URDF
+                        // for including this link in the tf2 tree before setting any name here...
+                        // else, just comment out if this is being used by ekf for releasing filtered odometry on "odom" frame
+
+                        if(from_hardware_node.find("rbf") != from_hardware_node.end())
+                        {
+                            from_hardware_node["rbf"].is_object();
+                            if(from_hardware_node["rbf"].find("wf") != from_hardware_node["rbf"].end())
+                            {
+                                from_hardware_node["rbf"]["wf"].is_object();
+                                if(from_hardware_node["rbf"]["wf"].find("v") != from_hardware_node["rbf"]["wf"].end())
+                                {
+                                    from_hardware_node["rbf"]["wf"]["v"].is_array();
+                                    if(from_hardware_node["rbf"]["wf"]["v"].size() >= 2)
+                                    {
+                                        // Calculate the wheel odometry, and publish to ROS.
+                                        wheel_odom.setWheelParams(WHEEL_SEPERATION, WHEEL_RADIUS, WHEEL_RADIUS);
+                                        wheel_odom.updateFromVelocity
+                                        (
+                                            (-1.0f * from_hardware_node["rbf"]["wf"]["v"][0].get<float>() * _dt * WHEEL_CIRCUMFERENCE), // meters per second
+                                            (from_hardware_node["rbf"]["wf"]["v"][1].get<float>() * _dt * WHEEL_CIRCUMFERENCE),
+                                            _dt
+                                        );
+                                        double _Position_X = wheel_odom.getX(); // aka cartesian coordinates
+                                        double _Position_Y = wheel_odom.getY();
+                                        wheel_odom_quaternion.setRPY(0.0, 0.0, wheel_odom.getHeading());
+                                        double _LinearVelocity_X = wheel_odom.getLinear();
+                                        double _AngularVelocity_Z = wheel_odom.getAngular();
+
+                                        odometry_message.pose.pose.position.x = _Position_X;
+                                        odometry_message.pose.pose.position.y = _Position_Y;
+                                        odometry_message.pose.pose.orientation.w = wheel_odom_quaternion.w();
+                                        odometry_message.pose.pose.orientation.x = wheel_odom_quaternion.x();
+                                        odometry_message.pose.pose.orientation.y = wheel_odom_quaternion.y();
+                                        odometry_message.pose.pose.orientation.z = wheel_odom_quaternion.z();
+                                        odometry_message.twist.twist.linear.x = _LinearVelocity_X;
+                                        odometry_message.twist.twist.angular.z = _AngularVelocity_Z;
+                                    }
+                                }
+                            }
+                        }
+                        wheel_odometry_publisher_->publish(odometry_message);
+
+                        // adjust the IMU data, and publish to ROS
+                        auto imu_raw_message = sensor_msgs::msg::Imu();
+                        auto imu_mag_message = sensor_msgs::msg::MagneticField();
+                        imu_raw_message.header.stamp = _now;
+                        imu_mag_message.header.stamp = _now;
+
+                        imu_raw_message.linear_acceleration.x = 0.0;
+                        imu_raw_message.linear_acceleration.y = 0.0;
+                        imu_raw_message.linear_acceleration.z = 0.0;
+                        imu_raw_message.angular_velocity.x = 0.0;
+                        imu_raw_message.angular_velocity.y = 0.0;
+                        imu_raw_message.angular_velocity.z = 0.0;
+                        imu_mag_message.magnetic_field.x = 0.0;
+                        imu_mag_message.magnetic_field.y = 0.0;
+                        imu_mag_message.magnetic_field.z = 0.0;
+
+                        if(from_hardware_node.find("rbf") != from_hardware_node.end())
+                        {
+                            from_hardware_node["rbf"].is_object();
+                            if(from_hardware_node["rbf"].find("imu") != from_hardware_node["rbf"].end())
+                            {
+                                from_hardware_node["rbf"]["imu"].is_object();
+                                if(from_hardware_node["rbf"]["imu"].find("a") != from_hardware_node["rbf"]["imu"].end())
+                                {
+                                    from_hardware_node["rbf"]["imu"]["a"].is_array();
+                                    if(from_hardware_node["rbf"]["imu"]["a"].size() >= 3)
+                                    {
+                                        imu_raw_message.linear_acceleration.x = (-1.0f * from_hardware_node["rbf"]["imu"]["a"][0].get<float>());
+                                        imu_raw_message.linear_acceleration.y = from_hardware_node["rbf"]["imu"]["a"][1].get<float>();
+                                        imu_raw_message.linear_acceleration.z = from_hardware_node["rbf"]["imu"]["a"][2].get<float>();
+                                    }
+                                    if(from_hardware_node["rbf"]["imu"]["g"].size() >= 3)
+                                    {
+                                        imu_raw_message.angular_velocity.x = from_hardware_node["rbf"]["imu"]["g"][0].get<float>();
+                                        imu_raw_message.angular_velocity.y = from_hardware_node["rbf"]["imu"]["g"][1].get<float>();
+                                        imu_raw_message.angular_velocity.z = from_hardware_node["rbf"]["imu"]["g"][2].get<float>();
+                                    }
+                                    if(from_hardware_node["rbf"]["imu"]["m"].size() >= 3)
+                                    {
+                                        imu_mag_message.magnetic_field.x = from_hardware_node["rbf"]["imu"]["m"][0].get<float>();
+                                        imu_mag_message.magnetic_field.y = from_hardware_node["rbf"]["imu"]["m"][1].get<float>();
+                                        imu_mag_message.magnetic_field.z = from_hardware_node["rbf"]["imu"]["m"][2].get<float>();
+                                    }
+                                }
+                            }
+                        }
+                        imu_raw_publisher_->publish(imu_raw_message);
+                        imu_mag_publisher_->publish(imu_mag_message);
+                    }
+                }
             }
         }
 
-        robot_base_node() : Node("hardware_interface_ROS_node"), io_context_(), serial_port_(io_context_, "/dev/ttyUSB1")  // Initialize io_context_ and serial_port_ in constructor
+        robot_base_node() : Node("hardware_interface_ROS_node"), io_context_(), serial_port_(io_context_)  // Initialize io_context_ and serial_port_ in constructor
         {
             this->declare_parameter("velocity_input_topic", "cmd_vel");
             _velocity_input_topic = this->get_parameter("velocity_input_topic");
             velocity_input_topic_ = _velocity_input_topic.as_string();
+            
+            this->declare_parameter("usb_port", "/dev/ttyUSB*");
+            _usb_port = this->get_parameter("usb_port");
+            usb_port_ = _usb_port.as_string();
+
+            serial_port_.open(usb_port_, ec);
 
             // ROS subscribers
             cmd_vel_subscription_ = this->create_subscription<geometry_msgs::msg::Twist>(
@@ -78,7 +213,13 @@ class robot_base_node : public rclcpp::Node {
             serial_port_.set_option(serial_port_base::character_size(8));
             serial_port_.set_option(serial_port_base::parity(serial_port_base::parity::none));
             serial_port_.set_option(serial_port_base::stop_bits(serial_port_base::stop_bits::one));
-            // async_read_until(serial_port_, rx_buffer_, "\n", std::bind(&robot_base_node::hardware_node_data_receiver_callback, this, std::placeholders::_1, std::placeholders::_2, std::ref(rx_buffer_)));
+        }
+        ~robot_base_node()
+        {
+            if(serial_port_.is_open())
+            {
+                serial_port_.close(ec);
+            }
         }
 
     private:
@@ -189,155 +330,6 @@ class robot_base_node : public rclcpp::Node {
             {
                 NEW_command_linear_X = 0.0;
                 NEW_command_angular_Z = 0.0;
-            }
-        }
-
-        void hardware_node_data_receiver_callback(const boost::system::error_code &error, size_t bytes_transferred, boost::asio::streambuf &buffer) // receive any / all data from the hardware
-        {
-            if (!error)
-            {
-                istream is(&buffer);
-                string receivedPacket;
-                getline(is, receivedPacket);
-                cout<<"received: "<<receivedPacket<<endl;
-
-                // Calculate how many bytes getline actually consumed from the buffer's
-                // input sequence. This includes the newline character that getline extracts
-                // but doesn't put in the string.
-                size_t consumed_length = receivedPacket.length() + 1;
-
-                // *** Consume exactly what getline processed from the buffer ***
-                // This leaves any potential "readahead" data (beyond the first newline)
-                // in the buffer for the next read operation.
-                buffer.consume(consumed_length);
-
-                // Optional: Log the raw line for debugging, especially if garbled data persists
-                // RCLCPP_INFO(this->get_logger(), "Received line raw: %s", receivedPacket.c_str());
-
-                // --- Add Robustness: Check for empty or invalid lines before parsing ---
-                if (receivedPacket.empty()) {
-                    RCLCPP_DEBUG(this->get_logger(), "Received empty line, skipping.");
-                }
-                else if (receivedPacket.rfind('{', 0) != 0) // Checks if first char is '{'
-                {
-                    RCLCPP_WARN(this->get_logger(), "Received line does not start with '{', skipping parse: %s", receivedPacket.c_str());
-                }
-                else
-                {                
-                    try
-                    {
-                        // json from_hardware_node = json::parse(receivedPacket);
-                        // cout << "Received JSON: " << from_hardware_node.dump(4) << endl;
-                        
-                        rclcpp::Time _now = this->get_clock()->now();
-
-                        auto odometry_message = nav_msgs::msg::Odometry();
-                        odometry_message.header.stamp = _now;
-                        odometry_message.header.frame_id = "odom"; // only for the sake of not leaving the frame_id's as null
-                        odometry_message.child_frame_id = "base_footprint"; // because the proper odometry is actually published by the ekf with appropriate frame_id's
-                        // odometry_message.header.frame_id = "base_link";
-                        // odometry_message.child_frame_id = "left_wheel_link";
-                        // ekf doesn't care about this ^^^, but make changes to the URDF
-                        // for including this link in the tf2 tree before setting any name here...
-                        // else, just comment out if this is being used by ekf for releasing filtered odometry on "odom" frame
-
-                        // if(from_hardware_node.find["rbf"] != from_hardware_node.end())
-                        // {
-                        //     from_hardware_node("rbf").is_object();
-                        //     if(from_hardware_node["rbf"].find("wf") != from_hardware_node["rbf"].end())
-                        //     {
-                        //         from_hardware_node["rbf"]["wf"].is_object();
-                        //         if(from_hardware_node["rbf"]["wf"].find("v") != from_hardware_node["rbf"]["wf"].end())
-                        //         {
-                        //             from_hardware_node["rbf"]["wf"]["v"].is_array();
-                        //             if(from_hardware_node["rbf"]["wf"]["v"].size() >= 2)
-                        //             {
-                        //                 // Calculate the wheel odometry, and publish to ROS.
-                        //                 wheel_odom.setWheelParams(WHEEL_SEPERATION, WHEEL_RADIUS, WHEEL_RADIUS);
-                        //                 wheel_odom.updateFromVelocity
-                        //                 (
-                        //                     (-1.0f * from_hardware_node["rbf"]["wf"]["v"][0] * _dt * WHEEL_CIRCUMFERENCE), // meters per second
-                        //                     (from_hardware_node["rbf"]["wf"]["v"][1] * _dt * WHEEL_CIRCUMFERENCE),
-                        //                     _dt
-                        //                 );
-                        //                 double _Position_X = wheel_odom.getX(); // aka cartesian coordinates
-                        //                 double _Position_Y = wheel_odom.getY();
-                        //                 wheel_odom_quaternion.setRPY(0.0, 0.0, wheel_odom.getHeading());
-                        //                 double _LinearVelocity_X = wheel_odom.getLinear();
-                        //                 double _AngularVelocity_Z = wheel_odom.getAngular();
-
-                        //                 odometry_message.pose.pose.position.x = _Position_X;
-                        //                 odometry_message.pose.pose.position.y = _Position_Y;
-                        //                 odometry_message.pose.pose.orientation.w = wheel_odom_quaternion.w();
-                        //                 odometry_message.pose.pose.orientation.x = wheel_odom_quaternion.x();
-                        //                 odometry_message.pose.pose.orientation.y = wheel_odom_quaternion.y();
-                        //                 odometry_message.pose.pose.orientation.z = wheel_odom_quaternion.z();
-                        //                 odometry_message.twist.twist.linear.x = _LinearVelocity_X;
-                        //                 odometry_message.twist.twist.angular.z = _AngularVelocity_Z;
-                        //             }
-                        //         }
-                        //     }
-                        // }
-                        wheel_odometry_publisher_->publish(odometry_message);
-
-                        // adjust the IMU data, and publish to ROS
-                        auto imu_raw_message = sensor_msgs::msg::Imu();
-                        auto imu_mag_message = sensor_msgs::msg::MagneticField();
-                        imu_raw_message.header.stamp = _now;
-                        imu_mag_message.header.stamp = _now;
-
-                        imu_raw_message.linear_acceleration.x = 0.0;
-                        imu_raw_message.linear_acceleration.y = 0.0;
-                        imu_raw_message.linear_acceleration.z = 0.0;
-                        imu_raw_message.angular_velocity.x = 0.0;
-                        imu_raw_message.angular_velocity.y = 0.0;
-                        imu_raw_message.angular_velocity.z = 0.0;
-                        imu_mag_message.magnetic_field.x = 0.0;
-                        imu_mag_message.magnetic_field.y = 0.0;
-                        imu_mag_message.magnetic_field.z = 0.0;
-
-                        // if(from_hardware_node.find["rbf"] != from_hardware_node.end())
-                        // {
-                        //     from_hardware_node("rbf").is_object();
-                        //     if(from_hardware_node["rbf"].find("imu") != from_hardware_node["rbf"].end())
-                        //     {
-                        //         from_hardware_node["rbf"]["imu"].is_object();
-                        //         if(from_hardware_node["rbf"]["imu"].find("a") != from_hardware_node["rbf"]["imu"].end())
-                        //         {
-                        //             from_hardware_node["rbf"]["imu"]["a"].is_array();
-                        //             if(from_hardware_node["rbf"]["imu"]["a"].size() >= 3)
-                        //             {
-                        //                 imu_raw_message.linear_acceleration.x = (-1.0f * from_hardware_node["rbf"]["imu"]["a"][0]);
-                        //                 imu_raw_message.linear_acceleration.y = from_hardware_node["rbf"]["imu"]["a"][1];
-                        //                 imu_raw_message.linear_acceleration.z = from_hardware_node["rbf"]["imu"]["a"][2];
-                        //             }
-                        //             if(from_hardware_node["rbf"]["imu"]["g"].size() >= 3)
-                        //             {
-                        //                 imu_raw_message.angular_velocity.x = from_hardware_node["rbf"]["imu"]["g"][0];
-                        //                 imu_raw_message.angular_velocity.y = from_hardware_node["rbf"]["imu"]["g"][1];
-                        //                 imu_raw_message.angular_velocity.z = from_hardware_node["rbf"]["imu"]["g"][2];
-                        //             }
-                        //             if(from_hardware_node["rbf"]["imu"]["m"].size() >= 3)
-                        //             {
-                        //                 imu_mag_message.magnetic_field.x = from_hardware_node["rbf"]["imu"]["m"][0];
-                        //                 imu_mag_message.magnetic_field.y = from_hardware_node["rbf"]["imu"]["m"][1];
-                        //                 imu_mag_message.magnetic_field.z = from_hardware_node["rbf"]["imu"]["m"][2];
-                        //             }
-                        //         }
-                        //     }
-                        // }
-                        // imu_raw_publisher_->publish(imu_raw_message);
-                        // imu_mag_publisher_->publish(imu_mag_message);
-                    }
-                    catch (json::parse_error &pe)
-                    {
-                        cerr << "JSON parse error: " << pe.what() << endl;
-                    }
-                }
-            }
-            else
-            {
-                cerr << "UART receive error: " << error.message() << endl;
             }
         }
 
