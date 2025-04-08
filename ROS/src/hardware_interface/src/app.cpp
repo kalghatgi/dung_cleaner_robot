@@ -19,6 +19,9 @@
 #include "odometry.hpp"
 #include "nlohmann/json.hpp"
 
+#define PACKET_START_CHARACTER '\r'
+#define PACKET_END_CHARACTER '\n'
+
 #define LIMIT(x, min, max) ((x < min) ? min : (x > max) ? max : x)
 #define SIGN(x) ((x > 0) ? 1 : -1)
 
@@ -35,7 +38,6 @@ class robot_base_node : public rclcpp::Node {
     bool command_received_ = false;
     rclcpp::Time last_command_time_;
     const double WATCHDOG_TIMEOUT = 0.5;
-    rclcpp::Time previous = this->get_clock()->now();
 
     public:
         // for transferring the parameter value into a variable for use inside the code
@@ -54,7 +56,7 @@ class robot_base_node : public rclcpp::Node {
             while(rclcpp::ok())
             {
                 boost::system::error_code _ec;
-                std::size_t _bytes_transferred = boost::asio::read_until(this->serial_port_, this->rx_buffer_, '\n', _ec);
+                std::size_t _bytes_transferred = boost::asio::read_until(this->serial_port_, this->rx_buffer_, PACKET_END_CHARACTER, _ec);
 
                 if(_ec)
                 {
@@ -66,16 +68,11 @@ class robot_base_node : public rclcpp::Node {
                     std::istream is(&this->rx_buffer_);
                     std::string _received_line;
                     std::getline(is, _received_line); // extract till \n
-                    if(_received_line[0] == '{')
+                    if(_received_line[0] == PACKET_START_CHARACTER)
                     {
-                        cout<<"Received a potential json packet: "<<_received_line<<endl;
-
-                        // json from_hardware_node = json::parse(receivedPacket);
-                        // cout << "Received JSON: " << from_hardware_node.dump(4) << endl;
+                        // RCLCPP_INFO(this->get_logger(), "%s", &_received_line[0]);
                         
                         rclcpp::Time _now = this->get_clock()->now();
-                        float _dt = _now.seconds() - previous.seconds();
-                        previous = _now;
 
                         auto odometry_message = nav_msgs::msg::Odometry();
                         odometry_message.header.stamp = _now;
@@ -99,12 +96,11 @@ class robot_base_node : public rclcpp::Node {
                                     if(from_hardware_node["rbf"]["wf"]["v"].size() >= 2)
                                     {
                                         // Calculate the wheel odometry, and publish to ROS.
-                                        wheel_odom.setWheelParams(WHEEL_SEPERATION, WHEEL_RADIUS, WHEEL_RADIUS);
+                                        wheel_odom.setWheelParams(WHEEL_SEPARATION, WHEEL_RADIUS, WHEEL_RADIUS);
                                         wheel_odom.updateFromVelocity
                                         (
-                                            (-1.0f * from_hardware_node["rbf"]["wf"]["v"][0].get<float>() * _dt * WHEEL_CIRCUMFERENCE), // meters per second
-                                            (from_hardware_node["rbf"]["wf"]["v"][1].get<float>() * _dt * WHEEL_CIRCUMFERENCE),
-                                            _dt
+                                            (-1.0f * from_hardware_node["rbf"]["wf"]["v"][0].get<float>() * WHEEL_CIRCUMFERENCE), // rotations-per-second --> meters-per-second
+                                            (-1.0f * from_hardware_node["rbf"]["wf"]["v"][1].get<float>() * WHEEL_CIRCUMFERENCE)
                                         );
                                         double _Position_X = wheel_odom.getX(); // aka cartesian coordinates
                                         double _Position_Y = wheel_odom.getY();
@@ -225,7 +221,7 @@ class robot_base_node : public rclcpp::Node {
     private:
         const double WHEEL_RADIUS = 0.100;  // meters
         const double WHEEL_CIRCUMFERENCE = (2 * M_PI * WHEEL_RADIUS);
-        const double WHEEL_SEPERATION = 0.555;  // meters
+        const double WHEEL_SEPARATION = 0.555;  // meters
         double NEW_command_linear_X = 0, NEW_command_angular_Z = 0;
         rclcpp::Time previous_time_;
         rclcpp::TimerBase::SharedPtr watchdog_timer_;
@@ -340,7 +336,7 @@ class robot_base_node : public rclcpp::Node {
                 packet,
                 "{\"rbc\":{\"wc\":{\"t\":[0.0,0.0],\"v\":[%.2f,%.2f],\"p\":[0.0,0.0]}}},{\"rpc\":{\"cc\":{\"t\":[0.0,0.0]}}}\n",
                 // reserved for rbc/wc/t
-                (-1.0f * (NEW_command_linear_X - (NEW_command_angular_Z * WHEEL_SEPERATION / 2)) / WHEEL_CIRCUMFERENCE), (-1.0f * (NEW_command_linear_X + (NEW_command_angular_Z * WHEEL_SEPERATION / 2)) / WHEEL_CIRCUMFERENCE)
+                (-1.0f * (NEW_command_linear_X - (NEW_command_angular_Z * WHEEL_SEPARATION / 2)) / WHEEL_CIRCUMFERENCE), (-1.0f * (NEW_command_linear_X + (NEW_command_angular_Z * WHEEL_SEPARATION / 2)) / WHEEL_CIRCUMFERENCE)
                 // reserved for rbc/wc/p
                 // reserved for rpc/cc/t
             );
