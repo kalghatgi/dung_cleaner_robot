@@ -1,3 +1,6 @@
+# v1.3
+* Added a Start and End character for the JSON packet.
+
 # v1.2
 * Disabled inside menuconfig, the UART port used for log output.
 

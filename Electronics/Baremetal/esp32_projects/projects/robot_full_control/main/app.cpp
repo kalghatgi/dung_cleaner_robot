@@ -60,6 +60,8 @@
 #define ENCODER_PPR (ENCODER_CPR / 4)
 #define MOTOR_GEAR_RATIO 46.566 // Reference: https://robokits.co.in/motors/rhino-planetary-geared-24v-motor/100w-24v-encoder-servo-motor/rhino-servo-24v-60rpm-100w-ig52-extra-heavy-duty-planetary-encoder-servo-motor-160kgcm#:~:text=ratio%20is%201%20%3A-,47,-the%20Optical%20encoder
 #define BASE_MOTOR_ROTATION_PER_ENCODER_COUNT (1.0f / (ENCODER_PPR * MOTOR_GEAR_RATIO)) // Base motor is just the motor without considering its gearbox
+#define PACKET_START_CHARACTER '\r'
+#define PACKET_END_CHARACTER '\n'
 
 typedef enum
 {
@@ -392,7 +394,8 @@ void TIMER__ros_node_data_sender_callback(TimerHandle_t xTimer)
     sprintf
     (
         _to_ros_node,
-        "{\"rbf\":{\"wf\":{\"t\":[%i,%i],\"v\":[%.2f,%.2f],\"p\":[%lli,%lli]},\"imu\":{\"a\":[%f,%f,%f],\"g\":[%f,%f,%f],\"m\":[%f,%f,%f]}},\"rpf\":{\"ls\":[%d,%d],\"ds\":%.1f}}\n",
+        "%c{\"rbf\":{\"wf\":{\"t\":[%i,%i],\"v\":[%.2f,%.2f],\"p\":[%lli,%lli]},\"imu\":{\"a\":[%f,%f,%f],\"g\":[%f,%f,%f],\"m\":[%f,%f,%f]}},\"rpf\":{\"ls\":[%d,%d],\"ds\":%.1f}}%c",
+        PACKET_START_CHARACTER,
         base_motor_duty_cycle[0], base_motor_duty_cycle[1],
         base_motor_velocity_feedback[0], base_motor_velocity_feedback[1],
         (new_encoder_count[0] % ENCODER_PPR), (new_encoder_count[1] % ENCODER_PPR),
@@ -400,7 +403,8 @@ void TIMER__ros_node_data_sender_callback(TimerHandle_t xTimer)
         (gyro_DPS.x * DEGREES_TO_RADIANS), (gyro_DPS.y * DEGREES_TO_RADIANS), (gyro_DPS.z * DEGREES_TO_RADIANS), // radians per second
         (mag_uT.x * 0.001f), (mag_uT.y * 0.001f), (mag_uT.z * 0.001f), // nano-Tesla
         payload_limit_switch_status[0], payload_limit_switch_status[1],
-        payload_distance_sensor_reading[0]
+        payload_distance_sensor_reading[0],
+        PACKET_END_CHARACTER
     );
     uart_write_bytes(UART_PORT, &_to_ros_node[0], strlen(_to_ros_node));
 }
