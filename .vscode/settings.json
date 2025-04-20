@@ -59,5 +59,11 @@
         "xmemory": "cpp",
         "xstring": "cpp",
         "xtr1common": "cpp"
-    }
+    },
+    "python.testing.pytestArgs": [
+        "."
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "idf.pythonInstallPath": "c:\\Users\\cheta\\esp\\tools\\idf-python\\3.11.2\\python.exe"
 }

@@ -184,7 +184,7 @@ def generate_launch_description():
 
     # Start navigation
     start_nav2_bringup_cmd = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(nav2_bringup_dir, 'launch', 'bringup_launch.py')),
+        PythonLaunchDescriptionSource(os.path.join(robot_bringup_dir, 'launch', 'bringup_with_coverage_launch.py')),
         launch_arguments={
             'namespace': namespace,
             'slam': 'False',

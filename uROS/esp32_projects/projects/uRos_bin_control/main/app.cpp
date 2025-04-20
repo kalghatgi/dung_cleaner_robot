@@ -94,100 +94,120 @@ void Set_Motor_Speed()
 
 void TASK_motor_control(void *args)
 {
-    bool bottom_limit_reached = false;
-    bool top_limit_reached = false;
-    bool distance_limit = false;
-    bool bin_empty_button_pressed = false;
-    static bool relay_on = false;
+    bool bottom_limit_active; // True if MIN_LIMIT_SWITCH_GPIO reads 0 (pressed)
+    bool top_limit_active;    // True if MAX_LIMIT_SWITCH_GPIO reads 0 (pressed)
+    bool distance_active;     // True if DISTANCE_SENSOR_GPIO reads 1 (triggered)
+    bool bin_empty_pressed;   // True if BIN_EMPTY_BUTTON_GPIO reads 0 (pressed)
+
+    ESP_LOGI(TAG, "Starting Motor Control Task (State Machine Logic)");
 
     while (true)
     {
-        bottom_limit_reached = gpio_get_level(MIN_LIMIT_SWITCH_GPIO);
-        top_limit_reached = gpio_get_level(MAX_LIMIT_SWITCH_GPIO);
-        distance_limit = gpio_get_level(DISTANCE_SENSOR_GPIO);
-        bin_empty_button_pressed = gpio_get_level(BIN_EMPTY_BUTTON_GPIO);
+        // 1. Read Inputs and Determine Active State
+        bottom_limit_active = (gpio_get_level(MIN_LIMIT_SWITCH_GPIO) == 0);
+        top_limit_active    = (gpio_get_level(MAX_LIMIT_SWITCH_GPIO) == 0);
+        distance_active     = (gpio_get_level(DISTANCE_SENSOR_GPIO) == 1);
+        bin_empty_pressed   = (gpio_get_level(BIN_EMPTY_BUTTON_GPIO) == 0);
 
-        ESP_LOGI(TAG, "Bottom limit switch: %d", bottom_limit_reached);
-        ESP_LOGI(TAG, "Top limit switch: %d", top_limit_reached);
-        ESP_LOGI(TAG, "Distance sensor: %d", distance_limit);
-        ESP_LOGI(TAG, "Bin empty button pressed: %d", bin_empty_button_pressed);
+        ESP_LOGD(TAG, "Inputs - Bottom:%d, Top:%d, Dist:%d, Btn:%d",
+                 bottom_limit_active, top_limit_active, distance_active, bin_empty_pressed);
 
-        // New logic to control motor1 and relay output
-        // Logic 1: Distance sensor is true, lower limit is false, top limit is true, bin button is false
-        // if (distance_limit && !bottom_limit_reached && top_limit_reached && !bin_empty_button_pressed)
-        if (!bin_empty_button_pressed)
+        // 2. Set Default Outputs (Motors OFF, Relay OFF)
+        Motor_Duty_Cycle[0] = 0.0;
+        Motor_Duty_Cycle[1] = 0.0;
+        gpio_set_level(RELAY_GPIO, 0); // Default relay to OFF
+
+        // 3. Evaluate States based on User Definition
+        // Note: Using 'else if' ensures only one state is active per cycle. Order can matter if states overlap.
+
+        // State 7: Start Motor 1 (Conveyor)
+        // Inputs: Bottom ACTIVE, Top INACTIVE, Dist ACTIVE, Btn PRESSED
+        if (bottom_limit_active && !top_limit_active && distance_active && bin_empty_pressed)
         {
-            if (distance_limit && !bottom_limit_reached && top_limit_reached)
-            {
-                Motor_Duty_Cycle[0] = 50.0; // Motor1 at 10% duty cycle
-                Motor_Duty_Cycle[1] = 0.0;  // Motor2 off
-                gpio_set_level(RELAY_GPIO, 1); // Turn on the relay
-                ESP_LOGI(TAG, "Condition 1: Conveyor ON, Relay ON for 500 ticks.");
-                vTaskDelay(pdMS_TO_TICKS(500)); // Delay for 500 ticks
-
-                gpio_set_level(RELAY_GPIO, 0); // Turn off the relay
-                ESP_LOGI(TAG, "Relay OFF for 2000 ticks.");
-                vTaskDelay(pdMS_TO_TICKS(1000)); // Delay for 2000 ticks
-            }
-            else if(!distance_limit && !bottom_limit_reached && top_limit_reached)
-            {
-                Motor_Duty_Cycle[0] = 0.0; // Stop Motor1
-                gpio_set_level(RELAY_GPIO, 1); // Turn on the relay
-                ESP_LOGI(TAG, "Condition 2: Bin Full Conveyor stopped.");
-                vTaskDelay(pdMS_TO_TICKS(100)); // Delay for 100 ticks
-
-                gpio_set_level(RELAY_GPIO, 0); // Turn off the relay
-                ESP_LOGI(TAG, "Relay OFF for 2000 ticks.");
-                vTaskDelay(pdMS_TO_TICKS(200)); // Delay for 2000 ticks
-            }
+            ESP_LOGI(TAG, "State 7: Conveyor ON");
+            Motor_Duty_Cycle[0] = 100.0;
+            // Optional: Control relay similar to old Condition 1?
+            // gpio_set_level(RELAY_GPIO, 1);
         }
-        else if (bin_empty_button_pressed)
+        // State 1 & 2: Lift Motor 2 (Up)
+        // Inputs: Top INACTIVE, Dist INACTIVE, Btn NOT PRESSED
+        //         (Covers both Bottom Active and Bottom Inactive cases as long as Top is Inactive)
+        else if (!top_limit_active && !distance_active && !bin_empty_pressed)
         {
-            if(!bottom_limit_reached && top_limit_reached && !distance_limit)
-            {
-                Motor_Duty_Cycle[0] = 0.0;
-                Motor_Duty_Cycle[1] = 50.0;
-                gpio_set_level(RELAY_GPIO, 0); // Turn off the relay
-                ESP_LOGI(TAG, "Condition 3: Bin full, Lift Bin.");
-                if(!top_limit_reached && bottom_limit_reached)
-                {
-                    Motor_Duty_Cycle[0] = 0.0;
-                    Motor_Duty_Cycle[1] = 0.0;
-                    gpio_set_level(RELAY_GPIO, 1); // Turn on the relay
-                    vTaskDelay(pdMS_TO_TICKS(700)); // Delay for 1000 ticks
-                    gpio_set_level(RELAY_GPIO, 0); // Turn off the relay
-                    vTaskDelay(pdMS_TO_TICKS(3000)); // Delay for 1000 ticks
-                }
-            }
+             // We only lift if the bottom limit is NOT active OR if it is the very first state specified (State 1: Bottom Active -> Start Lift)
+             // Let's implement the combined rule: Lift if Top is inactive, Dist inactive, Button released.
+             // The stop condition at the top (State 3) or bottom (implicit stop) will handle limits.
+             // Check specifically for State 1 to initiate lift from bottom:
+             if (bottom_limit_active && !top_limit_active && !distance_active && !bin_empty_pressed) {
+                 ESP_LOGI(TAG, "State 1: Start Lifting Bin");
+                 Motor_Duty_Cycle[1] = 50.0;
+             }
+             // Check for State 2 condition to continue lift:
+             else if (!bottom_limit_active && !top_limit_active && !distance_active && !bin_empty_pressed) {
+                 ESP_LOGI(TAG, "State 2: Continue Lifting Bin");
+                 Motor_Duty_Cycle[1] = 50.0;
+             }
+             // If bottom limit is active but it's not State 1, stop (safety).
+             else if (bottom_limit_active) {
+                  ESP_LOGW(TAG,"State (Lift Logic): Unexpected state with bottom limit active, stopping lift.");
+             }
+
         }
-        else if(!bin_empty_button_pressed && bottom_limit_reached)
+        // State 4 & 5: Lower Motor 2 (Down)
+        // Inputs: Bottom INACTIVE, Dist INACTIVE, Btn PRESSED
+        //         (Covers both Top Active and Top Inactive cases as long as Bottom is Inactive)
+        else if (!bottom_limit_active && !distance_active && bin_empty_pressed)
         {
-            Motor_Duty_Cycle[0] = 0.0;
-            Motor_Duty_Cycle[1] = -50.0;
-            gpio_set_level(RELAY_GPIO, 1); // Turn off the relay
-            ESP_LOGI(TAG, "Condition 4: Bin Empty, Lower Bin");
-            vTaskDelay(pdMS_TO_TICKS(1000)); // Delay for 1000 ticks
-            if (!bottom_limit_reached)
-            {
-                Motor_Duty_Cycle[0] = 0.0;
-                Motor_Duty_Cycle[1] = 0.0;
-                gpio_set_level(RELAY_GPIO, 0); // Turn off the relay
-                ESP_LOGI(TAG, "Condition 5: Bin Empty.");
+            // Check specifically for State 4 to initiate lower from top:
+            if (!bottom_limit_active && top_limit_active && !distance_active && bin_empty_pressed) {
+                 ESP_LOGI(TAG, "State 4: Start Lowering Bin");
+                 Motor_Duty_Cycle[1] = -50.0;
+            }
+            // Check for State 5 condition to continue lowering:
+            else if (!bottom_limit_active && !top_limit_active && !distance_active && bin_empty_pressed) {
+                 ESP_LOGI(TAG, "State 5: Continue Lowering Bin");
+                 Motor_Duty_Cycle[1] = -50.0;
+            }
+             // If top limit is active but it's not State 4, stop (safety).
+            else if (top_limit_active) {
+                ESP_LOGW(TAG, "State (Lower Logic): Unexpected state with top limit active, stopping lower.");
             }
         }
-        else // Distance sensor is true
+        // State 3: Stop Motor 2 at Top
+        // Inputs: Bottom INACTIVE, Top ACTIVE, Dist INACTIVE, Btn NOT PRESSED
+        else if (!bottom_limit_active && top_limit_active && !distance_active && !bin_empty_pressed)
         {
-            gpio_set_level(RELAY_GPIO, 0); // Turn off the relay permanently
-            relay_on = false;
-            ESP_LOGI(TAG, "Relay OFF: Distance sensor is true.");
+            ESP_LOGI(TAG, "State 3: Top Limit Reached, Bin Stopped");
+            // Motors already stopped by default
+        }
+        // State 6: Stop Motor 2 at Bottom
+        // Inputs: Bottom ACTIVE, Top INACTIVE, Dist INACTIVE, Btn PRESSED
+        else if (bottom_limit_active && !top_limit_active && !distance_active && bin_empty_pressed)
+        {
+            ESP_LOGI(TAG, "State 6: Bottom Limit Reached, Bin Stopped");
+            // Motors already stopped by default
+        }
+        // Default: Handle any undefined states
+        else
+        {
+            // Motors are already stopped by default settings above.
+            // Log if it's not one of the expected stopped states (3 or 6) or running states (1,2,4,5,7)
+            if (!( (!bottom_limit_active && top_limit_active && !distance_active && !bin_empty_pressed) || // State 3
+                   (bottom_limit_active && !top_limit_active && !distance_active && bin_empty_pressed) )) // State 6
+            {
+                 ESP_LOGD(TAG, "Default State: No specific action defined, Motors Stopped.");
+            }
         }
 
+        // 4. Apply Motor Speeds
         Set_Motor_Speed();
-        vTaskDelay(pdMS_TO_TICKS(2000));
+
+        // 5. Delay
+        vTaskDelay(pdMS_TO_TICKS(100)); // Reduced delay for faster response to state changes
     }
+
     vTaskDelete(NULL);
 }
-
 
 void Setup_PWM()
 {
