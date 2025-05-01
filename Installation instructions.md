@@ -1,5 +1,8 @@
 # ROS:
+HEAD:ROS/src/suru_v1_0/README.md
 sudo apt install ros-humble-desktop ros-humble-navigation2 ros-humble-nav2-bringup ros-humble-joint-state-publisher ros-humble-robot-localization ros-humble-xacro ros-humble-imu-complementary-filter ros-humble-imu-filter-madgwick ros-humble-rmw-cyclonedds-cpp ros-humble-behaviortree-cpp ros-humble-filters
+
+sudo apt install ros-humble-desktop ros-humble-navigation2 ros-humble-nav2-bringup ros-humble-joint-state-publisher ros-humble-robot-localization ros-humble-xacro ros-humble-imu-complementary-filter ros-humble-imu-filter-madgwick ros-humble-filters ros-humble-rmw-cyclonedds-cpp ros-humble-behaviortree-cpp libboost-all-dev build-essential python3-colcon-common-extensions
 
 # microROS:
 source /opt/ros/humble/setup.bash
@@ -22,16 +25,17 @@ alias getnodes='source ~/dung_cleaner_robot/ROS/install/local_setup.bash'
 alias geturos='source ~/uros_ws/install/local_setup.bash'
 
 # ROS nodes
-cd dung_cleaner_robot/ROS/src/Fields2Cover-1.2.1
+cd dung_cleaner_robot/ROS/src/Fields2Cover
 mkdir -p build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make -j$(nproc);
 sudo make install
-cd dung_cleaner_robot/ROS
-gethumble
+cd ../../../
+getros
 colcon build --symlink-install
 
+HEAD:ROS/src/suru_v1_0/README.md
 
 ####---- ROS 2 Coverage Path Planner using Fields2Cover ----####
 
@@ -151,3 +155,7 @@ This script underwent significant debugging primarily due to API differences and
 14. **`AttributeError: getState` on `f2c.Path`**: The `f2c.Path` object does not support indexed access via `getState(i)`. **Fix:** Used `dir(path_object)` to discover the `.states` attribute. Modified `publish_path` to access `path_object.states` and iterate over that collection. *(Also confirmed via error messages that direct iteration `for state in path:` and indexing `path[i]` were not supported).*
 
 ## The Code (`coverage_planner_node.py`)
+=======
+# Permissions
+sudo usermod -a -G dialout $USER
+sudo chmod a+rw /dev/tty*
