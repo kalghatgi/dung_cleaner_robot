@@ -1,5 +1,5 @@
 # ROS:
-sudo apt install ros-humble-desktop ros-humble-navigation2 ros-humble-nav2-bringup ros-humble-joint-state-publisher ros-humble-robot-localization ros-humble-xacro ros-humble-imu-complementary-filter ros-humble-imu-filter-madgwick ros-humble-rmw-cyclonedds-cpp ros-humble-behaviortree-cpp
+sudo apt install ros-humble-desktop ros-humble-navigation2 ros-humble-nav2-bringup ros-humble-joint-state-publisher ros-humble-robot-localization ros-humble-xacro ros-humble-imu-complementary-filter ros-humble-imu-filter-madgwick ros-humble-filters ros-humble-rmw-cyclonedds-cpp ros-humble-behaviortree-cpp libboost-all-dev build-essential python3-colcon-common-extensions
 
 # microROS:
 source /opt/ros/humble/setup.bash
@@ -22,12 +22,16 @@ alias getnodes='source ~/dung_cleaner_robot/ROS/install/local_setup.bash'
 alias geturos='source ~/uros_ws/install/local_setup.bash'
 
 # ROS nodes
-cd dung_cleaner_robot/ROS/src/Fields2Cover-1.2.1
+cd dung_cleaner_robot/ROS/src/Fields2Cover
 mkdir -p build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make -j$(nproc);
 sudo make install
-cd dung_cleaner_robot/ROS
-gethumble
+cd ../../../
+getros
 colcon build --symlink-install
+
+# Permissions
+sudo usermod -a -G dialout $USER
+sudo chmod a+rw /dev/tty*
