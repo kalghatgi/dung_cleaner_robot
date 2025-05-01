@@ -1,3 +1,8 @@
+# v1.9
+* Added free space exctraction from generated map files : terrace_map.yaml and terrace_map.pgm
+# Added coverage planner node which uses free space extraction
+# Updated suru_navigation_with_coverage_launch.py which uses coverage planner node and uploads generated path to the map on rviz.
+
 # v1.8
 * Added params and launch file for navigation coverage planner.
 * Updated Inflation radius for local and global costmap.
