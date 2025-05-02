@@ -1,4 +1,12 @@
+# v2.1
+## suru_navigation_multi_robot_launch.py
+* Corrected the topic names  inside yaml file, for properly prefixing the namespaces
+* Moved the nav2_bringup and rviz launch files out of the PushRosNamespace group, inorder to properly add the namespace.
+* Added the serial_port input to rplidar launch, and usb_port input to hardware_node inorder to avoid conflicts while launching other nodes.
+* Removed unwanted nodes from the launch file.
+
 # v2.0
+## suru_navigation_multi_robot_launch.py
 * Made changes to force namespace to all ROS nodes and launch files executed from the suru_navigation_launch.py
 * Changed the rviz file to the namespace supported one, provided in nav2_bringup directory.
 * Added the hardware_interface ROS node to the suru_navigation_launch.py

@@ -119,19 +119,13 @@ def generate_launch_description():
     parameters=[ekf_file_path]
   )
 
-  start_robot_base_uROS_node = Node(
-    package='micro_ros_agent',
-    executable='micro_ros_agent',
-    name='uROS_robot_base',
-    arguments=["serial", "-D", "/dev/ttyUSB1", "-b", "460800"]
-  )
-
   start_hardware_interface_ROS_node = Node(
     package='hardware_interface',
     executable='hardware_interface_node',
     name='hardware_interface_node',
     parameters=[{
-      'velocity_input_topic': 'cmd_vel'
+      'velocity_input_topic': 'cmd_vel',
+      'usb_port': '/dev/ttyUSB0'
     }]
   )
 
@@ -149,15 +143,6 @@ def generate_launch_description():
       )
     }],
     remappings=remappings
-  )
-
-  start_robot_base_ROS_node = Node(
-    package='robot_base',
-    executable='robot_base_node',
-    name='robot_base_ROS_node',
-    parameters=[{
-      'velocity_input_topic': 'cmd_vel'
-    }]
   )
 
   start_complementary_filter_ROS_node = Node(
@@ -181,7 +166,8 @@ def generate_launch_description():
     PythonLaunchDescriptionSource(os.path.join(lidar_package_dir, 'launch', 'rplidar_s1_launch.py')),
     launch_arguments={
       'topic_name': 'scan_raw',
-      'frame_id': 'Lidar_link' # from the urdf
+      'frame_id': 'Lidar_link', # from the urdf
+      'serial_port': '/dev/ttyUSB1'
     }.items(),
   )
 
@@ -189,7 +175,9 @@ def generate_launch_description():
     PythonLaunchDescriptionSource(os.path.join(robot_bringup_dir, 'launch', 'rviz_launch.py')),
     condition=IfCondition(use_rviz),
     launch_arguments={
-      'rviz_config': rviz_config_file
+      'use_namespace': 'True',
+      'rviz_config': rviz_config_file,
+      'namespace': auto_namespace
     }.items()
   )
 
@@ -200,6 +188,8 @@ def generate_launch_description():
       'map': map_yaml_file,
       'use_sim_time': use_sim_time,
       'params_file': params_file,
+      'use_namespace': 'True',
+      'namespace': auto_namespace,
       'autostart': autostart
     }.items()
   )
@@ -233,23 +223,20 @@ def generate_launch_description():
   start_namespaced_nodes = GroupAction([
     PushRosNamespace(auto_namespace),  # Force the namespace to everthing inside
 
-    # All nodes
+    # Nodes
     start_robot_state_publisher_ROS_node,
-    # start_robot_base_ROS_node,
-    # start_robot_base_uROS_node, #
     start_hardware_interface_ROS_node,
     start_robot_ekf_ROS_node,
     start_complementary_filter_ROS_node,
     start_map_to_odom_transform_publisher_ROS_node,
 
-    # All launch files
+    # Launch files
     start_laser_filter_ROS_node,
     start_lidar_ROS_node,
-    start_nav2_bringup_ROS_node,
-    start_rviz_ROS_node,
   ])
 
-  # Add the actions to launch all of the nodes under a namespace
   ld.add_action(start_namespaced_nodes)
+  ld.add_action(start_nav2_bringup_ROS_node) # this launch calls PushRosNamespace internally
+  ld.add_action(start_rviz_ROS_node) # so does this one
 
   return ld
