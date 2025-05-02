@@ -127,6 +127,8 @@ class robot_base_node : public rclcpp::Node {
                         auto imu_mag_message = sensor_msgs::msg::MagneticField();
                         imu_raw_message.header.stamp = _now;
                         imu_mag_message.header.stamp = _now;
+                        imu_raw_message.header.frame_id = "imu_link";
+                        imu_mag_message.header.frame_id = "imu_link";
 
                         imu_raw_message.linear_acceleration.x = 0.0;
                         imu_raw_message.linear_acceleration.y = 0.0;

@@ -1,3 +1,6 @@
+# v1.3
+* Added the frame name in the headers of imu messages.
+
 # v1.2
 * Corrected the odometry calculation formula by excluding the time delta (dT).
 * Corrected the sign of the obtained velocity before odometry calculation.
