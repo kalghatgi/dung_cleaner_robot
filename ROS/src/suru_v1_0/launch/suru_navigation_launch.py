@@ -4,11 +4,11 @@ import launch_ros.parameter_descriptions
 import launch
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, GroupAction
-from launch.conditions import IfCondition
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, TextSubstitution
-from launch_ros.actions import Node, PushRosNamespace
+from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import Node
 
 def get_last_octet_of_ip():
     """Retrieve the last octet of the system's IP address for dynamic namespace generation."""
@@ -30,13 +30,12 @@ def generate_launch_description():
   map_file_path = os.path.join(robot_bringup_dir, 'maps', 'terrace_map.yaml')
   params_file_path = os.path.join(robot_bringup_dir, 'params', 'robot_navigation_parameters.yaml')
   laser_filter_params_file_path = os.path.join(robot_bringup_dir, 'params', 'laser_filter.yaml')
-  rviz_file_path = os.path.join(robot_bringup_dir, 'rviz', 'nav2_namespaced_view.rviz')
+  rviz_file_path = os.path.join(robot_bringup_dir, 'rviz', 'nav2_default_view.rviz')
   ekf_file_path = os.path.join(robot_bringup_dir, 'config', 'ekf_wheel_imu.yaml')
   auto_namespace = get_last_octet_of_ip()
 
   # Create the launch configuration variables
   namespace = LaunchConfiguration('namespace')
-  use_namespace = LaunchConfiguration('use_namespace')
   use_robot_state_pub = LaunchConfiguration('use_robot_state_pub')
   map_yaml_file = LaunchConfiguration('map')
   use_sim_time = LaunchConfiguration('use_sim_time')
@@ -52,13 +51,13 @@ def generate_launch_description():
   # Declare the launch arguments
   declare_namespace_cmd = DeclareLaunchArgument(
     name='namespace',
-    default_value=TextSubstitution(text=auto_namespace),
-    description='Top-level namespace, dynamically set from IP address'
+    default_value='', # TextSubstitution(text=auto_namespace)
+    description='Top-level namespace'
   )
 
   declare_use_namespace_cmd = DeclareLaunchArgument(
     name='use_namespace',
-    default_value='True',
+    default_value='False',
     description='Whether to apply a namespace to the navigation stack'
   )
 
@@ -104,13 +103,6 @@ def generate_launch_description():
     description='Whether to start the robot state publisher'
   )
 
-  declare_use_rviz_cmd = DeclareLaunchArgument(
-    name='use_rviz',
-    default_value='True',
-    description='Whether to start RVIZ'
-  )
-
-  # declare the nodes
   start_robot_ekf_ROS_node = Node(
     package='robot_localization',
     executable='ekf_node',
@@ -129,11 +121,27 @@ def generate_launch_description():
     }]
   )
 
+  start_robot_base_uROS_node = Node(
+    package='micro_ros_agent',
+    executable='micro_ros_agent',
+    name='uROS_robot_base',
+    arguments=["serial", "-D", "/dev/ttyUSB1", "-b", "460800"]
+  )
+
+  declare_use_rviz_cmd = DeclareLaunchArgument(
+    name='use_rviz',
+    default_value='True',
+    description='Whether to start RVIZ'
+  )
+
+  # Specify the actions
+  # Subscribe to the joint states of the robot, and publish the 3D pose of each link.
   start_robot_state_publisher_ROS_node = Node(
     condition=IfCondition(use_robot_state_pub),
     package='robot_state_publisher',
     executable='robot_state_publisher',
     name='robot_state_publisher',
+    namespace=namespace,
     output='screen',
     parameters=[{
       'use_sim_time': use_sim_time,
@@ -143,6 +151,16 @@ def generate_launch_description():
       )
     }],
     remappings=remappings
+  )
+
+  start_robot_base_ROS_node = Node(
+    package='robot_base',
+    executable='robot_base_node',
+    name='robot_base_ROS_node',
+    namespace=namespace,
+    parameters=[{
+      'velocity_input_topic': '/cmd_vel'
+    }]
   )
 
   start_complementary_filter_ROS_node = Node(
@@ -175,21 +193,20 @@ def generate_launch_description():
     PythonLaunchDescriptionSource(os.path.join(robot_bringup_dir, 'launch', 'rviz_launch.py')),
     condition=IfCondition(use_rviz),
     launch_arguments={
-      'use_namespace': 'True',
-      'rviz_config': rviz_config_file,
-      'namespace': auto_namespace
+      'namespace': namespace,
+      'use_namespace': 'False',
+      'rviz_config': rviz_config_file
     }.items()
   )
 
   start_nav2_bringup_ROS_node = IncludeLaunchDescription(
     PythonLaunchDescriptionSource(os.path.join(nav2_bringup_dir, 'launch', 'bringup_launch.py')),
     launch_arguments={
+      'namespace': namespace,
       'slam': 'False',
       'map': map_yaml_file,
       'use_sim_time': use_sim_time,
       'params_file': params_file,
-      'use_namespace': 'True',
-      'namespace': auto_namespace,
       'autostart': autostart
     }.items()
   )
@@ -197,12 +214,9 @@ def generate_launch_description():
   start_map_to_odom_transform_publisher_ROS_node = Node(
     package='tf2_ros',
     executable='static_transform_publisher',
-    # name=f"{auto_namespace}_map_to_odom_tf_publisher",
-    # arguments=['0', '0', '0', '0', '0', '0', f"{auto_namespace}/map", f"{auto_namespace}/odom"],
-    name="map_to_odom_tf_publisher",
+    name='map_to_odom_tf_publisher',
     arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom'],
     output='screen',
-    remappings=remappings
   )
 
   # Create the launch description and populate
@@ -220,23 +234,17 @@ def generate_launch_description():
   ld.add_action(declare_use_robot_state_pub_cmd)
   ld.add_action(declare_use_rviz_cmd)
 
-  start_namespaced_nodes = GroupAction([
-    PushRosNamespace(auto_namespace),  # Force the namespace to everthing inside
-
-    # Nodes
-    start_robot_state_publisher_ROS_node,
-    start_hardware_interface_ROS_node,
-    start_robot_ekf_ROS_node,
-    start_complementary_filter_ROS_node,
-    start_map_to_odom_transform_publisher_ROS_node,
-
-    # Launch files
-    start_laser_filter_ROS_node,
-    start_lidar_ROS_node,
-  ])
-
-  ld.add_action(start_namespaced_nodes)
-  ld.add_action(start_nav2_bringup_ROS_node) # this launch calls PushRosNamespace internally
-  ld.add_action(start_rviz_ROS_node) # so does this one
+  # Add the actions to launch all of the navigation nodes
+  ld.add_action(start_rviz_ROS_node)
+  ld.add_action(start_laser_filter_ROS_node)
+  ld.add_action(start_lidar_ROS_node)
+  # ld.add_action(start_robot_base_uROS_node)
+  # ld.add_action(start_robot_base_ROS_node)
+  ld.add_action(start_hardware_interface_ROS_node)
+  ld.add_action(start_robot_ekf_ROS_node)
+  ld.add_action(start_complementary_filter_ROS_node)
+  ld.add_action(start_robot_state_publisher_ROS_node)
+  ld.add_action(start_map_to_odom_transform_publisher_ROS_node)
+  ld.add_action(start_nav2_bringup_ROS_node)
 
   return ld
