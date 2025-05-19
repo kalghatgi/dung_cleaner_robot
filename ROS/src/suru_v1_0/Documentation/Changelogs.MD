@@ -1,3 +1,7 @@
+# v2.0
+* Replaced the microROS node with a hardware interface node.
+* Modified the navigation launch file to run the hardware interface node instead of microROS.
+
 # v1.7
 * Adjustd the costmap so that the obot does not create a path too close to the walls.
 * Added B2 button for bin control.

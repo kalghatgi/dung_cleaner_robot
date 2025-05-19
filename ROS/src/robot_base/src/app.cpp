@@ -36,28 +36,28 @@ class robot_base_node : public rclcpp::Node
 
     robot_base_node(): Node("AMR__robot_base__ROS_node")
     {
-      this->declare_parameter("velocity_input_topic", "/cmd_vel");
+      this->declare_parameter("velocity_input_topic", "cmd_vel");
       _velocity_input_topic = this->get_parameter("velocity_input_topic");
       velocity_input_topic_ = _velocity_input_topic.as_string();
 
       encoder_raw_subscription_ = this->create_subscription<std_msgs::msg::Int64MultiArray>(
-        "/amr/encoder_raw", rclcpp::SensorDataQoS(), std::bind(&robot_base_node::encoder_raw_callback, this, _1));
+        "amr/encoder_raw", rclcpp::SensorDataQoS(), std::bind(&robot_base_node::encoder_raw_callback, this, _1));
 
       cmd_vel_subscription_ = this->create_subscription<geometry_msgs::msg::Twist>(
         velocity_input_topic_, rclcpp::SystemDefaultsQoS(), std::bind(&robot_base_node::cmd_vel_callback, this, _1));
 
       wheel_odometry_publisher_ = this->create_publisher<nav_msgs::msg::Odometry>(
-        "/odom/wheel_encoder", rclcpp::SystemDefaultsQoS());
+        "odom/wheel_encoder", rclcpp::SystemDefaultsQoS());
       wheel_odometry_timer_ = this->create_wall_timer(
         100ms, std::bind(&robot_base_node::wheel_odometry_timer_callback, this));
 
       wheel_velocity_publisher_ = this->create_publisher<sensor_msgs::msg::JointState>(
-        "/amr/wheel_speed", rclcpp::SystemDefaultsQoS());
+        "amr/wheel_speed", rclcpp::SystemDefaultsQoS());
       wheel_velocity_timer_ = this->create_wall_timer(
         50ms, std::bind(&robot_base_node::wheel_velocity_timer_callback, this));
 
       current_velocity_publisher_ = this->create_publisher<sensor_msgs::msg::JointState>(
-        "/amr/current_speed", rclcpp::SystemDefaultsQoS());
+        "amr/current_speed", rclcpp::SystemDefaultsQoS());
       current_velocity_timer_ = this->create_wall_timer(
         50ms, std::bind(&robot_base_node::current_velocity_timer_callback, this));
 

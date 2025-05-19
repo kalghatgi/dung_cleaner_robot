@@ -1,4 +1,5 @@
 import os
+import socket
 import launch_ros.parameter_descriptions
 import launch
 from ament_index_python.packages import get_package_share_directory
@@ -8,6 +9,16 @@ from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
+
+def get_last_octet_of_ip():
+    """Retrieve the last octet of the system's IP address for dynamic namespace generation."""
+    try:
+        hostname = socket.gethostname()
+        ip_address = socket.gethostbyname(hostname)
+        last_octet = ip_address.split(".")[-1]  # Extract last part
+        return f"robot_{last_octet}"
+    except Exception as e:
+        return "robot_default"  # Fallback in case of error
 
 def generate_launch_description():
   # Get all paths
@@ -21,6 +32,7 @@ def generate_launch_description():
   laser_filter_params_file_path = os.path.join(robot_bringup_dir, 'params', 'laser_filter.yaml')
   rviz_file_path = os.path.join(robot_bringup_dir, 'rviz', 'nav2_default_view.rviz')
   ekf_file_path = os.path.join(robot_bringup_dir, 'config', 'ekf_wheel_imu.yaml')
+  auto_namespace = get_last_octet_of_ip()
 
   # Create the launch configuration variables
   namespace = LaunchConfiguration('namespace')
@@ -39,7 +51,7 @@ def generate_launch_description():
   # Declare the launch arguments
   declare_namespace_cmd = DeclareLaunchArgument(
     name='namespace',
-    default_value='',
+    default_value='', # TextSubstitution(text=auto_namespace)
     description='Top-level namespace'
   )
 
@@ -91,12 +103,22 @@ def generate_launch_description():
     description='Whether to start the robot state publisher'
   )
 
-  start_robot_ekf_cmd = Node(
+  start_robot_ekf_ROS_node = Node(
     package='robot_localization',
     executable='ekf_node',
     name='ekf_filter_node',
     output='screen',
     parameters=[ekf_file_path]
+  )
+
+  start_hardware_interface_ROS_node = Node(
+    package='hardware_interface',
+    executable='hardware_interface_node',
+    name='hardware_interface_node',
+    parameters=[{
+      'velocity_input_topic': 'cmd_vel',
+      'usb_port': '/dev/ttyUSB0'
+    }]
   )
 
   start_robot_base_uROS_node = Node(
@@ -162,7 +184,8 @@ def generate_launch_description():
     PythonLaunchDescriptionSource(os.path.join(lidar_package_dir, 'launch', 'rplidar_s1_launch.py')),
     launch_arguments={
       'topic_name': 'scan_raw',
-      'frame_id': 'Lidar_link' # from the urdf
+      'frame_id': 'Lidar_link', # from the urdf
+      'serial_port': '/dev/ttyUSB1'
     }.items(),
   )
 
@@ -170,7 +193,7 @@ def generate_launch_description():
     PythonLaunchDescriptionSource(os.path.join(robot_bringup_dir, 'launch', 'rviz_launch.py')),
     condition=IfCondition(use_rviz),
     launch_arguments={
-      'namespace': '',
+      'namespace': namespace,
       'use_namespace': 'False',
       'rviz_config': rviz_config_file
     }.items()
@@ -215,9 +238,10 @@ def generate_launch_description():
   ld.add_action(start_rviz_ROS_node)
   ld.add_action(start_laser_filter_ROS_node)
   ld.add_action(start_lidar_ROS_node)
-  ld.add_action(start_robot_base_uROS_node)
-  ld.add_action(start_robot_base_ROS_node)
-  ld.add_action(start_robot_ekf_cmd)
+  # ld.add_action(start_robot_base_uROS_node)
+  # ld.add_action(start_robot_base_ROS_node)
+  ld.add_action(start_hardware_interface_ROS_node)
+  ld.add_action(start_robot_ekf_ROS_node)
   ld.add_action(start_complementary_filter_ROS_node)
   ld.add_action(start_robot_state_publisher_ROS_node)
   ld.add_action(start_map_to_odom_transform_publisher_ROS_node)
