@@ -118,18 +118,24 @@ def generate_launch_description():
           target_action=start_bin_control_uROS_agent_node, # Trigger when the bin agent node starts
           on_start=[
               TimerAction(
-                  period=3.0, # Wait 3 seconds after agent starts before publishing
+                  period=5.0, # Increased delay slightly for more buffer, adjust if needed
                   actions=[
                       ExecuteProcess(
                           # Use FindExecutable to ensure 'ros2' is found correctly
                           cmd=[
                               FindExecutable(name='ros2'),
-                              'topic', 'pub', '--once', '/bin_control/start_command',
+                              'topic', 'pub',
+                              # REMOVED --once
+                              '/bin_control/start_command',
                               'std_msgs/msg/Bool',
-                              # Use YAML format for the message data
-                              '"{data: true}"' # Note the quotes around the YAML string needed by cmd list
+                              # Pass YAML directly
+                              '{data: true}',
+                              # ADDED QoS setting for latching
+                              '--qos-durability', 'transient_local'
                           ],
-                          output='screen'
+                          # Keep output='screen' for debugging, consider removing later
+                          output='screen',
+                          # This process will now run until the launch file is stopped.
                       )
                   ]
               )

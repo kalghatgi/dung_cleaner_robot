@@ -133,17 +133,20 @@ void TASK_motor_control(void *args)
         // Inputs: Top INACTIVE, Dist INACTIVE, Btn NOT PRESSED
         //         (Covers both Bottom Active and Bottom Inactive cases as long as Top is Inactive)
         else if (!top_limit_active && !distance_active && !bin_empty_pressed)
+        // else if (!top_limit_active && !bin_empty_pressed)
         {
              // We only lift if the bottom limit is NOT active OR if it is the very first state specified (State 1: Bottom Active -> Start Lift)
              // Let's implement the combined rule: Lift if Top is inactive, Dist inactive, Button released.
              // The stop condition at the top (State 3) or bottom (implicit stop) will handle limits.
              // Check specifically for State 1 to initiate lift from bottom:
-             if (bottom_limit_active && !top_limit_active && !distance_active && !bin_empty_pressed) {
+            //  if (bottom_limit_active && !top_limit_active && !distance_active && !bin_empty_pressed)
+             if (bottom_limit_active && !top_limit_active && !bin_empty_pressed) {
                  ESP_LOGI(TAG, "State 1: Start Lifting Bin");
                  Motor_Duty_Cycle[1] = 50.0;
              }
              // Check for State 2 condition to continue lift:
-             else if (!bottom_limit_active && !top_limit_active && !distance_active && !bin_empty_pressed) {
+            //  else if (!bottom_limit_active && !top_limit_active && !distance_active && !bin_empty_pressed)
+             else if (!bottom_limit_active && !top_limit_active && !bin_empty_pressed) {
                  ESP_LOGI(TAG, "State 2: Continue Lifting Bin");
                  Motor_Duty_Cycle[1] = 50.0;
              }
@@ -151,20 +154,19 @@ void TASK_motor_control(void *args)
              else if (bottom_limit_active) {
                   ESP_LOGW(TAG,"State (Lift Logic): Unexpected state with bottom limit active, stopping lift.");
              }
-
         }
         // State 4 & 5: Lower Motor 2 (Down)
         // Inputs: Bottom INACTIVE, Dist INACTIVE, Btn PRESSED
         //         (Covers both Top Active and Top Inactive cases as long as Bottom is Inactive)
-        else if (!bottom_limit_active && !distance_active && bin_empty_pressed)
+        else if (!bottom_limit_active && bin_empty_pressed)
         {
             // Check specifically for State 4 to initiate lower from top:
-            if (!bottom_limit_active && top_limit_active && !distance_active && bin_empty_pressed) {
+            if (!bottom_limit_active && top_limit_active && bin_empty_pressed) {
                  ESP_LOGI(TAG, "State 4: Start Lowering Bin");
                  Motor_Duty_Cycle[1] = -50.0;
             }
             // Check for State 5 condition to continue lowering:
-            else if (!bottom_limit_active && !top_limit_active && !distance_active && bin_empty_pressed) {
+            else if (!bottom_limit_active && !top_limit_active && bin_empty_pressed) {
                  ESP_LOGI(TAG, "State 5: Continue Lowering Bin");
                  Motor_Duty_Cycle[1] = -50.0;
             }
@@ -173,16 +175,19 @@ void TASK_motor_control(void *args)
                 ESP_LOGW(TAG, "State (Lower Logic): Unexpected state with top limit active, stopping lower.");
             }
         }
+
         // State 3: Stop Motor 2 at Top
         // Inputs: Bottom INACTIVE, Top ACTIVE, Dist INACTIVE, Btn NOT PRESSED
-        else if (!bottom_limit_active && top_limit_active && !distance_active && !bin_empty_pressed)
+        // else if (!bottom_limit_active && top_limit_active && !distance_active && !bin_empty_pressed)
+        else if (!bottom_limit_active && top_limit_active && !bin_empty_pressed)
         {
             ESP_LOGI(TAG, "State 3: Top Limit Reached, Bin Stopped");
             // Motors already stopped by default
         }
         // State 6: Stop Motor 2 at Bottom
         // Inputs: Bottom ACTIVE, Top INACTIVE, Dist INACTIVE, Btn PRESSED
-        else if (bottom_limit_active && !top_limit_active && !distance_active && bin_empty_pressed)
+        // else if (bottom_limit_active && !top_limit_active && !distance_active && bin_empty_pressed)
+        else if (bottom_limit_active && !top_limit_active && bin_empty_pressed)
         {
             ESP_LOGI(TAG, "State 6: Bottom Limit Reached, Bin Stopped");
             // Motors already stopped by default
